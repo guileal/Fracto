@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
-import FractoLogo from './components/FractoLogo.vue'
+import FractoLogoCorner from './components/FractoLogoCorner.vue'
 
 const route = useRoute()
 const showAppHeader = computed(() => !route.meta.bare)
@@ -9,9 +9,6 @@ const showAppHeader = computed(() => !route.meta.bare)
 
 <template>
   <header v-if="showAppHeader" class="app-header">
-    <RouterLink to="/" class="brand" aria-label="Fracto">
-      <FractoLogo :size="24" decorative />
-    </RouterLink>
     <nav>
       <RouterLink to="/">Índice</RouterLink>
       <RouterLink to="/landing">Landing</RouterLink>
@@ -25,4 +22,5 @@ const showAppHeader = computed(() => !route.meta.bare)
     </nav>
   </header>
   <RouterView />
+  <FractoLogoCorner />
 </template>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
-import FractoLogo from '../components/FractoLogo.vue'
 import HeroCubesScene from '../components/HeroCubesScene.vue'
 import LandingButton from '../components/landing/LandingButton.vue'
 import SectionBadge from '../components/landing/SectionBadge.vue'
@@ -41,10 +40,6 @@ onUnmounted(() => {
     <section class="hero">
       <HeroCubesScene />
       <div class="hero__vignette" aria-hidden />
-
-      <a href="#" class="hero__brand-pill" aria-label="Fracto">
-        <FractoLogo :size="22" decorative />
-      </a>
 
       <div class="hero__content">
         <h1 class="hero__headline">
@@ -118,7 +113,6 @@ onUnmounted(() => {
     </section>
 
     <footer class="landing-footer">
-      <FractoLogo :size="48" />
       <p>© {{ new Date().getFullYear() }} Fracto. Todos os direitos reservados.</p>
     </footer>
   </div>
@@ -150,22 +144,6 @@ onUnmounted(() => {
     radial-gradient(ellipse 80% 60% at 50% 40%, transparent 0%, rgba(0, 0, 0, 0.35) 70%),
     linear-gradient(to top, rgba(0, 0, 0, 0.92) 0%, transparent 42%),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, transparent 18%);
-}
-
-.hero__brand-pill {
-  position: relative;
-  z-index: 3;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin: clamp(1.25rem, 3vw, 2rem) auto 0;
-  padding: 0.45rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(12px);
-  text-decoration: none;
-  color: #fff;
 }
 
 .hero__content {
@@ -330,11 +308,7 @@ onUnmounted(() => {
 .landing-footer {
   padding: 2.5rem clamp(1.5rem, 5vw, 4rem);
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  text-align: center;
 }
 
 .landing-footer p {

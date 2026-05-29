@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import FractoLogo from '../components/FractoLogo.vue'
 import GridLightDock from '../components/GridLightDock.vue'
 import HeroGlbSlot from '../components/HeroGlbSlot.vue'
 import InstancedGridBackgroundV5 from '../components/InstancedGridBackgroundV5.vue'
@@ -131,10 +130,6 @@ onUnmounted(() => {
         <RouterLink to="/v5" class="hero__nav-link">v5</RouterLink>
       </nav>
 
-      <a href="#" class="hero__brand-pill" aria-label="Fracto">
-        <FractoLogo :size="22" decorative />
-      </a>
-
       <div class="hero__stage">
         <div class="hero__isotipo">
           <HeroGlbSlot
@@ -226,7 +221,6 @@ onUnmounted(() => {
     </section>
 
     <footer class="landing-footer">
-      <FractoLogo :size="48" />
       <p>© {{ new Date().getFullYear() }} Fracto. Todos os direitos reservados.</p>
     </footer>
   </div>
@@ -312,22 +306,6 @@ onUnmounted(() => {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-}
-
-.hero__brand-pill {
-  position: relative;
-  z-index: 3;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin: clamp(1.25rem, 3vw, 2rem) auto 0;
-  padding: 0.45rem 0.85rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(12px);
-  text-decoration: none;
-  color: #fff;
 }
 
 .hero__content {
@@ -488,11 +466,7 @@ onUnmounted(() => {
 .landing-footer {
   padding: 2.5rem clamp(1.5rem, 5vw, 4rem);
   border-top: 1px solid rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  text-align: center;
 }
 
 .landing-footer p {
