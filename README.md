@@ -18,6 +18,32 @@ npm install
 npm run dev
 ```
 
+## Deploy na Vercel
+
+O projeto é uma SPA Vue 3 + Vite. A Vercel detecta o framework automaticamente; o `vercel.json` na raiz garante rewrites para o `vue-router` (modo history) e cache longo para assets estáticos e modelos GLB.
+
+1. Faça push do repositório para o GitHub, GitLab ou Bitbucket.
+2. Em [vercel.com/new](https://vercel.com/new), importe o repositório.
+3. Confirme as configurações (já definidas no `vercel.json`):
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+   - **Install Command:** `npm install`
+4. Clique em **Deploy**.
+
+Para deploy via CLI:
+
+```bash
+npm i -g vercel
+vercel
+```
+
+Preview local do build de produção:
+
+```bash
+npm run build
+npm run preview
+```
+
 ## Blender → scroll
 
 1. Suas keyframes na timeline do Blender (action **`Summary`** ou export completo).
