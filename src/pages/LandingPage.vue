@@ -159,7 +159,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   margin: clamp(1.25rem, 3vw, 2rem) auto 0;
-  padding: 0.5rem;
+  padding: 0.45rem 0.85rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.14);

@@ -10,7 +10,7 @@ const showAppHeader = computed(() => !route.meta.bare)
 <template>
   <header v-if="showAppHeader" class="app-header">
     <RouterLink to="/" class="brand" aria-label="Fracto">
-      <FractoLogo :size="28" decorative />
+      <FractoLogo :size="24" decorative />
     </RouterLink>
     <nav>
       <RouterLink to="/">Índice</RouterLink>
