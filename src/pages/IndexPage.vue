@@ -29,6 +29,20 @@ const pages = [
     tag: 'Experimento',
   },
   {
+    to: '/v5',
+    title: 'Landing v5',
+    description:
+      'Logotipo Fracto integrado na grade — acende perto do mouse, piscadas estilizadas e quadrados aleatórios em branco e laranja.',
+    tag: 'Experimento',
+  },
+  {
+    to: '/v6',
+    title: 'Landing v6',
+    description:
+      'Fundo da v5 + isotipo animado em GLB em tela cheia sobre o título.',
+    tag: 'Experimento',
+  },
+  {
     to: '/viewer',
     title: 'Viewer GLB',
     description: 'Scroll que scruba a timeline Summary de modelos .glb exportados do Blender.',

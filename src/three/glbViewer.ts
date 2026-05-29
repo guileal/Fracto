@@ -24,6 +24,10 @@ export interface GlbViewerOptions {
   /** Canvas e cena sem fundo opaco — para sobrepor background da página. */
   transparent?: boolean
   showGrid?: boolean
+  /** Cap ~30fps, DPR 1, sem AA, materiais mais leves. */
+  lowPower?: boolean
+  maxPixelRatio?: number
+  antialias?: boolean
 }
 
 export interface GlbViewerHandle {
@@ -47,6 +51,10 @@ export function createGlbViewer(
 ): GlbViewerHandle {
   const transparent = options.transparent ?? false
   const showGrid = options.showGrid ?? !transparent
+  const lowPower = options.lowPower ?? false
+  const maxPixelRatio = options.maxPixelRatio ?? (lowPower ? 1 : 2)
+  const antialias = options.antialias ?? !lowPower
+  const frameBudgetMs = lowPower ? 1000 / 30 : 0
   const state: GlbViewerState = {
     loaded: false,
     loading: false,
@@ -72,12 +80,20 @@ export function createGlbViewer(
   const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 2000)
   camera.position.set(2.5, 1.8, 3.5)
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: transparent })
+  const renderer = new THREE.WebGLRenderer({
+    antialias,
+    alpha: transparent,
+    powerPreference: lowPower ? 'low-power' : 'high-performance',
+  })
   if (transparent) {
     renderer.setClearColor(0x000000, 0)
   }
   renderer.outputColorSpace = THREE.SRGBColorSpace
-  renderer.toneMapping = THREE.ACESFilmicToneMapping
+  if (lowPower) {
+    renderer.toneMapping = THREE.NoToneMapping
+  } else {
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+  }
   renderer.toneMappingExposure = state.exposure
   container.appendChild(renderer.domElement)
 
@@ -166,8 +182,45 @@ export function createGlbViewer(
     state.loaded = false
   }
 
+  let visible = true
+  let lastTickAt = 0
+
+  const tuneHeroModel = (root: THREE.Object3D) => {
+    if (!lowPower) return
+    root.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return
+      child.frustumCulled = true
+      child.castShadow = false
+      child.receiveShadow = false
+      const mats = Array.isArray(child.material) ? child.material : [child.material]
+      for (let i = 0; i < mats.length; i++) {
+        const m = mats[i]
+        if (!(m instanceof THREE.MeshStandardMaterial)) continue
+        const simple = new THREE.MeshPhongMaterial({
+          color: m.color,
+          map: m.map,
+          transparent: m.transparent,
+          opacity: m.opacity,
+          side: m.side,
+        })
+        if (Array.isArray(child.material)) {
+          child.material[i] = simple
+        } else {
+          child.material = simple
+        }
+        m.dispose()
+      }
+    })
+  }
+
   const tick = () => {
     raf = requestAnimationFrame(tick)
+    if (!visible || document.hidden) return
+
+    const now = performance.now()
+    if (frameBudgetMs > 0 && now - lastTickAt < frameBudgetMs) return
+    lastTickAt = now
+
     const delta = clock.getDelta()
 
     if (heroPresentation && mainAction && mixer && !mainAction.paused) {
@@ -188,18 +241,27 @@ export function createGlbViewer(
     }
 
     controls.autoRotate = state.autoRotate
-    controls.autoRotateSpeed = 1.2
+    controls.autoRotateSpeed = lowPower ? 0.85 : 1.2
     controls.update()
     renderer.render(scene, camera)
   }
   tick()
 
+  const visibilityObserver = new IntersectionObserver(
+    ([entry]) => {
+      visible = entry?.isIntersecting ?? true
+    },
+    { threshold: 0.05 },
+  )
+  visibilityObserver.observe(container)
+
   const resize = () => {
-    const w = Math.max(container.clientWidth, 1)
-    const h = Math.max(container.clientHeight, 1)
+    const w = container.clientWidth
+    const h = container.clientHeight
+    if (w < 8 || h < 8) return
     camera.aspect = w / h
     camera.updateProjectionMatrix()
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPixelRatio))
     renderer.setSize(w, h)
   }
 
@@ -210,6 +272,7 @@ export function createGlbViewer(
   const applyGltf = (gltf: import('three/examples/jsm/loaders/GLTFLoader.js').GLTF) => {
     model = gltf.scene
     model.updateMatrixWorld(true)
+    tuneHeroModel(model)
     frameModel(model)
     scene.add(model)
     fitCamera(model)
@@ -306,7 +369,7 @@ export function createGlbViewer(
     heroPresentation = enabled
     state.scrollDriven = !enabled
     if (enabled) {
-      state.autoRotate = true
+      state.autoRotate = !lowPower
       if (mainAction && mixer) {
         mainAction.setLoop(THREE.LoopRepeat, Infinity)
         mainAction.clampWhenFinished = false
@@ -341,6 +404,7 @@ export function createGlbViewer(
     dispose: () => {
       cancelAnimationFrame(raf)
       ro.disconnect()
+      visibilityObserver.disconnect()
       clearModel()
       controls.dispose()
       renderer.dispose()

@@ -30,7 +30,9 @@ body[data-landing] {
 }
 
 body[data-landing-v3],
-body[data-landing-v4] {
+body[data-landing-v4],
+body[data-landing-v5],
+body[data-landing-v6] {
   background: #000;
 }
 

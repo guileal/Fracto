@@ -15,6 +15,8 @@ const showAppHeader = computed(() => !route.meta.bare)
       <RouterLink to="/v2">Landing v2</RouterLink>
       <RouterLink to="/v3">Landing v3</RouterLink>
       <RouterLink to="/v4">Landing v4</RouterLink>
+      <RouterLink to="/v5">Landing v5</RouterLink>
+      <RouterLink to="/v6">Landing v6</RouterLink>
       <RouterLink to="/viewer">Viewer</RouterLink>
       <RouterLink to="/iridescent">Iridescent</RouterLink>
     </nav>

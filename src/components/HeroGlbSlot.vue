@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 import { createGlbViewer, type GlbViewerState } from '../three/glbViewer'
 
 const props = withDefaults(
@@ -10,11 +10,14 @@ const props = withDefaults(
     transparent?: boolean
     /** Sem borda, sombra, toolbar nem animação de “caixa”. */
     chromeless?: boolean
+    /** Menos GPU: ~30fps, DPR 1, materiais simplificados. */
+    lowPower?: boolean
   }>(),
   {
     defaultModel: '/models/cubo-magico-4.glb',
     transparent: false,
     chromeless: false,
+    lowPower: false,
   },
 )
 
@@ -31,13 +34,22 @@ onMounted(async () => {
       state.value = s
       hasModel.value = s.loaded
     },
-    { transparent: props.transparent, showGrid: !props.transparent },
+    {
+      transparent: props.transparent,
+      showGrid: !props.transparent,
+      lowPower: props.lowPower,
+    },
   )
 
   if (!props.defaultModel) return
   viewer.value.setHeroPresentation(true)
   try {
     await viewer.value.loadUrl(props.defaultModel, 'Cubo mágico 4')
+    await nextTick()
+    requestAnimationFrame(() => {
+      viewer.value?.resize()
+      requestAnimationFrame(() => viewer.value?.resize())
+    })
   } catch {
     /* erro em state */
   }
@@ -336,13 +348,21 @@ function onDrop(ev: DragEvent) {
   display: none;
 }
 
-/* v2 — modelo flutuando sobre o background, sem “caixa” */
+/* v2/v6 — modelo flutuando sobre o background, sem “caixa” */
 .hero-glb--chromeless {
-  min-height: 100%;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .hero-glb--chromeless .hero-glb__frame--bare {
-  min-height: 100%;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   border: none;
   border-radius: 0;
   background: transparent;

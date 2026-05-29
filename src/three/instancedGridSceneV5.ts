@@ -1,29 +1,13 @@
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
+import { buildLogoCellMap } from '../lib/fractoLogoPattern'
 import {
   DEFAULT_SCENE_LIGHTING,
   mergeLighting,
   type SceneLightingConfig,
 } from '../lib/gridLighting'
-import { createPerfSampler, type PerfStatsListener } from '../lib/perfMonitor'
-
-export interface InstancedGridOptions {
-  cols?: number
-  rows?: number
-  cellSize?: number
-  lighting?: SceneLightingConfig
-  onStats?: PerfStatsListener
-  /** Menos pixels, sem AA e ~30fps — para páginas com segundo canvas (ex.: v6). */
-  lowPower?: boolean
-}
-
-export interface InstancedGridHandle {
-  dispose: () => void
-  setLighting: (config: SceneLightingConfig) => void
-  getLighting: () => SceneLightingConfig
-  getCols: () => number
-  getRows: () => number
-}
+import { createPerfSampler } from '../lib/perfMonitor'
+import type { InstancedGridHandle, InstancedGridOptions } from './instancedGridScene'
 
 const DEFAULTS = {
   cols: 16,
@@ -32,21 +16,47 @@ const DEFAULTS = {
 } as const
 
 const CUBE_DEPTH = 0.42
-/** Bevel discreto nas arestas (proporcional ao tamanho do cubo) */
 const BEVEL_RADIUS = 0.042
 const BEVEL_SEGMENTS = 2
 const MAX_LIFT = 2.15
 const MOUSE_RADIUS = 3.6
 const MOUSE_RADIUS_SQ = MOUSE_RADIUS * MOUSE_RADIUS
+const LOGO_MOUSE_RADIUS = 5.2
+const LOGO_MOUSE_RADIUS_SQ = LOGO_MOUSE_RADIUS * LOGO_MOUSE_RADIUS
 const LIFT_LERP = 0.13
 const MOUSE_LERP = 0.12
 const LIFT_EPSILON = 0.004
 
-export function createInstancedGridScene(
+const COLOR_REST = new THREE.Color(0x282830)
+const COLOR_LIFT = new THREE.Color(0x5a6270)
+const COLOR_LOGO_DARK = new THREE.Color(0x0e0e12)
+const COLOR_LOGO_WHITE = new THREE.Color(0xf4f6fa)
+const COLOR_BRAND = new THREE.Color(0xf55e1d)
+const COLOR_FLICKER_WHITE = new THREE.Color(0xe8ecf4)
+const COLOR_FLICKER_ORANGE = new THREE.Color(0xf55e1d)
+
+type FlickerKind = 'white' | 'orange'
+
+interface GridFlicker {
+  index: number
+  until: number
+  kind: FlickerKind
+  strength: number
+}
+
+interface LogoFlicker {
+  until: number
+  /** 0 = apagado, 1 = brilho máximo */
+  phase: number
+}
+
+export function createInstancedGridSceneV5(
   container: HTMLElement,
   options: InstancedGridOptions = {},
 ): InstancedGridHandle {
-  const { cols, rows, cellSize, onStats } = { ...DEFAULTS, ...options }
+  const { cols, rows, cellSize, onStats, lowPower = false } = { ...DEFAULTS, ...options }
+  const frameBudgetMs = lowPower ? 1000 / 30 : 0
+  const flickerSpawnMs = lowPower ? 320 : 140
   let lightingConfig = mergeLighting(
     DEFAULT_SCENE_LIGHTING,
     options.lighting ?? {},
@@ -62,16 +72,14 @@ export function createInstancedGridScene(
   const isNarrow = () => container.clientWidth < 768
 
   const renderer = new THREE.WebGLRenderer({
-    antialias: !isNarrow(),
+    antialias: lowPower ? false : !isNarrow(),
     alpha: false,
-    powerPreference: 'high-performance',
+    powerPreference: lowPower ? 'low-power' : 'high-performance',
   })
   renderer.setClearColor(0x000000, 1)
-  renderer.shadowMap.enabled = false
   container.appendChild(renderer.domElement)
 
-  const hemi = new THREE.HemisphereLight(0x7a828c, 0x101014, 0.7)
-  scene.add(hemi)
+  scene.add(new THREE.HemisphereLight(0x7a828c, 0x101014, 0.7))
   scene.add(new THREE.AmbientLight(0x3c3c44, 0.32))
 
   const key = new THREE.DirectionalLight(0xe8ecf4, 1.15)
@@ -108,8 +116,6 @@ export function createInstancedGridScene(
   const currentLift = new Float32Array(count)
   const dummy = new THREE.Object3D()
   const color = new THREE.Color()
-  const restColor = new THREE.Color(0x282830)
-  const liftColor = new THREE.Color(0x5a6270)
 
   const offsetX = ((cols - 1) * cellSize) / 2
   const offsetY = ((rows - 1) * cellSize) / 2
@@ -120,11 +126,16 @@ export function createInstancedGridScene(
     for (let col = 0; col < cols; col++) {
       baseX[idx] = col * cellSize - offsetX
       baseY[idx] = row * cellSize - offsetY
-      mesh.setColorAt(idx, restColor)
+      mesh.setColorAt(idx, COLOR_REST)
       idx++
     }
   }
   colorAttr.needsUpdate = true
+
+  const logo = buildLogoCellMap(cols, rows, baseX, baseY)
+  const logoFlickers = new Map<number, LogoFlicker>()
+  const gridFlickers: GridFlicker[] = []
+  let lastFlickerSpawn = 0
 
   const gridGroup = new THREE.Group()
   gridGroup.add(mesh)
@@ -144,6 +155,7 @@ export function createInstancedGridScene(
   let mouseGridY = 0
   let mouseActive = false
   let gridScale = 1
+  let clock = 0
 
   const applyMouseLightParams = () => {
     const m = lightingConfig.mouse
@@ -166,10 +178,6 @@ export function createInstancedGridScene(
     }
   }
 
-  const renderFrame = () => {
-    renderer.render(scene, camera)
-  }
-
   applyMouseLightParams()
 
   const onMove = (event: MouseEvent) => {
@@ -187,8 +195,8 @@ export function createInstancedGridScene(
   container.addEventListener('mousemove', onMove, { passive: true })
   container.addEventListener('mouseleave', onLeave)
 
-  const radialInfluence = (distSq: number): number => {
-    const t = Math.min(1, distSq / MOUSE_RADIUS_SQ)
+  const radialInfluence = (distSq: number, radiusSq: number): number => {
+    const t = Math.min(1, distSq / radiusSq)
     const falloff = 1 - t
     const smooth = falloff * falloff * (3 - 2 * falloff)
     return Math.pow(smooth, 0.72)
@@ -201,9 +209,116 @@ export function createInstancedGridScene(
     mesh.setMatrixAt(i, dummy.matrix)
   }
 
-  const setInstanceColor = (i: number, lift: number) => {
-    const t = Math.min(1, lift / MAX_LIFT)
-    color.copy(restColor).lerp(liftColor, t)
+  const pickNonLogoIndex = (): number => {
+    let i = Math.floor(Math.random() * count)
+    let guard = 0
+    while (logo.cells.has(i) && guard++ < 24) {
+      i = Math.floor(Math.random() * count)
+    }
+    return i
+  }
+
+  const spawnAmbientFlickers = (time: number) => {
+    if (time - lastFlickerSpawn < flickerSpawnMs) return
+    lastFlickerSpawn = time
+
+    const whiteCount = lowPower ? 1 : Math.random() < 0.55 ? 2 : 1
+    for (let k = 0; k < whiteCount; k++) {
+      gridFlickers.push({
+        index: pickNonLogoIndex(),
+        until: time + 70 + Math.random() * 120,
+        kind: 'white',
+        strength: 0.55 + Math.random() * 0.45,
+      })
+    }
+
+    if (!lowPower && Math.random() < 0.38) {
+      gridFlickers.push({
+        index: pickNonLogoIndex(),
+        until: time + 220 + Math.random() * 380,
+        kind: 'orange',
+        strength: 0.14 + Math.random() * 0.28,
+      })
+    }
+  }
+
+  const maybeLogoFlicker = (i: number, time: number, proximity: number) => {
+    const existing = logoFlickers.get(i)
+    if (existing && existing.until > time) return
+
+    const chance = mouseActive
+      ? 0.028 * proximity + 0.006
+      : 0.0018
+
+    if (Math.random() < chance) {
+      logoFlickers.set(i, {
+        until: time + (mouseActive ? 90 : 140) + Math.random() * 110,
+        phase: Math.random(),
+      })
+    }
+  }
+
+  const applyLogoColor = (
+    i: number,
+    lift: number,
+    time: number,
+    accent: boolean,
+  ) => {
+    const dx = baseX[i]! - mouseGridX
+    const dy = baseY[i]! - mouseGridY
+    const distSq = dx * dx + dy * dy
+    const proximity = mouseActive
+      ? radialInfluence(distSq, LOGO_MOUSE_RADIUS_SQ)
+      : 0
+
+    maybeLogoFlicker(i, time, proximity)
+
+    const flicker = logoFlickers.get(i)
+    let flickerMix = 0
+    if (flicker && flicker.until > time) {
+      const elapsed = 1 - (flicker.until - time) / 200
+      flickerMix = Math.sin(elapsed * Math.PI * 3 + flicker.phase * 6) * 0.5 + 0.5
+      flickerMix = Math.max(0, flickerMix)
+    } else if (flicker) {
+      logoFlickers.delete(i)
+    }
+
+    color.copy(COLOR_LOGO_DARK)
+
+    if (proximity > 0.02) {
+      const lit = accent ? COLOR_BRAND : COLOR_LOGO_WHITE
+      color.lerp(lit, proximity * 0.92)
+    }
+
+    if (flickerMix > 0.15) {
+      if (flickerMix > 0.72 && Math.random() < 0.35) {
+        color.copy(COLOR_LOGO_DARK)
+      } else {
+        const pulse = accent ? COLOR_BRAND : COLOR_LOGO_WHITE
+        color.lerp(pulse, flickerMix * 0.85)
+      }
+    }
+
+    const liftT = Math.min(1, lift / MAX_LIFT)
+    color.lerp(COLOR_LIFT, liftT * 0.12)
+    mesh.setColorAt(i, color)
+  }
+
+  const applyGridFlickerColor = (i: number, lift: number, time: number) => {
+    const active = gridFlickers.find((f) => f.index === i && f.until > time)
+    color.copy(COLOR_REST)
+    const liftT = Math.min(1, lift / MAX_LIFT)
+    color.lerp(COLOR_LIFT, liftT)
+
+    if (active) {
+      const pulse =
+        active.kind === 'white'
+          ? Math.sin((active.until - time) * 0.08) * 0.5 + 0.5
+          : Math.sin((active.until - time) * 0.04) * 0.5 + 0.5
+      const target = active.kind === 'white' ? COLOR_FLICKER_WHITE : COLOR_FLICKER_ORANGE
+      color.lerp(target, active.strength * pulse)
+    }
+
     mesh.setColorAt(i, color)
   }
 
@@ -230,14 +345,25 @@ export function createInstancedGridScene(
     )
   }
 
-  const updateInstances = (): boolean => {
+  const updateInstances = (time: number): boolean => {
+    spawnAmbientFlickers(time)
+
+    const cutoff = time - 50
+    for (let f = gridFlickers.length - 1; f >= 0; f--) {
+      if (gridFlickers[f]!.until < cutoff) {
+        gridFlickers.splice(f, 1)
+      }
+    }
+
     const mouseMoved = updateMouseOnGrid()
     let matrixDirty = mouseActive || mouseMoved
-    let colorDirty = mouseActive
+    let colorDirty = true
 
     const influenceRadiusSq = MOUSE_RADIUS_SQ * 1.25
 
     for (let i = 0; i < count; i++) {
+      const isLogo = logo.cells.has(i)
+      const hasFlicker = gridFlickers.some((f) => f.index === i && f.until > time)
       const liftBefore = currentLift[i]!
       let targetLift = 0
 
@@ -246,20 +372,27 @@ export function createInstancedGridScene(
         const dy = baseY[i]! - mouseGridY
         const distSq = dx * dx + dy * dy
         if (distSq <= influenceRadiusSq) {
-          targetLift = radialInfluence(distSq) * MAX_LIFT
+          targetLift = radialInfluence(distSq, MOUSE_RADIUS_SQ) * MAX_LIFT
         }
-      } else if (liftBefore < LIFT_EPSILON) {
+      } else if (liftBefore < LIFT_EPSILON && !isLogo && !hasFlicker) {
         continue
       }
 
       currentLift[i] = liftBefore + (targetLift - liftBefore) * LIFT_LERP
 
-      if (Math.abs(currentLift[i]! - liftBefore) < 0.0001 && !mouseMoved && !mouseActive) continue
+      const matrixChanged =
+        Math.abs(currentLift[i]! - liftBefore) >= 0.0001 || mouseMoved || mouseActive
 
-      setInstanceMatrix(i, currentLift[i]!)
-      matrixDirty = true
-      setInstanceColor(i, currentLift[i]!)
-      colorDirty = true
+      if (matrixChanged) {
+        setInstanceMatrix(i, currentLift[i]!)
+        matrixDirty = true
+      }
+
+      if (isLogo) {
+        applyLogoColor(i, currentLift[i]!, time, logo.cells.get(i)!)
+      } else if (hasFlicker || matrixChanged || mouseActive) {
+        applyGridFlickerColor(i, currentLift[i]!, time)
+      }
     }
 
     if (matrixDirty) mesh.instanceMatrix.needsUpdate = true
@@ -272,12 +405,24 @@ export function createInstancedGridScene(
 
   let raf = 0
   let visible = true
+  let startTime = performance.now()
+  let lastTickAt = 0
+  let tickCount = 0
 
   const tick = () => {
     raf = requestAnimationFrame(tick)
-    if (!visible) return
+    if (!visible || document.hidden) return
 
-    updateInstances()
+    const now = performance.now()
+    if (frameBudgetMs > 0 && now - lastTickAt < frameBudgetMs) return
+    lastTickAt = now
+    tickCount++
+
+    clock = now - startTime
+    const skipHeavyUpdate = lowPower && !mouseActive && tickCount % 2 === 0
+    if (!skipHeavyUpdate) {
+      updateInstances(clock)
+    }
     renderer.render(scene, camera)
 
     if (perf) {
@@ -296,7 +441,9 @@ export function createInstancedGridScene(
     if (width === 0 || height === 0) return
     camera.aspect = width / height
     camera.updateProjectionMatrix()
-    const dpr = Math.min(window.devicePixelRatio, isNarrow() ? 1 : 1.5)
+    const dpr = lowPower
+      ? 1
+      : Math.min(window.devicePixelRatio, isNarrow() ? 1 : 1.5)
     renderer.setPixelRatio(dpr)
     renderer.setSize(width, height, false)
 
@@ -322,8 +469,8 @@ export function createInstancedGridScene(
 
   for (let i = 0; i < count; i++) setInstanceMatrix(i, 0)
   mesh.instanceMatrix.needsUpdate = true
+  updateInstances(0)
   renderer.render(scene, camera)
-
   tick()
 
   const dispose = () => {
@@ -342,14 +489,14 @@ export function createInstancedGridScene(
   return {
     dispose,
     setLighting: (config: SceneLightingConfig) => {
-      lightingConfig = {
-        mouse: { ...config.mouse },
-      }
+      lightingConfig = { mouse: { ...config.mouse } }
       applyMouseLightParams()
       updateMouseLight()
-      renderFrame()
+      renderer.render(scene, camera)
     },
-    getLighting: () => structuredClone(lightingConfig),
+    getLighting: () => ({
+      mouse: { ...lightingConfig.mouse },
+    }),
     getCols: () => cols,
     getRows: () => rows,
   }
