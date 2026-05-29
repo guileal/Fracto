@@ -1,0 +1,8 @@
+:root {
+  --fracto-brand: #f55e1d;
+  --fracto-brand-hover: #ff7138;
+  --fracto-brand-soft: #ff9a6a;
+  --fracto-brand-dim: rgba(245, 94, 29, 0.14);
+  --fracto-brand-border: rgba(245, 94, 29, 0.48);
+  --fracto-coral: var(--fracto-brand);
+}

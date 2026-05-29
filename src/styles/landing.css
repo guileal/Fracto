@@ -1,0 +1,20 @@
+/* Landing fracto.br — tipografia e tokens */
+.landing-page {
+  --fracto-coral: var(--fracto-brand);
+  --fracto-black: #0a0a0a;
+  --fracto-muted: #6b6b6b;
+  --fracto-surface: #f5f5f5;
+  font-family:
+    'DM Sans',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: var(--fracto-black);
+  -webkit-font-smoothing: antialiased;
+}
+
+.landing-page strong,
+.landing-page .text-accent {
+  color: var(--fracto-coral);
+  font-weight: 600;
+}
