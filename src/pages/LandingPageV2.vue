@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
+import FractoLogo from '../components/FractoLogo.vue'
 import HeroGlbSlot from '../components/HeroGlbSlot.vue'
 import PageBackgroundPicker from '../components/PageBackgroundPicker.vue'
 import { usePageBackground } from '../composables/usePageBackground'
@@ -54,8 +55,8 @@ onUnmounted(() => {
     </div>
 
     <header class="landing-v2__header">
-      <RouterLink to="/landing" class="landing-v2__logo-link">
-        <img src="/logo-fracto.png" alt="Fracto" class="landing-v2__logo" width="120" height="auto" />
+      <RouterLink to="/landing" class="landing-v2__logo-link" aria-label="Fracto">
+        <FractoLogo :size="40" decorative class="landing-v2__logo" />
       </RouterLink>
 
       <div class="landing-v2__header-actions">
@@ -160,8 +161,6 @@ onUnmounted(() => {
 }
 
 .landing-v2__logo {
-  width: min(120px, 32vw);
-  height: auto;
   filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.5));
 }
 

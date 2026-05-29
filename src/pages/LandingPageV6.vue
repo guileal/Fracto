@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
+import FractoLogo from '../components/FractoLogo.vue'
 import GridLightDock from '../components/GridLightDock.vue'
 import HeroGlbSlot from '../components/HeroGlbSlot.vue'
 import InstancedGridBackgroundV5 from '../components/InstancedGridBackgroundV5.vue'
@@ -130,9 +131,8 @@ onUnmounted(() => {
         <RouterLink to="/v5" class="hero__nav-link">v5</RouterLink>
       </nav>
 
-      <a href="#" class="hero__brand-pill">
-        <img src="/logo-fracto.png" alt="" class="hero__brand-icon" width="22" height="22" />
-        <span>Fracto</span>
+      <a href="#" class="hero__brand-pill" aria-label="Fracto">
+        <FractoLogo :size="22" decorative />
       </a>
 
       <div class="hero__stage">
@@ -226,7 +226,7 @@ onUnmounted(() => {
     </section>
 
     <footer class="landing-footer">
-      <img src="/logo-fracto.png" alt="Fracto" width="96" height="auto" />
+      <FractoLogo :size="48" />
       <p>© {{ new Date().getFullYear() }} Fracto. Todos os direitos reservados.</p>
     </footer>
   </div>
@@ -319,24 +319,15 @@ onUnmounted(() => {
   z-index: 3;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
   margin: clamp(1.25rem, 3vw, 2rem) auto 0;
-  padding: 0.45rem 1rem 0.45rem 0.65rem;
+  padding: 0.5rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(12px);
   text-decoration: none;
   color: #fff;
-  font-size: 0.88rem;
-  font-weight: 600;
-}
-
-.hero__brand-icon {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
 }
 
 .hero__content {

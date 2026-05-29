@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import FractoLogo from '../components/FractoLogo.vue'
 
 const pages = [
   {
@@ -60,8 +61,7 @@ const pages = [
 <template>
   <div class="index">
     <header class="index__header">
-      <img src="/logo-fracto.png" alt="Fracto" class="index__logo" width="140" height="auto" />
-      <h1 class="index__title">Fracto</h1>
+      <FractoLogo :size="56" class="index__logo" />
       <p class="index__lead">Índice das páginas do projeto Vue + Three.js</p>
     </header>
 
@@ -94,16 +94,7 @@ const pages = [
 
 .index__logo {
   display: block;
-  width: min(140px, 40vw);
-  height: auto;
   margin-bottom: 1.25rem;
-}
-
-.index__title {
-  margin: 0 0 0.5rem;
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
 }
 
 .index__lead {

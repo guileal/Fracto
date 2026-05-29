@@ -54,9 +54,10 @@ a {
 }
 
 .app-header .brand {
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
   text-decoration: none;
-  letter-spacing: -0.02em;
 }
 
 .app-header nav {
