@@ -20,8 +20,8 @@ defineProps<{
 <style scoped>
 .perf {
   position: fixed;
-  bottom: 0.75rem;
-  right: 0.75rem;
+  bottom: 1.35rem;
+  right: 1.25rem;
   z-index: 9999;
   display: flex;
   flex-direction: column;

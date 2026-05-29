@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 import HeroCubesScene from '../components/HeroCubesScene.vue'
+import LandingHeroIntro from '../components/landing/LandingHeroIntro.vue'
 import LandingButton from '../components/landing/LandingButton.vue'
 import SectionBadge from '../components/landing/SectionBadge.vue'
 import '../styles/landing.css'
@@ -37,11 +38,11 @@ onUnmounted(() => {
 
 <template>
   <div class="landing-page">
-    <section class="hero">
+    <section class="hero hero--grid">
       <HeroCubesScene />
-      <div class="hero__vignette" aria-hidden />
+      <div class="hero__vignette hero__vignette--grid" aria-hidden />
 
-      <div class="hero__content">
+      <LandingHeroIntro>
         <h1 class="hero__headline">
           Somos um <strong>Núcleo de Inteligência Criativa</strong> que atua como parceira
           estratégica em branding, consultoria e comunicação digital
@@ -51,7 +52,7 @@ onUnmounted(() => {
           <LandingButton href="#contato">Comece um projeto</LandingButton>
           <LandingButton href="#trabalho" variant="outline">Conheça nosso portfólio</LandingButton>
         </div>
-      </div>
+      </LandingHeroIntro>
     </section>
 
     <section id="sobre" class="section section--white section--about">
@@ -121,57 +122,6 @@ onUnmounted(() => {
 <style scoped>
 .landing-page {
   background: #fff;
-}
-
-/* —— Hero —— */
-.hero {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  background: #000;
-  color: #fff;
-  overflow: hidden;
-}
-
-.hero__vignette {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 40%, transparent 0%, rgba(0, 0, 0, 0.35) 70%),
-    linear-gradient(to top, rgba(0, 0, 0, 0.92) 0%, transparent 42%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, transparent 18%);
-}
-
-.hero__content {
-  position: relative;
-  z-index: 3;
-  margin-top: auto;
-  padding: 2rem clamp(1.5rem, 5vw, 4rem) clamp(2.5rem, 6vw, 4.5rem);
-  max-width: 52rem;
-  pointer-events: none;
-}
-
-.hero__headline {
-  margin: 0 0 2rem;
-  font-size: clamp(1.65rem, 3.8vw, 2.75rem);
-  font-weight: 500;
-  line-height: 1.22;
-  letter-spacing: -0.03em;
-}
-
-.hero__headline strong {
-  font-weight: 600;
-}
-
-.hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  pointer-events: auto;
 }
 
 /* —— Sections —— */

@@ -5,6 +5,7 @@ import FractoLogoCorner from './components/FractoLogoCorner.vue'
 
 const route = useRoute()
 const showAppHeader = computed(() => !route.meta.bare)
+const showLogoCorner = computed(() => !route.meta.bare)
 </script>
 
 <template>
@@ -22,5 +23,5 @@ const showAppHeader = computed(() => !route.meta.bare)
     </nav>
   </header>
   <RouterView />
-  <FractoLogoCorner />
+  <FractoLogoCorner v-if="showLogoCorner" />
 </template>

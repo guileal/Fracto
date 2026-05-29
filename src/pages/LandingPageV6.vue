@@ -5,6 +5,7 @@ import GridLightDock from '../components/GridLightDock.vue'
 import HeroGlbSlot from '../components/HeroGlbSlot.vue'
 import InstancedGridBackgroundV5 from '../components/InstancedGridBackgroundV5.vue'
 import { ISOTIPO_ANIM_GLB } from '../lib/heroModels'
+import LandingHeroIntro from '../components/landing/LandingHeroIntro.vue'
 import LandingButton from '../components/landing/LandingButton.vue'
 import PerfMonitor from '../components/PerfMonitor.vue'
 import SectionBadge from '../components/landing/SectionBadge.vue'
@@ -130,28 +131,26 @@ onUnmounted(() => {
         <RouterLink to="/v5" class="hero__nav-link">v5</RouterLink>
       </nav>
 
-      <div class="hero__stage">
-        <div class="hero__isotipo">
-          <HeroGlbSlot
-            :default-model="ISOTIPO_ANIM_GLB"
-            transparent
-            chromeless
-            low-power
-          />
-        </div>
-
-        <div class="hero__content">
-          <h1 class="hero__headline">
-            Somos um <strong>Núcleo de Inteligência Criativa</strong> que atua como parceira
-            estratégica em branding, consultoria e comunicação digital
-          </h1>
-
-          <div class="hero__actions">
-            <LandingButton href="#contato">Comece um projeto</LandingButton>
-            <LandingButton href="#trabalho" variant="outline">Conheça nosso portfólio</LandingButton>
-          </div>
-        </div>
+      <div class="hero__isotipo hero__isotipo--ambient" aria-hidden>
+        <HeroGlbSlot
+          :default-model="ISOTIPO_ANIM_GLB"
+          transparent
+          chromeless
+          low-power
+        />
       </div>
+
+      <LandingHeroIntro>
+        <h1 class="hero__headline">
+          Somos um <strong>Núcleo de Inteligência Criativa</strong> que atua como parceira
+          estratégica em branding, consultoria e comunicação digital
+        </h1>
+
+        <div class="hero__actions">
+          <LandingButton href="#contato">Comece um projeto</LandingButton>
+          <LandingButton href="#trabalho" variant="outline">Conheça nosso portfólio</LandingButton>
+        </div>
+      </LandingHeroIntro>
     </section>
 
     <GridLightDock
@@ -227,114 +226,12 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.landing-v6 .hero--grid {
-  background: #000;
-}
-
-.hero--v6 .hero__stage {
-  position: relative;
-  z-index: 3;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  width: 100%;
-  pointer-events: none;
-}
-
-.hero--v6 .hero__isotipo {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: min(68vh, 720px);
-  width: 100%;
-  pointer-events: auto;
-}
-
-.hero--v6 .hero__content {
-  flex-shrink: 0;
-  position: relative;
-  z-index: 4;
-  margin-top: 0;
-  padding-top: 0.25rem;
-  pointer-events: none;
-}
-
-.hero--v6 .hero__actions {
-  pointer-events: auto;
-}
-
-.hero__vignette--grid {
-  background:
-    radial-gradient(ellipse 65% 50% at 50% 42%, transparent 0%, rgba(0, 0, 0, 0.35) 100%),
-    linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, transparent 50%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, transparent 25%);
-}
-
-.hero__nav {
-  position: absolute;
-  top: clamp(1rem, 3vw, 1.5rem);
-  right: clamp(1.25rem, 4vw, 2.5rem);
-  z-index: 4;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.65rem 1rem;
-}
-
-.hero__nav-link {
-  font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.4);
-  text-decoration: none;
-}
-
-.hero__nav-link:hover {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.hero {
-  position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  color: #fff;
-  overflow: hidden;
-}
-
-.hero__vignette {
+.hero--v6 .hero__isotipo--ambient {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
+  opacity: 0.42;
   pointer-events: none;
-}
-
-.hero__content {
-  position: relative;
-  z-index: 3;
-  margin-top: auto;
-  padding: 2rem clamp(1.5rem, 5vw, 4rem) clamp(2.5rem, 6vw, 4.5rem);
-  max-width: 52rem;
-  pointer-events: none;
-}
-
-.hero__headline {
-  margin: 0 0 2rem;
-  font-size: clamp(1.65rem, 3.8vw, 2.75rem);
-  font-weight: 500;
-  line-height: 1.22;
-  letter-spacing: -0.03em;
-  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.85);
-}
-
-.hero__headline strong {
-  font-weight: 600;
-}
-
-.hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  pointer-events: auto;
 }
 
 .section {

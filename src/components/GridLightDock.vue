@@ -176,8 +176,8 @@ onUnmounted(() => {
 
 .light-dock {
   position: fixed;
-  left: 0.75rem;
-  bottom: 0.75rem;
+  left: 1.25rem;
+  bottom: 1.35rem;
   z-index: 10001;
   display: flex;
   align-items: center;
