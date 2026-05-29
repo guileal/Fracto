@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, shallowRef, toRaw } from 'vue'
 import { DEFAULT_GRID_CONFIG, type GridConfig } from '../lib/gridConfig'
 import type { SceneLightingConfig } from '../lib/gridLighting'
 import type { PerfStats } from '../lib/perfMonitor'
@@ -23,6 +23,10 @@ const props = defineProps<{
 const host = ref<HTMLElement | null>(null)
 const handle = shallowRef<InstancedGridHandle | null>(null)
 
+function cloneLighting(config: SceneLightingConfig): SceneLightingConfig {
+  return structuredClone(toRaw(config))
+}
+
 function defaultGridSize(): GridConfig {
   if (!host.value) return { ...DEFAULT_GRID_CONFIG }
   const narrow = host.value.clientWidth < 768
@@ -34,14 +38,19 @@ function defaultGridSize(): GridConfig {
 
 function mountScene(cols: number, rows: number) {
   if (!host.value) return
-  const savedLighting = handle.value?.getLighting() ?? props.lighting
+
+  const savedLighting =
+    props.lighting ?? handle.value?.getLighting()
+
   handle.value?.dispose()
+
   const options: InstancedGridOptions = {
     cols,
     rows,
-    lighting: savedLighting,
+    lighting: savedLighting ? cloneLighting(savedLighting) : undefined,
     onStats: (stats) => emit('stats', stats),
   }
+
   handle.value = createInstancedGridScene(host.value, options)
   emit('ready', handle.value)
 }
@@ -50,7 +59,8 @@ function rebuildGrid(cols: number, rows: number) {
   mountScene(cols, rows)
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await nextTick()
   const { cols, rows } = defaultGridSize()
   mountScene(cols, rows)
 })
@@ -61,7 +71,7 @@ onUnmounted(() => {
 })
 
 function setLighting(config: SceneLightingConfig) {
-  handle.value?.setLighting(config)
+  handle.value?.setLighting(cloneLighting(config))
 }
 
 defineExpose({
@@ -83,6 +93,7 @@ defineExpose({
 .grid-bg {
   position: absolute;
   inset: 0;
+  z-index: 0;
   overflow: hidden;
   background: #000;
 }

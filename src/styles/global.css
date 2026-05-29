@@ -29,7 +29,8 @@ body[data-landing] {
   color: #0a0a0a;
 }
 
-body[data-landing-v3] {
+body[data-landing-v3],
+body[data-landing-v4] {
   background: #000;
 }
 

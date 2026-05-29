@@ -340,7 +340,9 @@ export function createInstancedGridScene(
   return {
     dispose,
     setLighting: (config: SceneLightingConfig) => {
-      lightingConfig = structuredClone(config)
+      lightingConfig = {
+        mouse: { ...config.mouse },
+      }
       applyMouseLightParams()
       updateMouseLight()
       renderFrame()

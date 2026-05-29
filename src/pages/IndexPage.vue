@@ -22,6 +22,13 @@ const pages = [
     tag: 'Experimento',
   },
   {
+    to: '/v4',
+    title: 'Landing v4',
+    description:
+      'Grade 3D com luz difusa do mouse — slider de intensidade, cor livre, grade por atalho e bolha de referência.',
+    tag: 'Experimento',
+  },
+  {
     to: '/viewer',
     title: 'Viewer GLB',
     description: 'Scroll que scruba a timeline Summary de modelos .glb exportados do Blender.',
