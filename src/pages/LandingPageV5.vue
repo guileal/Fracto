@@ -108,6 +108,8 @@ onUnmounted(() => {
     <section class="hero hero--grid">
       <InstancedGridBackgroundV5
         ref="gridBgRef"
+        :cols="16"
+        :rows="12"
         :lighting="lighting"
         @stats="perfStats = $event"
         @ready="onGridReady"
@@ -137,6 +139,7 @@ onUnmounted(() => {
     </section>
 
     <GridLightDock
+      class="landing-v5__light-dock"
       :lighting="lighting"
       :grid="gridConfig"
       @update:lighting="onLightingUpdate"
@@ -345,6 +348,12 @@ onUnmounted(() => {
   margin: 0;
   font-size: 0.82rem;
   color: var(--fracto-muted);
+}
+
+@media (hover: none), (pointer: coarse), (max-width: 767px) {
+  .landing-v5__light-dock {
+    display: none !important;
+  }
 }
 
 @media (max-width: 720px) {

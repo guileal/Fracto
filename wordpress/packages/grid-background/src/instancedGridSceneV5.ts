@@ -153,7 +153,6 @@ export function createInstancedGridSceneV5(
   let mouseGridX = 0
   let mouseGridY = 0
   let mouseActive = false
-  let userPointerActive = false
   let gridScale = 1
   let clock = 0
 
@@ -187,7 +186,7 @@ export function createInstancedGridSceneV5(
 
   const updateMouseLight = () => {
     const m = lightingConfig.mouse
-    if (!m.enabled) {
+    if (!m.enabled || shouldUseScrollDrive()) {
       mouseLight.intensity = 0
       return
     }
@@ -203,47 +202,26 @@ export function createInstancedGridSceneV5(
 
   /** Mouse na janela — o fundo pode ter pointer-events: none e ficar atrás do WPBakery. */
   const onMove = (event: MouseEvent) => {
-    userPointerActive = true
+    if (shouldUseScrollDrive()) return
     mouseActive = true
     setPointerNdcFromClient(event.clientX, event.clientY)
   }
 
   const onWindowLeave = (event: MouseEvent) => {
+    if (shouldUseScrollDrive()) return
     const rel = event.relatedTarget as Node | null
     if (rel && document.documentElement.contains(rel)) return
-    userPointerActive = false
-    if (!shouldUseScrollDrive()) {
-      mouseActive = false
-      updateMouseLight()
-    }
-  }
-
-  const onTouchMove = (event: TouchEvent) => {
-    const touch = event.touches[0]
-    if (!touch) return
-    userPointerActive = true
-    mouseActive = true
-    setPointerNdcFromClient(touch.clientX, touch.clientY)
-  }
-
-  const onTouchEnd = () => {
-    userPointerActive = false
-    if (!shouldUseScrollDrive()) {
-      mouseActive = false
-      updateMouseLight()
-    }
+    mouseActive = false
+    updateMouseLight()
   }
 
   const onScroll = () => {
-    if (!shouldUseScrollDrive() || userPointerActive) return
+    if (!shouldUseScrollDrive()) return
     applyScrollPointer()
   }
 
   window.addEventListener('mousemove', onMove, { passive: true })
   document.documentElement.addEventListener('mouseout', onWindowLeave)
-  window.addEventListener('touchmove', onTouchMove, { passive: true })
-  window.addEventListener('touchend', onTouchEnd)
-  window.addEventListener('touchcancel', onTouchEnd)
   window.addEventListener('scroll', onScroll, { passive: true })
 
   const radialInfluence = (distSq: number, radiusSq: number): number => {
@@ -374,7 +352,7 @@ export function createInstancedGridSceneV5(
   }
 
   const updateMouseOnGrid = (): boolean => {
-    if (shouldUseScrollDrive() && !userPointerActive) {
+    if (shouldUseScrollDrive()) {
       applyScrollPointer()
     }
 
@@ -524,9 +502,6 @@ export function createInstancedGridSceneV5(
     visibilityObserver.disconnect()
     window.removeEventListener('mousemove', onMove)
     document.documentElement.removeEventListener('mouseout', onWindowLeave)
-    window.removeEventListener('touchmove', onTouchMove)
-    window.removeEventListener('touchend', onTouchEnd)
-    window.removeEventListener('touchcancel', onTouchEnd)
     window.removeEventListener('scroll', onScroll)
     geometry.dispose()
     material.dispose()
