@@ -1,18 +1,29 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import MagicCubeDock from '../components/MagicCubeDock.vue'
 import LandingButton from '../components/landing/LandingButton.vue'
 import SectionBadge from '../components/landing/SectionBadge.vue'
+import { DEFAULT_MAGIC_CUBE_CONFIG, type MagicCubeConfig } from '../lib/magicCubeConfig'
 import { MagicCubeScene } from '../three/MagicCubeScene'
 import '../styles/landing.css'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
+const cubeConfig = ref<MagicCubeConfig>({ ...DEFAULT_MAGIC_CUBE_CONFIG })
 let scene: MagicCubeScene | null = null
 
 onMounted(() => {
   if (!canvasRef.value) return
-  scene = new MagicCubeScene(canvasRef.value)
+  scene = new MagicCubeScene(canvasRef.value, cubeConfig.value)
 })
+
+watch(
+  cubeConfig,
+  (config) => {
+    scene?.applyConfig(config)
+  },
+  { deep: true },
+)
 
 onBeforeUnmount(() => {
   scene?.dispose()
@@ -45,6 +56,8 @@ onBeforeUnmount(() => {
         <canvas ref="canvasRef" class="page7__canvas" aria-hidden="true" />
       </div>
     </section>
+
+    <MagicCubeDock v-model:config="cubeConfig" />
   </div>
 </template>
 

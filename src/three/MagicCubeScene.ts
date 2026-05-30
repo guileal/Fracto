@@ -2,6 +2,10 @@ import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import {
+  DEFAULT_MAGIC_CUBE_CONFIG,
+  type MagicCubeConfig,
+} from '../lib/magicCubeConfig'
+import {
   ACCENT_CUBE_INDEX,
   CUBE_COUNT,
   MAGIC_CUBE_STATES,
@@ -9,12 +13,7 @@ import {
 } from './magicCubeStates'
 
 const CUBE_SIZE = 0.48
-const BEVEL_RADIUS = 0.012
 const BEVEL_SEGMENTS = 2
-
-/** Mesmo preto do fundo da hero /v5 */
-const COLOR_CUBE = new THREE.Color(0x000000)
-const COLOR_ACCENT = new THREE.Color(0xf55e1d)
 
 const _color = new THREE.Color()
 
@@ -39,6 +38,16 @@ function lerpVec3(out: THREE.Vector3, a: Vec3, b: Vec3, t: number): THREE.Vector
   )
 }
 
+function createCubeGeometry(bevelRadius: number): RoundedBoxGeometry {
+  return new RoundedBoxGeometry(
+    CUBE_SIZE,
+    CUBE_SIZE,
+    CUBE_SIZE,
+    BEVEL_SEGMENTS,
+    bevelRadius,
+  )
+}
+
 export class MagicCubeScene {
   private readonly canvas: HTMLCanvasElement
   private readonly scene = new THREE.Scene()
@@ -50,11 +59,13 @@ export class MagicCubeScene {
   private readonly clock = new THREE.Clock()
   private readonly resizeHandler: () => void
 
+  private config: MagicCubeConfig
   private raf = 0
   private disposed = false
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, initialConfig: MagicCubeConfig = DEFAULT_MAGIC_CUBE_CONFIG) {
     this.canvas = canvas
+    this.config = { ...initialConfig }
 
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100)
     this.camera.position.set(0, 0.15, 4.2)
@@ -76,13 +87,6 @@ export class MagicCubeScene {
 
     this.setupLighting()
 
-    const geometry = new RoundedBoxGeometry(
-      CUBE_SIZE,
-      CUBE_SIZE,
-      CUBE_SIZE,
-      BEVEL_SEGMENTS,
-      BEVEL_RADIUS,
-    )
     const material = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       roughness: 0.94,
@@ -91,16 +95,13 @@ export class MagicCubeScene {
       envMapIntensity: 0.12,
     })
 
-    this.mesh = new THREE.InstancedMesh(geometry, material, CUBE_COUNT)
+    this.mesh = new THREE.InstancedMesh(
+      createCubeGeometry(this.config.bevelRadius),
+      material,
+      CUBE_COUNT,
+    )
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
-
-    for (let i = 0; i < CUBE_COUNT; i++) {
-      _color.copy(i === ACCENT_CUBE_INDEX ? COLOR_ACCENT : COLOR_CUBE)
-      this.mesh.setColorAt(i, _color)
-    }
-    if (this.mesh.instanceColor) {
-      this.mesh.instanceColor.needsUpdate = true
-    }
+    this.applyColors()
 
     this.group.add(this.mesh)
     this.group.rotation.x = -0.14
@@ -112,6 +113,42 @@ export class MagicCubeScene {
     this.resize()
 
     this.animate()
+  }
+
+  applyConfig(partial: Partial<MagicCubeConfig>): void {
+    const next = { ...this.config, ...partial }
+    const bevelChanged = next.bevelRadius !== this.config.bevelRadius
+    const colorsChanged =
+      next.cubeColor !== this.config.cubeColor || next.accentColor !== this.config.accentColor
+
+    this.config = next
+
+    if (bevelChanged) {
+      this.mesh.geometry.dispose()
+      this.mesh.geometry = createCubeGeometry(this.config.bevelRadius)
+    }
+
+    if (colorsChanged) {
+      this.applyColors()
+    }
+  }
+
+  getConfig(): MagicCubeConfig {
+    return { ...this.config }
+  }
+
+  private applyColors(): void {
+    const cubeColor = new THREE.Color(this.config.cubeColor)
+    const accentColor = new THREE.Color(this.config.accentColor)
+
+    for (let i = 0; i < CUBE_COUNT; i++) {
+      _color.copy(i === ACCENT_CUBE_INDEX ? accentColor : cubeColor)
+      this.mesh.setColorAt(i, _color)
+    }
+
+    if (this.mesh.instanceColor) {
+      this.mesh.instanceColor.needsUpdate = true
+    }
   }
 
   private setupLighting(): void {
