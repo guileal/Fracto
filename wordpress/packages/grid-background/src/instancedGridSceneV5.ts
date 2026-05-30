@@ -160,7 +160,7 @@ export function createInstancedGridSceneV5(
   const isTouchLike = () =>
     window.matchMedia('(hover: none), (pointer: coarse)').matches
 
-  const shouldAutoDrift = () => isTouchLike() || isNarrow()
+  const shouldUseScrollDrive = () => isTouchLike() || isNarrow()
 
   const setPointerNdcFromClient = (clientX: number, clientY: number) => {
     const rect = container.getBoundingClientRect()
@@ -169,10 +169,13 @@ export function createInstancedGridSceneV5(
     targetNdcY = -(((clientY - rect.top) / rect.height) * 2 - 1)
   }
 
-  const applyAutoDrift = (timeMs: number) => {
-    const t = timeMs * 0.001
-    targetNdcX = Math.sin(t * 0.85) * 0.62
-    targetNdcY = Math.cos(t * 0.62) * 0.38 + Math.sin(t * 0.38) * 0.22
+  const applyScrollPointer = () => {
+    const doc = document.documentElement
+    const maxScroll = Math.max(1, doc.scrollHeight - doc.clientHeight)
+    const t = doc.scrollTop / maxScroll
+    targetNdcX = -0.72 + t * 1.44
+    targetNdcY = 0.55 - t * 1.1
+    mouseActive = true
   }
 
   const applyMouseLightParams = () => {
@@ -209,7 +212,7 @@ export function createInstancedGridSceneV5(
     const rel = event.relatedTarget as Node | null
     if (rel && document.documentElement.contains(rel)) return
     userPointerActive = false
-    if (!shouldAutoDrift()) {
+    if (!shouldUseScrollDrive()) {
       mouseActive = false
       updateMouseLight()
     }
@@ -225,10 +228,15 @@ export function createInstancedGridSceneV5(
 
   const onTouchEnd = () => {
     userPointerActive = false
-    if (!shouldAutoDrift()) {
+    if (!shouldUseScrollDrive()) {
       mouseActive = false
       updateMouseLight()
     }
+  }
+
+  const onScroll = () => {
+    if (!shouldUseScrollDrive() || userPointerActive) return
+    applyScrollPointer()
   }
 
   window.addEventListener('mousemove', onMove, { passive: true })
@@ -236,6 +244,7 @@ export function createInstancedGridSceneV5(
   window.addEventListener('touchmove', onTouchMove, { passive: true })
   window.addEventListener('touchend', onTouchEnd)
   window.addEventListener('touchcancel', onTouchEnd)
+  window.addEventListener('scroll', onScroll, { passive: true })
 
   const radialInfluence = (distSq: number, radiusSq: number): number => {
     const t = Math.min(1, distSq / radiusSq)
@@ -364,10 +373,9 @@ export function createInstancedGridSceneV5(
     mesh.setColorAt(i, color)
   }
 
-  const updateMouseOnGrid = (timeMs: number): boolean => {
-    if (shouldAutoDrift() && !userPointerActive) {
-      mouseActive = true
-      applyAutoDrift(timeMs)
+  const updateMouseOnGrid = (): boolean => {
+    if (shouldUseScrollDrive() && !userPointerActive) {
+      applyScrollPointer()
     }
 
     const prevX = smoothNdcX
@@ -402,7 +410,7 @@ export function createInstancedGridSceneV5(
       }
     }
 
-    const mouseMoved = updateMouseOnGrid(time)
+    const mouseMoved = updateMouseOnGrid()
     let matrixDirty = mouseActive || mouseMoved
     let colorDirty = true
 
@@ -519,6 +527,7 @@ export function createInstancedGridSceneV5(
     window.removeEventListener('touchmove', onTouchMove)
     window.removeEventListener('touchend', onTouchEnd)
     window.removeEventListener('touchcancel', onTouchEnd)
+    window.removeEventListener('scroll', onScroll)
     geometry.dispose()
     material.dispose()
     mesh.dispose()
