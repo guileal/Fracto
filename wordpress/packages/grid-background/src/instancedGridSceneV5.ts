@@ -1,13 +1,12 @@
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
-import { buildLogoCellMap } from '../lib/fractoLogoPattern'
+import { buildLogoCellMap } from './lib/fractoLogoPattern'
 import {
   DEFAULT_SCENE_LIGHTING,
   mergeLighting,
   type SceneLightingConfig,
-} from '../lib/gridLighting'
-import { createPerfSampler } from '../lib/perfMonitor'
-import type { InstancedGridHandle, InstancedGridOptions } from './instancedGridScene'
+} from './lib/gridLighting'
+import type { InstancedGridHandle, InstancedGridOptions } from './types'
 
 const DEFAULTS = {
   cols: 16,
@@ -54,11 +53,7 @@ export function createInstancedGridSceneV5(
   container: HTMLElement,
   options: InstancedGridOptions = {},
 ): InstancedGridHandle {
-  const { cols, rows, cellSize, onStats, lowPower = false, pointerTarget } = {
-    ...DEFAULTS,
-    ...options,
-  }
-  const pointerEl = pointerTarget ?? container
+  const { cols, rows, cellSize, lowPower = false } = { ...DEFAULTS, ...options }
   const frameBudgetMs = lowPower ? 1000 / 30 : 0
   const flickerSpawnMs = lowPower ? 320 : 140
   let lightingConfig = mergeLighting(
@@ -165,7 +160,6 @@ export function createInstancedGridSceneV5(
   const isTouchLike = () =>
     window.matchMedia('(hover: none), (pointer: coarse)').matches
 
-  /** Celular / touch: fundo anima sozinho; mouse real ou toque assume o controle. */
   const shouldAutoDrift = () => isTouchLike() || isNarrow()
 
   const setPointerNdcFromClient = (clientX: number, clientY: number) => {
@@ -204,13 +198,16 @@ export function createInstancedGridSceneV5(
 
   applyMouseLightParams()
 
+  /** Mouse na janela — o fundo pode ter pointer-events: none e ficar atrás do WPBakery. */
   const onMove = (event: MouseEvent) => {
     userPointerActive = true
     mouseActive = true
     setPointerNdcFromClient(event.clientX, event.clientY)
   }
 
-  const onLeave = () => {
+  const onWindowLeave = (event: MouseEvent) => {
+    const rel = event.relatedTarget as Node | null
+    if (rel && document.documentElement.contains(rel)) return
     userPointerActive = false
     if (!shouldAutoDrift()) {
       mouseActive = false
@@ -234,11 +231,11 @@ export function createInstancedGridSceneV5(
     }
   }
 
-  pointerEl.addEventListener('mousemove', onMove, { passive: true, capture: true })
-  pointerEl.addEventListener('mouseleave', onLeave)
-  pointerEl.addEventListener('touchmove', onTouchMove, { passive: true, capture: true })
-  pointerEl.addEventListener('touchend', onTouchEnd, { capture: true })
-  pointerEl.addEventListener('touchcancel', onTouchEnd, { capture: true })
+  window.addEventListener('mousemove', onMove, { passive: true })
+  document.documentElement.addEventListener('mouseout', onWindowLeave)
+  window.addEventListener('touchmove', onTouchMove, { passive: true })
+  window.addEventListener('touchend', onTouchEnd)
+  window.addEventListener('touchcancel', onTouchEnd)
 
   const radialInfluence = (distSq: number, radiusSq: number): number => {
     const t = Math.min(1, distSq / radiusSq)
@@ -451,7 +448,6 @@ export function createInstancedGridSceneV5(
     return matrixDirty || colorDirty || mouseActive
   }
 
-  const perf = onStats ? createPerfSampler(onStats) : null
 
   let raf = 0
   let visible = true
@@ -474,15 +470,6 @@ export function createInstancedGridSceneV5(
       updateInstances(clock)
     }
     renderer.render(scene, camera)
-
-    if (perf) {
-      const info = renderer.info.render
-      perf.tick({
-        instances: count,
-        triangles: info.triangles,
-        drawCalls: info.calls,
-      })
-    }
   }
 
   const resize = () => {
@@ -527,11 +514,11 @@ export function createInstancedGridSceneV5(
     cancelAnimationFrame(raf)
     observer.disconnect()
     visibilityObserver.disconnect()
-    pointerEl.removeEventListener('mousemove', onMove, true)
-    pointerEl.removeEventListener('mouseleave', onLeave)
-    pointerEl.removeEventListener('touchmove', onTouchMove, true)
-    pointerEl.removeEventListener('touchend', onTouchEnd, true)
-    pointerEl.removeEventListener('touchcancel', onTouchEnd, true)
+    window.removeEventListener('mousemove', onMove)
+    document.documentElement.removeEventListener('mouseout', onWindowLeave)
+    window.removeEventListener('touchmove', onTouchMove)
+    window.removeEventListener('touchend', onTouchEnd)
+    window.removeEventListener('touchcancel', onTouchEnd)
     geometry.dispose()
     material.dispose()
     mesh.dispose()

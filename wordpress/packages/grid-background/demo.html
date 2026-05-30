@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fracto 3D — grid-background</title>
+    <link rel="stylesheet" href="../../uploads/fracto-3d/grid-background/grid-background.css" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, sans-serif;
+        color: #fff;
+      }
+      main {
+        position: relative;
+        z-index: 1;
+        padding: 2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      data-fracto-3d="grid-background"
+      data-cols="10"
+      data-rows="10"
+      data-light-intensity="0.5"
+      aria-hidden="true"
+    ></div>
+    <main>
+      <p>Conteúdo por cima — mouse reage na janela inteira.</p>
+    </main>
+    <script src="../../uploads/fracto-3d/grid-background/grid-background.min.js"></script>
+  </body>
+</html>
