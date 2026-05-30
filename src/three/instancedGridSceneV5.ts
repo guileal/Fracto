@@ -54,7 +54,11 @@ export function createInstancedGridSceneV5(
   container: HTMLElement,
   options: InstancedGridOptions = {},
 ): InstancedGridHandle {
-  const { cols, rows, cellSize, onStats, lowPower = false } = { ...DEFAULTS, ...options }
+  const { cols, rows, cellSize, onStats, lowPower = false, pointerTarget } = {
+    ...DEFAULTS,
+    ...options,
+  }
+  const pointerEl = pointerTarget ?? container
   const frameBudgetMs = lowPower ? 1000 / 30 : 0
   const flickerSpawnMs = lowPower ? 320 : 140
   let lightingConfig = mergeLighting(
@@ -192,8 +196,8 @@ export function createInstancedGridSceneV5(
     updateMouseLight()
   }
 
-  container.addEventListener('mousemove', onMove, { passive: true })
-  container.addEventListener('mouseleave', onLeave)
+  pointerEl.addEventListener('mousemove', onMove, { passive: true, capture: true })
+  pointerEl.addEventListener('mouseleave', onLeave)
 
   const radialInfluence = (distSq: number, radiusSq: number): number => {
     const t = Math.min(1, distSq / radiusSq)
@@ -477,8 +481,8 @@ export function createInstancedGridSceneV5(
     cancelAnimationFrame(raf)
     observer.disconnect()
     visibilityObserver.disconnect()
-    container.removeEventListener('mousemove', onMove)
-    container.removeEventListener('mouseleave', onLeave)
+    pointerEl.removeEventListener('mousemove', onMove, true)
+    pointerEl.removeEventListener('mouseleave', onLeave)
     geometry.dispose()
     material.dispose()
     mesh.dispose()

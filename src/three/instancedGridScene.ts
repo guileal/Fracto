@@ -15,6 +15,8 @@ export interface InstancedGridOptions {
   onStats?: PerfStatsListener
   /** Menos pixels, sem AA e ~30fps — para páginas com segundo canvas (ex.: v6). */
   lowPower?: boolean
+  /** Área que repassa mouse para a grade (ex.: `.hero--grid`); usa capture para incluir overlays. */
+  pointerTarget?: HTMLElement
 }
 
 export interface InstancedGridHandle {
@@ -46,7 +48,8 @@ export function createInstancedGridScene(
   container: HTMLElement,
   options: InstancedGridOptions = {},
 ): InstancedGridHandle {
-  const { cols, rows, cellSize, onStats } = { ...DEFAULTS, ...options }
+  const { cols, rows, cellSize, onStats, pointerTarget } = { ...DEFAULTS, ...options }
+  const pointerEl = pointerTarget ?? container
   let lightingConfig = mergeLighting(
     DEFAULT_SCENE_LIGHTING,
     options.lighting ?? {},
@@ -184,8 +187,8 @@ export function createInstancedGridScene(
     updateMouseLight()
   }
 
-  container.addEventListener('mousemove', onMove, { passive: true })
-  container.addEventListener('mouseleave', onLeave)
+  pointerEl.addEventListener('mousemove', onMove, { passive: true, capture: true })
+  pointerEl.addEventListener('mouseleave', onLeave)
 
   const radialInfluence = (distSq: number): number => {
     const t = Math.min(1, distSq / MOUSE_RADIUS_SQ)
@@ -330,8 +333,8 @@ export function createInstancedGridScene(
     cancelAnimationFrame(raf)
     observer.disconnect()
     visibilityObserver.disconnect()
-    container.removeEventListener('mousemove', onMove)
-    container.removeEventListener('mouseleave', onLeave)
+    pointerEl.removeEventListener('mousemove', onMove, true)
+    pointerEl.removeEventListener('mouseleave', onLeave)
     geometry.dispose()
     material.dispose()
     mesh.dispose()

@@ -44,11 +44,14 @@ function mountScene(cols: number, rows: number) {
 
   handle.value?.dispose()
 
+  const pointerTarget = host.value.closest('.hero--grid') as HTMLElement | null
+
   const options: InstancedGridOptions = {
     cols,
     rows,
     lighting: savedLighting ? cloneLighting(savedLighting) : undefined,
     onStats: (stats) => emit('stats', stats),
+    pointerTarget: pointerTarget ?? undefined,
   }
 
   handle.value = createInstancedGridScene(host.value, options)
