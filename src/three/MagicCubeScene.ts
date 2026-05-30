@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { normalizeHexColor } from '../lib/colorHex'
 import {
   DEFAULT_MAGIC_CUBE_CONFIG,
@@ -52,6 +53,18 @@ function createCubeGeometry(bevelRadius: number): RoundedBoxGeometry {
   )
 }
 
+function createShinyMaterial(): THREE.MeshPhysicalMaterial {
+  return new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    roughness: 0.22,
+    metalness: 0.06,
+    clearcoat: 1,
+    clearcoatRoughness: 0.18,
+    reflectivity: 0.85,
+    envMapIntensity: 0.55,
+  })
+}
+
 export class MagicCubeScene {
   private readonly canvas: HTMLCanvasElement
   private readonly scene = new THREE.Scene()
@@ -59,9 +72,10 @@ export class MagicCubeScene {
   private readonly renderer: THREE.WebGLRenderer
   private readonly regularMesh: THREE.InstancedMesh
   private readonly accentMesh: THREE.InstancedMesh
-  private readonly regularMaterial: THREE.MeshBasicMaterial
-  private readonly accentMaterial: THREE.MeshBasicMaterial
+  private readonly regularMaterial: THREE.MeshPhysicalMaterial
+  private readonly accentMaterial: THREE.MeshPhysicalMaterial
   private readonly group = new THREE.Group()
+  private readonly pmrem: THREE.PMREMGenerator
   private readonly clock = new THREE.Clock()
   private readonly resizeHandler: () => void
 
@@ -85,12 +99,18 @@ export class MagicCubeScene {
     })
     this.renderer.setClearColor(0x000000, 0)
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
-    this.renderer.toneMapping = THREE.NoToneMapping
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping
+    this.renderer.toneMappingExposure = 1.12
+
+    this.pmrem = new THREE.PMREMGenerator(this.renderer)
+    this.scene.environment = this.pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+
+    this.setupLighting()
 
     const geometry = createCubeGeometry(this.config.bevelRadius)
 
-    this.regularMaterial = new THREE.MeshBasicMaterial()
-    this.accentMaterial = new THREE.MeshBasicMaterial()
+    this.regularMaterial = createShinyMaterial()
+    this.accentMaterial = createShinyMaterial()
 
     this.regularMesh = new THREE.InstancedMesh(
       geometry,
@@ -145,8 +165,23 @@ export class MagicCubeScene {
   private applyColors(): void {
     this.regularMaterial.color.setStyle(this.config.cubeColor)
     this.accentMaterial.color.setStyle(this.config.accentColor)
-    this.regularMaterial.needsUpdate = true
-    this.accentMaterial.needsUpdate = true
+  }
+
+  private setupLighting(): void {
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.42))
+    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xc8ccd8, 0.38))
+
+    const key = new THREE.DirectionalLight(0xfff8f2, 1.15)
+    key.position.set(-5, 7, 6)
+    this.scene.add(key)
+
+    const fill = new THREE.DirectionalLight(0xd8dce8, 0.48)
+    fill.position.set(6, 2, 4)
+    this.scene.add(fill)
+
+    const rim = new THREE.DirectionalLight(0xffffff, 0.35)
+    rim.position.set(2, 3, -6)
+    this.scene.add(rim)
   }
 
   private getTransitionBlend(elapsed: number): { from: number; to: number; t: number } {
@@ -233,6 +268,8 @@ export class MagicCubeScene {
     this.accentMesh.geometry.dispose()
     this.regularMaterial.dispose()
     this.accentMaterial.dispose()
+    this.scene.environment?.dispose()
+    this.pmrem.dispose()
     this.renderer.dispose()
   }
 }
