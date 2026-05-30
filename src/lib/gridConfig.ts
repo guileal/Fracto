@@ -8,10 +8,10 @@ export const DEFAULT_GRID_CONFIG: GridConfig = {
   rows: 12,
 }
 
-/** Grade mais densa no celular (~400 instâncias). */
+/** Grade mais densa no celular (~300 instâncias). */
 export const MOBILE_GRID_CONFIG: GridConfig = {
   cols: 20,
-  rows: 20,
+  rows: 15,
 }
 
 export const GRID_LIMITS = {
