@@ -22,8 +22,9 @@
 /* —— Hero em grade (v3+) —— */
 .hero.hero--grid {
   position: relative;
+  /* svh: altura estável quando a barra do navegador some (evita resize/jump no 3D) */
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   color: #fff;
@@ -73,7 +74,7 @@
   left: clamp(1.25rem, 4vw, 2.5rem);
   transform: translateY(-50%);
   width: min(36rem, calc(100vw - 2.5rem));
-  max-height: calc(100dvh - 7rem);
+  max-height: calc(100svh - 7rem);
   display: flex;
   flex-direction: column;
   gap: clamp(2rem, 5vw, 3rem);

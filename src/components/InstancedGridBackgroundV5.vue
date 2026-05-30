@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref, shallowRef, toRaw } from 'vue'
-import { DEFAULT_GRID_CONFIG, type GridConfig } from '../lib/gridConfig'
+import {
+  DEFAULT_GRID_CONFIG,
+  MOBILE_GRID_CONFIG,
+  type GridConfig,
+} from '../lib/gridConfig'
 import type { SceneLightingConfig } from '../lib/gridLighting'
 import type { PerfStats } from '../lib/perfMonitor'
 import type { InstancedGridHandle } from '../three/instancedGridScene'
@@ -30,8 +34,8 @@ function defaultGridSize(): GridConfig {
   if (!host.value) return { ...DEFAULT_GRID_CONFIG }
   const narrow = host.value.clientWidth < 768
   return {
-    cols: props.cols ?? (narrow ? 11 : DEFAULT_GRID_CONFIG.cols),
-    rows: props.rows ?? (narrow ? 8 : DEFAULT_GRID_CONFIG.rows),
+    cols: props.cols ?? (narrow ? MOBILE_GRID_CONFIG.cols : DEFAULT_GRID_CONFIG.cols),
+    rows: props.rows ?? (narrow ? MOBILE_GRID_CONFIG.rows : DEFAULT_GRID_CONFIG.rows),
   }
 }
 

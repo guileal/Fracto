@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { observeStableContainerResize } from '../lib/stableContainerResize'
 import { buildSummaryTimeline, clipEndTime } from './summaryClip'
 
 export interface GlbViewerState {
@@ -265,9 +266,7 @@ export function createGlbViewer(
     renderer.setSize(w, h)
   }
 
-  const ro = new ResizeObserver(resize)
-  ro.observe(container)
-  resize()
+  const disconnectResize = observeStableContainerResize(container, { onResize: resize })
 
   const applyGltf = (gltf: import('three/examples/jsm/loaders/GLTFLoader.js').GLTF) => {
     model = gltf.scene
@@ -403,7 +402,7 @@ export function createGlbViewer(
     resize,
     dispose: () => {
       cancelAnimationFrame(raf)
-      ro.disconnect()
+      disconnectResize()
       visibilityObserver.disconnect()
       clearModel()
       controls.dispose()

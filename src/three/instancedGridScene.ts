@@ -6,6 +6,7 @@ import {
   type SceneLightingConfig,
 } from '../lib/gridLighting'
 import { createPerfSampler, type PerfStatsListener } from '../lib/perfMonitor'
+import { observeStableContainerResize } from '../lib/stableContainerResize'
 
 export interface InstancedGridOptions {
   cols?: number
@@ -311,9 +312,7 @@ export function createInstancedGridScene(
     gridGroup.scale.setScalar(gridScale)
   }
 
-  const observer = new ResizeObserver(resize)
-  observer.observe(container)
-  resize()
+  const disconnectResize = observeStableContainerResize(container, { onResize: resize })
 
   const visibilityObserver = new IntersectionObserver(
     ([entry]) => {
@@ -331,7 +330,7 @@ export function createInstancedGridScene(
 
   const dispose = () => {
     cancelAnimationFrame(raf)
-    observer.disconnect()
+    disconnectResize()
     visibilityObserver.disconnect()
     pointerEl.removeEventListener('mousemove', onMove, true)
     pointerEl.removeEventListener('mouseleave', onLeave)

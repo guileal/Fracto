@@ -7,6 +7,7 @@ import {
   type SceneLightingConfig,
 } from '../lib/gridLighting'
 import { createPerfSampler } from '../lib/perfMonitor'
+import { observeStableContainerResize } from '../lib/stableContainerResize'
 import type { InstancedGridHandle, InstancedGridOptions } from './instancedGridScene'
 
 const DEFAULTS = {
@@ -164,23 +165,11 @@ export function createInstancedGridSceneV5(
   const isTouchLike = () =>
     window.matchMedia('(hover: none), (pointer: coarse)').matches
 
-  /** Celular / estreito: cubos seguem o scroll; desktop usa hover do mouse. */
-  const shouldUseScrollDrive = () => isTouchLike() || isNarrow()
-
   const setPointerNdcFromClient = (clientX: number, clientY: number) => {
     const rect = container.getBoundingClientRect()
     if (rect.width === 0 || rect.height === 0) return
     targetNdcX = ((clientX - rect.left) / rect.width) * 2 - 1
     targetNdcY = -(((clientY - rect.top) / rect.height) * 2 - 1)
-  }
-
-  const applyScrollPointer = () => {
-    const doc = document.documentElement
-    const maxScroll = Math.max(1, doc.scrollHeight - doc.clientHeight)
-    const t = doc.scrollTop / maxScroll
-    targetNdcX = -0.72 + t * 1.44
-    targetNdcY = 0.55 - t * 1.1
-    mouseActive = true
   }
 
   const applyMouseLightParams = () => {
@@ -192,7 +181,7 @@ export function createInstancedGridSceneV5(
 
   const updateMouseLight = () => {
     const m = lightingConfig.mouse
-    if (!m.enabled || shouldUseScrollDrive()) {
+    if (!m.enabled || isTouchLike()) {
       mouseLight.intensity = 0
       return
     }
@@ -207,25 +196,44 @@ export function createInstancedGridSceneV5(
   applyMouseLightParams()
 
   const onMove = (event: MouseEvent) => {
-    if (shouldUseScrollDrive()) return
+    if (isTouchLike()) return
     mouseActive = true
     setPointerNdcFromClient(event.clientX, event.clientY)
   }
 
   const onLeave = () => {
-    if (shouldUseScrollDrive()) return
     mouseActive = false
     updateMouseLight()
   }
 
-  const onScroll = () => {
-    if (!shouldUseScrollDrive()) return
-    applyScrollPointer()
+  const onTouchPointer = (clientX: number, clientY: number) => {
+    mouseActive = true
+    setPointerNdcFromClient(clientX, clientY)
+  }
+
+  const onTouchStart = (event: TouchEvent) => {
+    const touch = event.touches[0]
+    if (!touch) return
+    onTouchPointer(touch.clientX, touch.clientY)
+  }
+
+  const onTouchMove = (event: TouchEvent) => {
+    const touch = event.touches[0]
+    if (!touch) return
+    onTouchPointer(touch.clientX, touch.clientY)
+  }
+
+  const onTouchEnd = () => {
+    mouseActive = false
+    updateMouseLight()
   }
 
   pointerEl.addEventListener('mousemove', onMove, { passive: true, capture: true })
   pointerEl.addEventListener('mouseleave', onLeave)
-  window.addEventListener('scroll', onScroll, { passive: true })
+  pointerEl.addEventListener('touchstart', onTouchStart, { passive: true, capture: true })
+  pointerEl.addEventListener('touchmove', onTouchMove, { passive: true, capture: true })
+  pointerEl.addEventListener('touchend', onTouchEnd, { capture: true })
+  pointerEl.addEventListener('touchcancel', onTouchEnd, { capture: true })
 
   const radialInfluence = (distSq: number, radiusSq: number): number => {
     const t = Math.min(1, distSq / radiusSq)
@@ -355,10 +363,6 @@ export function createInstancedGridSceneV5(
   }
 
   const updateMouseOnGrid = (): boolean => {
-    if (shouldUseScrollDrive()) {
-      applyScrollPointer()
-    }
-
     const prevX = smoothNdcX
     const prevY = smoothNdcY
     smoothNdcX += (targetNdcX - smoothNdcX) * MOUSE_LERP
@@ -491,9 +495,7 @@ export function createInstancedGridSceneV5(
     gridGroup.scale.setScalar(gridScale)
   }
 
-  const observer = new ResizeObserver(resize)
-  observer.observe(container)
-  resize()
+  const disconnectResize = observeStableContainerResize(container, { onResize: resize })
 
   const visibilityObserver = new IntersectionObserver(
     ([entry]) => {
@@ -511,11 +513,14 @@ export function createInstancedGridSceneV5(
 
   const dispose = () => {
     cancelAnimationFrame(raf)
-    observer.disconnect()
+    disconnectResize()
     visibilityObserver.disconnect()
     pointerEl.removeEventListener('mousemove', onMove, true)
     pointerEl.removeEventListener('mouseleave', onLeave)
-    window.removeEventListener('scroll', onScroll)
+    pointerEl.removeEventListener('touchstart', onTouchStart, true)
+    pointerEl.removeEventListener('touchmove', onTouchMove, true)
+    pointerEl.removeEventListener('touchend', onTouchEnd, true)
+    pointerEl.removeEventListener('touchcancel', onTouchEnd, true)
     geometry.dispose()
     material.dispose()
     mesh.dispose()
