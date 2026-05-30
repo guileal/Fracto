@@ -5,7 +5,7 @@ export interface MagicCubeState {
   positions: Vec3[]
 }
 
-/** Índice do cubo laranja de destaque (pixel accent do isotipo Fracto) */
+/** Cubo laranja — canto superior direito do isotipo (dc:4, dr:1) */
 export const ACCENT_CUBE_INDEX = 1
 
 /** Grade 6×6 do isotipo — 7 cubos, posições normalizadas ao centro */

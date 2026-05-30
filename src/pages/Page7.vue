@@ -52,8 +52,8 @@ onBeforeUnmount(() => {
 .page7 {
   min-height: 100vh;
   min-height: 100dvh;
-  background: #0a0a0a;
-  color: #f4f6fa;
+  background: #fff;
+  color: var(--fracto-black);
 }
 
 .page7__nav {
@@ -67,12 +67,12 @@ onBeforeUnmount(() => {
 
 .page7__nav-link {
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(0, 0, 0, 0.35);
   text-decoration: none;
 }
 
 .page7__nav-link:hover {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(0, 0, 0, 0.75);
 }
 
 .page7__section {
@@ -105,7 +105,7 @@ onBeforeUnmount(() => {
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.7;
-  color: rgba(244, 246, 250, 0.62);
+  color: var(--fracto-muted);
   max-width: 36rem;
 }
 
@@ -113,6 +113,7 @@ onBeforeUnmount(() => {
   flex: 1 1 50%;
   position: relative;
   min-height: 320px;
+  background: transparent;
 }
 
 .page7__canvas {

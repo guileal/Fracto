@@ -9,11 +9,14 @@ import {
 } from './magicCubeStates'
 
 const CUBE_SIZE = 0.48
-const BEVEL_RADIUS = 0.06
+const BEVEL_RADIUS = 0.012
 const BEVEL_SEGMENTS = 2
 
-const COLOR_PEARL = new THREE.Color(0xf4f6fa)
+/** Mesmo preto do fundo da hero /v5 */
+const COLOR_CUBE = new THREE.Color(0x000000)
 const COLOR_ACCENT = new THREE.Color(0xf55e1d)
+
+const _color = new THREE.Color()
 
 const _matrix = new THREE.Matrix4()
 const _position = new THREE.Vector3()
@@ -72,7 +75,6 @@ export class MagicCubeScene {
     this.scene.environment = this.pmrem.fromScene(new RoomEnvironment(), 0.04).texture
 
     this.setupLighting()
-    this.setupFloor()
 
     const geometry = new RoundedBoxGeometry(
       CUBE_SIZE,
@@ -81,27 +83,24 @@ export class MagicCubeScene {
       BEVEL_SEGMENTS,
       BEVEL_RADIUS,
     )
-    const material = new THREE.MeshPhysicalMaterial({
+    const material = new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      roughness: 0.18,
-      metalness: 0.08,
-      clearcoat: 1,
-      clearcoatRoughness: 0.22,
-      reflectivity: 0.9,
+      roughness: 0.94,
+      metalness: 0,
       vertexColors: true,
+      envMapIntensity: 0.12,
     })
 
     this.mesh = new THREE.InstancedMesh(geometry, material, CUBE_COUNT)
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
-    const colors = new Float32Array(CUBE_COUNT * 3)
     for (let i = 0; i < CUBE_COUNT; i++) {
-      const c = i === ACCENT_CUBE_INDEX ? COLOR_ACCENT : COLOR_PEARL
-      colors[i * 3] = c.r
-      colors[i * 3 + 1] = c.g
-      colors[i * 3 + 2] = c.b
+      _color.copy(i === ACCENT_CUBE_INDEX ? COLOR_ACCENT : COLOR_CUBE)
+      this.mesh.setColorAt(i, _color)
     }
-    this.mesh.instanceColor = new THREE.InstancedBufferAttribute(colors, 3)
+    if (this.mesh.instanceColor) {
+      this.mesh.instanceColor.needsUpdate = true
+    }
 
     this.group.add(this.mesh)
     this.group.rotation.x = -0.14
@@ -116,39 +115,15 @@ export class MagicCubeScene {
   }
 
   private setupLighting(): void {
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.28))
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.55))
 
-    const key = new THREE.DirectionalLight(0xfff4ec, 1.35)
+    const key = new THREE.DirectionalLight(0xffffff, 0.85)
     key.position.set(-4.5, 6, 5)
     this.scene.add(key)
 
-    const fill = new THREE.DirectionalLight(0xa8b8d8, 0.55)
+    const fill = new THREE.DirectionalLight(0xe8eaef, 0.35)
     fill.position.set(5, 2.5, -2)
     this.scene.add(fill)
-
-    const rim = new THREE.PointLight(0xff9a6a, 0.85, 18, 2)
-    rim.position.set(2.5, -1, 3)
-    this.scene.add(rim)
-
-    const back = new THREE.PointLight(0xe8ecf4, 0.45, 14, 2)
-    back.position.set(-3, 1, -4)
-    this.scene.add(back)
-  }
-
-  private setupFloor(): void {
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(12, 12),
-      new THREE.MeshPhysicalMaterial({
-        color: 0x08080a,
-        roughness: 0.42,
-        metalness: 0.72,
-        transparent: true,
-        opacity: 0.55,
-      }),
-    )
-    floor.rotation.x = -Math.PI / 2
-    floor.position.y = -1.35
-    this.scene.add(floor)
   }
 
   private getTransitionBlend(elapsed: number): { from: number; to: number; t: number } {
