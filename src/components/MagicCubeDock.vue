@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { normalizeHexColor } from '../lib/colorHex'
 import {
   DEFAULT_MAGIC_CUBE_CONFIG,
@@ -23,6 +23,76 @@ const props = withDefaults(
 const cubeHexInput = ref(props.config.cubeColor)
 const accentHexInput = ref(props.config.accentColor)
 const materialEditorExpanded = ref(true)
+const dockRef = ref<HTMLElement | null>(null)
+const dockPos = ref<{ x: number; y: number } | null>(null)
+const isDragging = ref(false)
+
+const dockStyle = computed(() => {
+  if (!dockPos.value) return undefined
+  return {
+    left: `${dockPos.value.x}px`,
+    top: `${dockPos.value.y}px`,
+    bottom: 'auto',
+    transform: 'none',
+  }
+})
+
+function clampDockPosition(x: number, y: number): { x: number; y: number } {
+  const el = dockRef.value
+  if (!el) return { x, y }
+
+  const margin = 8
+  const maxX = window.innerWidth - el.offsetWidth - margin
+  const maxY = window.innerHeight - el.offsetHeight - margin
+
+  return {
+    x: Math.min(Math.max(margin, x), Math.max(margin, maxX)),
+    y: Math.min(Math.max(margin, y), Math.max(margin, maxY)),
+  }
+}
+
+function onHeaderPointerDown(event: PointerEvent) {
+  if ((event.target as HTMLElement).closest('.cube-dock__toggle')) return
+
+  const el = dockRef.value
+  if (!el) return
+
+  event.preventDefault()
+
+  const rect = el.getBoundingClientRect()
+  if (!dockPos.value) {
+    dockPos.value = clampDockPosition(rect.left, rect.top)
+  }
+
+  const startX = event.clientX
+  const startY = event.clientY
+  const originX = dockPos.value.x
+  const originY = dockPos.value.y
+
+  isDragging.value = true
+  el.setPointerCapture(event.pointerId)
+
+  const onMove = (moveEvent: PointerEvent) => {
+    if (moveEvent.pointerId !== event.pointerId) return
+    dockPos.value = clampDockPosition(
+      originX + moveEvent.clientX - startX,
+      originY + moveEvent.clientY - startY,
+    )
+  }
+
+  const onEnd = (endEvent: PointerEvent) => {
+    if (endEvent.pointerId !== event.pointerId) return
+    isDragging.value = false
+    el.releasePointerCapture(endEvent.pointerId)
+    el.removeEventListener('pointermove', onMove)
+    el.removeEventListener('pointerup', onEnd)
+    el.removeEventListener('pointercancel', onEnd)
+  }
+
+  el.addEventListener('pointermove', onMove)
+  el.addEventListener('pointerup', onEnd)
+  el.addEventListener('pointercancel', onEnd)
+}
 
 function toggleMaterialEditor() {
   materialEditorExpanded.value = !materialEditorExpanded.value
@@ -105,11 +175,20 @@ function onMaterialInput(
 
 <template>
   <aside
+    ref="dockRef"
     class="cube-dock"
-    :class="{ 'cube-dock--collapsed': !materialEditorExpanded }"
+    :class="{
+      'cube-dock--collapsed': !materialEditorExpanded,
+      'cube-dock--dragged': dockPos !== null,
+      'cube-dock--dragging': isDragging,
+    }"
+    :style="dockStyle"
     aria-label="Controles do cubo mágico"
   >
-    <div class="cube-dock__header">
+    <div
+      class="cube-dock__header"
+      @pointerdown="onHeaderPointerDown"
+    >
       <p class="cube-dock__title">Cubo mágico</p>
       <button
         type="button"
@@ -314,15 +393,20 @@ function onMaterialInput(
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   pointer-events: auto;
+  touch-action: pan-y;
 }
 
 @media (max-width: 900px) {
-  .cube-dock {
+  .cube-dock:not(.cube-dock--dragged) {
     left: 50%;
     bottom: 1rem;
     transform: translateX(-50%);
     width: min(300px, calc(100vw - 2rem));
   }
+}
+
+.cube-dock--dragged {
+  touch-action: none;
 }
 
 .cube-dock--collapsed {
@@ -335,6 +419,16 @@ function onMaterialInput(
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  margin: -0.15rem -0.2rem 0;
+  padding: 0.15rem 0.2rem 0.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.cube-dock--dragging .cube-dock__header {
+  cursor: grabbing;
 }
 
 .cube-dock__title {
@@ -357,6 +451,7 @@ function onMaterialInput(
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
   cursor: pointer;
+  touch-action: auto;
 }
 
 .cube-dock__toggle:hover {
