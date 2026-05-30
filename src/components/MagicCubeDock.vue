@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { normalizeHexColor } from '../lib/colorHex'
 import {
   DEFAULT_MAGIC_CUBE_CONFIG,
@@ -8,6 +8,7 @@ import {
   type MagicCubeConfig,
   type MagicCubeMaterialConfig,
 } from '../lib/magicCubeConfig'
+import { formatMagicCubeCopyPayload } from '../lib/magicCubeReference'
 
 const EDGE_HIDE_THRESHOLD = 44
 const DRAG_CLICK_THRESHOLD = 6
@@ -30,6 +31,10 @@ const materialEditorExpanded = ref(true)
 const dockRef = ref<HTMLElement | null>(null)
 const dockPos = ref<{ x: number; y: number } | null>(null)
 const isDragging = ref(false)
+const copyFeedback = ref('')
+let copyTimer = 0
+
+const copyPayload = computed(() => formatMagicCubeCopyPayload(props.config))
 
 const dockStyle = computed(() => {
   if (!panelOpen.value || !dockPos.value) return undefined
@@ -221,6 +226,27 @@ function onMaterialInput(
     },
   })
 }
+
+async function copyDefaultsReference() {
+  try {
+    await navigator.clipboard.writeText(copyPayload.value)
+    copyFeedback.value = 'Copiado!'
+    window.clearTimeout(copyTimer)
+    copyTimer = window.setTimeout(() => {
+      copyFeedback.value = ''
+    }, 2000)
+  } catch {
+    copyFeedback.value = 'Erro ao copiar'
+    window.clearTimeout(copyTimer)
+    copyTimer = window.setTimeout(() => {
+      copyFeedback.value = ''
+    }, 2000)
+  }
+}
+
+onBeforeUnmount(() => {
+  window.clearTimeout(copyTimer)
+})
 </script>
 
 <template>
@@ -234,14 +260,14 @@ function onMaterialInput(
       'cube-dock--dragging': isDragging,
     }"
     :style="dockStyle"
-    aria-label="Controles do cubo mágico"
+    aria-label="Editor de Materiais"
   >
     <div
       class="cube-dock__header"
       :class="{ 'cube-dock__header--peek': !panelOpen }"
       @pointerdown="onHeaderPointerDown"
     >
-      <p class="cube-dock__title">Cubo mágico</p>
+      <p class="cube-dock__title">Editor de Materiais</p>
       <button
         v-if="panelOpen"
         type="button"
@@ -414,6 +440,15 @@ function onMaterialInput(
           />
           <output class="cube-dock__value">{{ config.accentMaterial.emissiveIntensity.toFixed(2) }}</output>
         </label>
+      </div>
+
+      <div class="cube-dock__export">
+        <p class="cube-dock__export-hint">
+          Copie os materiais aprovados para colar no Cursor, fixar os defaults e depois gerar o embed WP Bakery (como grid-background).
+        </p>
+        <button type="button" class="cube-dock__copy" @click="copyDefaultsReference">
+          {{ copyFeedback || 'Copiar defaults dos materiais' }}
+        </button>
       </div>
     </div>
   </aside>
@@ -635,5 +670,38 @@ function onMaterialInput(
 .cube-dock__hex:focus {
   outline: none;
   border-color: var(--fracto-brand-border);
+}
+
+.cube-dock__export {
+  margin-top: 0.35rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cube-dock__export-hint {
+  margin: 0;
+  font-size: 0.62rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.cube-dock__copy {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(245, 94, 29, 0.18);
+  border: 1px solid rgba(245, 94, 29, 0.35);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cube-dock__copy:hover {
+  background: rgba(245, 94, 29, 0.28);
+  border-color: rgba(245, 94, 29, 0.5);
 }
 </style>
