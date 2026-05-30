@@ -7,29 +7,36 @@ import {
   type MagicCubeConfig,
 } from '../lib/magicCubeConfig'
 
-const config = defineModel<MagicCubeConfig>('config', {
-  default: () => ({ ...DEFAULT_MAGIC_CUBE_CONFIG }),
-})
+const props = withDefaults(
+  defineProps<{
+    config?: MagicCubeConfig
+    apply?: (partial: Partial<MagicCubeConfig>) => void
+  }>(),
+  {
+    config: () => ({ ...DEFAULT_MAGIC_CUBE_CONFIG }),
+    apply: () => {},
+  },
+)
 
-const cubeHexInput = ref(config.value.cubeColor)
-const accentHexInput = ref(config.value.accentColor)
+const cubeHexInput = ref(props.config.cubeColor)
+const accentHexInput = ref(props.config.accentColor)
 
 watch(
-  () => config.value.cubeColor,
+  () => props.config.cubeColor,
   (c) => {
     cubeHexInput.value = c
   },
 )
 
 watch(
-  () => config.value.accentColor,
+  () => props.config.accentColor,
   (c) => {
     accentHexInput.value = c
   },
 )
 
 function patch(partial: Partial<MagicCubeConfig>) {
-  config.value = { ...config.value, ...partial }
+  props.apply(partial)
 }
 
 function onBevelInput(event: Event) {
@@ -37,11 +44,23 @@ function onBevelInput(event: Event) {
 }
 
 function onCubeColorPicker(input: string) {
-  patch({ cubeColor: input })
+  const normalized = normalizeHexColor(input)
+  if (normalized) patch({ cubeColor: normalized })
 }
 
 function onAccentColorPicker(input: string) {
-  patch({ accentColor: input })
+  const normalized = normalizeHexColor(input)
+  if (normalized) patch({ accentColor: normalized })
+}
+
+function onCubeHexInput(event: Event) {
+  const normalized = normalizeHexColor((event.target as HTMLInputElement).value)
+  if (normalized) patch({ cubeColor: normalized })
+}
+
+function onAccentHexInput(event: Event) {
+  const normalized = normalizeHexColor((event.target as HTMLInputElement).value)
+  if (normalized) patch({ accentColor: normalized })
 }
 
 function onCubeHexBlur() {
@@ -49,7 +68,7 @@ function onCubeHexBlur() {
   if (normalized) {
     patch({ cubeColor: normalized })
   } else {
-    cubeHexInput.value = config.value.cubeColor
+    cubeHexInput.value = props.config.cubeColor
   }
 }
 
@@ -58,7 +77,7 @@ function onAccentHexBlur() {
   if (normalized) {
     patch({ accentColor: normalized })
   } else {
-    accentHexInput.value = config.value.accentColor
+    accentHexInput.value = props.config.accentColor
   }
 }
 </script>
@@ -97,6 +116,7 @@ function onAccentHexBlur() {
         spellcheck="false"
         maxlength="7"
         aria-label="Cor dos cubos em hexadecimal"
+        @input="onCubeHexInput"
         @blur="onCubeHexBlur"
         @keydown.enter="($event.target as HTMLInputElement).blur()"
       />
@@ -119,6 +139,7 @@ function onAccentHexBlur() {
         spellcheck="false"
         maxlength="7"
         aria-label="Cor do destaque em hexadecimal"
+        @input="onAccentHexInput"
         @blur="onAccentHexBlur"
         @keydown.enter="($event.target as HTMLInputElement).blur()"
       />

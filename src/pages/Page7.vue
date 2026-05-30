@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import MagicCubeDock from '../components/MagicCubeDock.vue'
 import LandingButton from '../components/landing/LandingButton.vue'
@@ -17,13 +17,10 @@ onMounted(() => {
   scene = new MagicCubeScene(canvasRef.value, cubeConfig.value)
 })
 
-watch(
-  cubeConfig,
-  (config) => {
-    scene?.applyConfig(config)
-  },
-  { deep: true },
-)
+function onCubeConfigUpdate(partial: Partial<MagicCubeConfig>) {
+  cubeConfig.value = { ...cubeConfig.value, ...partial }
+  scene?.applyConfig(cubeConfig.value)
+}
 
 onBeforeUnmount(() => {
   scene?.dispose()
@@ -57,7 +54,7 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <MagicCubeDock v-model:config="cubeConfig" />
+    <MagicCubeDock :config="cubeConfig" :apply="onCubeConfigUpdate" />
   </div>
 </template>
 

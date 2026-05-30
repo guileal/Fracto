@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
+import { normalizeHexColor } from '../lib/colorHex'
 import {
   DEFAULT_MAGIC_CUBE_CONFIG,
   type MagicCubeConfig,
@@ -9,13 +9,17 @@ import {
   ACCENT_CUBE_INDEX,
   CUBE_COUNT,
   MAGIC_CUBE_STATES,
+  type MagicCubeState,
   type Vec3,
 } from './magicCubeStates'
 
 const CUBE_SIZE = 0.48
 const BEVEL_SEGMENTS = 2
 
-const _color = new THREE.Color()
+/** Índices dos cubos pretos (todos exceto o de destaque) */
+const REGULAR_CUBE_INDICES = Array.from({ length: CUBE_COUNT }, (_, i) => i).filter(
+  (i) => i !== ACCENT_CUBE_INDEX,
+)
 
 const _matrix = new THREE.Matrix4()
 const _position = new THREE.Vector3()
@@ -53,9 +57,11 @@ export class MagicCubeScene {
   private readonly scene = new THREE.Scene()
   private readonly camera: THREE.PerspectiveCamera
   private readonly renderer: THREE.WebGLRenderer
-  private readonly mesh: THREE.InstancedMesh
+  private readonly regularMesh: THREE.InstancedMesh
+  private readonly accentMesh: THREE.InstancedMesh
+  private readonly regularMaterial: THREE.MeshBasicMaterial
+  private readonly accentMaterial: THREE.MeshBasicMaterial
   private readonly group = new THREE.Group()
-  private readonly pmrem: THREE.PMREMGenerator
   private readonly clock = new THREE.Clock()
   private readonly resizeHandler: () => void
 
@@ -79,31 +85,27 @@ export class MagicCubeScene {
     })
     this.renderer.setClearColor(0x000000, 0)
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping
-    this.renderer.toneMappingExposure = 1.08
+    this.renderer.toneMapping = THREE.NoToneMapping
 
-    this.pmrem = new THREE.PMREMGenerator(this.renderer)
-    this.scene.environment = this.pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+    const geometry = createCubeGeometry(this.config.bevelRadius)
 
-    this.setupLighting()
+    this.regularMaterial = new THREE.MeshBasicMaterial()
+    this.accentMaterial = new THREE.MeshBasicMaterial()
 
-    const material = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      roughness: 0.94,
-      metalness: 0,
-      vertexColors: true,
-      envMapIntensity: 0.12,
-    })
-
-    this.mesh = new THREE.InstancedMesh(
-      createCubeGeometry(this.config.bevelRadius),
-      material,
-      CUBE_COUNT,
+    this.regularMesh = new THREE.InstancedMesh(
+      geometry,
+      this.regularMaterial,
+      REGULAR_CUBE_INDICES.length,
     )
-    this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+    this.accentMesh = new THREE.InstancedMesh(geometry, this.accentMaterial, 1)
+
+    this.regularMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+    this.accentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+
     this.applyColors()
 
-    this.group.add(this.mesh)
+    this.group.add(this.regularMesh)
+    this.group.add(this.accentMesh)
     this.group.rotation.x = -0.14
     this.group.rotation.y = 0.22
     this.scene.add(this.group)
@@ -116,21 +118,24 @@ export class MagicCubeScene {
   }
 
   applyConfig(partial: Partial<MagicCubeConfig>): void {
-    const next = { ...this.config, ...partial }
-    const bevelChanged = next.bevelRadius !== this.config.bevelRadius
-    const colorsChanged =
-      next.cubeColor !== this.config.cubeColor || next.accentColor !== this.config.accentColor
-
-    this.config = next
-
-    if (bevelChanged) {
-      this.mesh.geometry.dispose()
-      this.mesh.geometry = createCubeGeometry(this.config.bevelRadius)
+    const prevBevel = this.config.bevelRadius
+    this.config = {
+      ...this.config,
+      ...partial,
+      cubeColor: normalizeHexColor(partial.cubeColor ?? this.config.cubeColor) ?? this.config.cubeColor,
+      accentColor:
+        normalizeHexColor(partial.accentColor ?? this.config.accentColor) ?? this.config.accentColor,
     }
 
-    if (colorsChanged) {
-      this.applyColors()
+    if (this.config.bevelRadius !== prevBevel) {
+      const geometry = createCubeGeometry(this.config.bevelRadius)
+      this.regularMesh.geometry.dispose()
+      this.accentMesh.geometry.dispose()
+      this.regularMesh.geometry = geometry
+      this.accentMesh.geometry = geometry.clone()
     }
+
+    this.applyColors()
   }
 
   getConfig(): MagicCubeConfig {
@@ -138,29 +143,10 @@ export class MagicCubeScene {
   }
 
   private applyColors(): void {
-    const cubeColor = new THREE.Color(this.config.cubeColor)
-    const accentColor = new THREE.Color(this.config.accentColor)
-
-    for (let i = 0; i < CUBE_COUNT; i++) {
-      _color.copy(i === ACCENT_CUBE_INDEX ? accentColor : cubeColor)
-      this.mesh.setColorAt(i, _color)
-    }
-
-    if (this.mesh.instanceColor) {
-      this.mesh.instanceColor.needsUpdate = true
-    }
-  }
-
-  private setupLighting(): void {
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.55))
-
-    const key = new THREE.DirectionalLight(0xffffff, 0.85)
-    key.position.set(-4.5, 6, 5)
-    this.scene.add(key)
-
-    const fill = new THREE.DirectionalLight(0xe8eaef, 0.35)
-    fill.position.set(5, 2.5, -2)
-    this.scene.add(fill)
+    this.regularMaterial.color.setStyle(this.config.cubeColor)
+    this.accentMaterial.color.setStyle(this.config.accentColor)
+    this.regularMaterial.needsUpdate = true
+    this.accentMaterial.needsUpdate = true
   }
 
   private getTransitionBlend(elapsed: number): { from: number; to: number; t: number } {
@@ -182,24 +168,38 @@ export class MagicCubeScene {
     }
   }
 
+  private cubePosition(
+    cubeIndex: number,
+    fromState: MagicCubeState,
+    toState: MagicCubeState,
+    blend: number,
+    floatY: number,
+  ): THREE.Vector3 {
+    const a = fromState.positions[cubeIndex]!
+    const b = toState.positions[cubeIndex]!
+    lerpVec3(_lerped, a, b, blend)
+    return _position.set(_lerped.x, _lerped.y + floatY, _lerped.z)
+  }
+
   private updateInstances(elapsed: number): void {
     const { from, to, t } = this.getTransitionBlend(elapsed)
     const fromState = MAGIC_CUBE_STATES[from]!
     const toState = MAGIC_CUBE_STATES[to]!
-
+    const blend = from === to ? 0 : t
     const floatY = Math.sin(elapsed * 0.55) * 0.04
 
-    for (let i = 0; i < CUBE_COUNT; i++) {
-      const a = fromState.positions[i]!
-      const b = toState.positions[i]!
-      lerpVec3(_lerped, a, b, from === to ? 0 : t)
-
-      _position.set(_lerped.x, _lerped.y + floatY, _lerped.z)
+    REGULAR_CUBE_INDICES.forEach((cubeIndex, instanceIndex) => {
+      this.cubePosition(cubeIndex, fromState, toState, blend, floatY)
       _matrix.compose(_position, _quaternion, _scale)
-      this.mesh.setMatrixAt(i, _matrix)
-    }
+      this.regularMesh.setMatrixAt(instanceIndex, _matrix)
+    })
 
-    this.mesh.instanceMatrix.needsUpdate = true
+    this.cubePosition(ACCENT_CUBE_INDEX, fromState, toState, blend, floatY)
+    _matrix.compose(_position, _quaternion, _scale)
+    this.accentMesh.setMatrixAt(0, _matrix)
+
+    this.regularMesh.instanceMatrix.needsUpdate = true
+    this.accentMesh.instanceMatrix.needsUpdate = true
     this.group.rotation.y = 0.22 + Math.sin(elapsed * 0.28) * 0.08
   }
 
@@ -229,13 +229,10 @@ export class MagicCubeScene {
     cancelAnimationFrame(this.raf)
     window.removeEventListener('resize', this.resizeHandler)
 
-    this.mesh.geometry.dispose()
-    const mat = this.mesh.material
-    if (Array.isArray(mat)) mat.forEach((m) => m.dispose())
-    else mat.dispose()
-
-    this.scene.environment?.dispose()
-    this.pmrem.dispose()
+    this.regularMesh.geometry.dispose()
+    this.accentMesh.geometry.dispose()
+    this.regularMaterial.dispose()
+    this.accentMaterial.dispose()
     this.renderer.dispose()
   }
 }
