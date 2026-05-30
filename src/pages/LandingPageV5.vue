@@ -209,6 +209,10 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.landing-v5 .hero__headline {
+  pointer-events: none;
+}
+
 .section {
   padding: clamp(4rem, 10vw, 7rem) clamp(1.5rem, 5vw, 4rem);
 }
