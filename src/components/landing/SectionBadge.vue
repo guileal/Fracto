@@ -11,6 +11,7 @@ defineProps<{
 <style scoped>
 .section-badge {
   display: inline-block;
+  width: fit-content;
   padding: 0.4rem 1rem;
   border: 1px solid var(--fracto-brand-border);
   border-radius: 999px;

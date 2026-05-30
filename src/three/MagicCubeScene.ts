@@ -5,6 +5,7 @@ import { normalizeHexColor } from '../lib/colorHex'
 import {
   DEFAULT_MAGIC_CUBE_CONFIG,
   type MagicCubeConfig,
+  type MagicCubeMaterialConfig,
 } from '../lib/magicCubeConfig'
 import {
   ACCENT_CUBE_INDEX,
@@ -16,6 +17,9 @@ import {
 
 const CUBE_SIZE = 0.48
 const BEVEL_SEGMENTS = 2
+const GROUP_SCALE = 0.78
+const GROUP_TILT_X = -0.16
+const SPIN_SPEED_Y = 0.42
 
 /** Índices dos cubos pretos (todos exceto o de destaque) */
 const REGULAR_CUBE_INDICES = Array.from({ length: CUBE_COUNT }, (_, i) => i).filter(
@@ -53,15 +57,31 @@ function createCubeGeometry(bevelRadius: number): RoundedBoxGeometry {
   )
 }
 
-function createShinyMaterial(): THREE.MeshPhysicalMaterial {
+function applyMaterialProps(
+  material: THREE.MeshPhysicalMaterial,
+  props: MagicCubeMaterialConfig,
+  color: string,
+  emissiveColor?: string,
+): void {
+  material.color.setStyle(color)
+  material.roughness = props.roughness
+  material.clearcoat = props.clearcoat
+  material.clearcoatRoughness = Math.min(props.roughness + 0.08, 0.95)
+  material.reflectivity = THREE.MathUtils.lerp(0.85, 0.15, props.roughness)
+  material.envMapIntensity = props.envMapIntensity
+  material.emissiveIntensity = props.emissiveIntensity
+  if (emissiveColor && props.emissiveIntensity > 0) {
+    material.emissive.setStyle(emissiveColor)
+  } else {
+    material.emissive.setHex(0x000000)
+  }
+}
+
+function createPhysicalMaterial(): THREE.MeshPhysicalMaterial {
   return new THREE.MeshPhysicalMaterial({
     color: 0xffffff,
-    roughness: 0.22,
-    metalness: 0.06,
-    clearcoat: 1,
-    clearcoatRoughness: 0.18,
-    reflectivity: 0.85,
-    envMapIntensity: 0.55,
+    metalness: 0,
+    emissive: 0x000000,
   })
 }
 
@@ -109,8 +129,8 @@ export class MagicCubeScene {
 
     const geometry = createCubeGeometry(this.config.bevelRadius)
 
-    this.regularMaterial = createShinyMaterial()
-    this.accentMaterial = createShinyMaterial()
+    this.regularMaterial = createPhysicalMaterial()
+    this.accentMaterial = createPhysicalMaterial()
 
     this.regularMesh = new THREE.InstancedMesh(
       geometry,
@@ -122,12 +142,12 @@ export class MagicCubeScene {
     this.regularMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
     this.accentMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
-    this.applyColors()
+    this.applyMaterials()
 
     this.group.add(this.regularMesh)
     this.group.add(this.accentMesh)
-    this.group.rotation.x = -0.14
-    this.group.rotation.y = 0.22
+    this.group.scale.setScalar(GROUP_SCALE)
+    this.group.rotation.x = GROUP_TILT_X
     this.scene.add(this.group)
 
     this.resizeHandler = () => this.resize()
@@ -145,6 +165,8 @@ export class MagicCubeScene {
       cubeColor: normalizeHexColor(partial.cubeColor ?? this.config.cubeColor) ?? this.config.cubeColor,
       accentColor:
         normalizeHexColor(partial.accentColor ?? this.config.accentColor) ?? this.config.accentColor,
+      cubeMaterial: { ...this.config.cubeMaterial, ...partial.cubeMaterial },
+      accentMaterial: { ...this.config.accentMaterial, ...partial.accentMaterial },
     }
 
     if (this.config.bevelRadius !== prevBevel) {
@@ -155,16 +177,25 @@ export class MagicCubeScene {
       this.accentMesh.geometry = geometry.clone()
     }
 
-    this.applyColors()
+    this.applyMaterials()
   }
 
   getConfig(): MagicCubeConfig {
     return { ...this.config }
   }
 
-  private applyColors(): void {
-    this.regularMaterial.color.setStyle(this.config.cubeColor)
-    this.accentMaterial.color.setStyle(this.config.accentColor)
+  private applyMaterials(): void {
+    applyMaterialProps(
+      this.regularMaterial,
+      this.config.cubeMaterial,
+      this.config.cubeColor,
+    )
+    applyMaterialProps(
+      this.accentMaterial,
+      this.config.accentMaterial,
+      this.config.accentColor,
+      this.config.accentColor,
+    )
   }
 
   private setupLighting(): void {
@@ -235,7 +266,8 @@ export class MagicCubeScene {
 
     this.regularMesh.instanceMatrix.needsUpdate = true
     this.accentMesh.instanceMatrix.needsUpdate = true
-    this.group.rotation.y = 0.22 + Math.sin(elapsed * 0.28) * 0.08
+    this.group.rotation.y = elapsed * SPIN_SPEED_Y
+    this.group.rotation.z = Math.sin(elapsed * 0.35) * 0.06
   }
 
   private resize(): void {

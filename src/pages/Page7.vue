@@ -18,7 +18,12 @@ onMounted(() => {
 })
 
 function onCubeConfigUpdate(partial: Partial<MagicCubeConfig>) {
-  cubeConfig.value = { ...cubeConfig.value, ...partial }
+  cubeConfig.value = {
+    ...cubeConfig.value,
+    ...partial,
+    cubeMaterial: { ...cubeConfig.value.cubeMaterial, ...partial.cubeMaterial },
+    accentMaterial: { ...cubeConfig.value.accentMaterial, ...partial.accentMaterial },
+  }
   scene?.applyConfig(cubeConfig.value)
 }
 
@@ -93,10 +98,18 @@ onBeforeUnmount(() => {
   min-height: 100dvh;
 }
 
+.page7__canvas-wrap {
+  flex: 1 1 50%;
+  position: relative;
+  min-height: 320px;
+  background: transparent;
+}
+
 .page7__text {
   flex: 1 1 50%;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   justify-content: center;
   gap: 1.25rem;
   padding: clamp(5rem, 10vw, 7rem) clamp(1.5rem, 5vw, 4rem);
@@ -119,13 +132,6 @@ onBeforeUnmount(() => {
   max-width: 36rem;
 }
 
-.page7__canvas-wrap {
-  flex: 1 1 50%;
-  position: relative;
-  min-height: 320px;
-  background: transparent;
-}
-
 .page7__canvas {
   display: block;
   width: 100%;
@@ -137,15 +143,17 @@ onBeforeUnmount(() => {
     flex-direction: column;
   }
 
+  .page7__canvas-wrap {
+    order: -1;
+    flex: none;
+    min-height: min(42vh, 360px);
+  }
+
   .page7__text {
     flex: none;
     max-width: none;
+    padding-top: 0;
     padding-bottom: 2rem;
-  }
-
-  .page7__canvas-wrap {
-    flex: 1;
-    min-height: min(50vh, 480px);
   }
 }
 </style>
