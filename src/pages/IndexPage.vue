@@ -43,6 +43,13 @@ const pages = [
     tag: 'Experimento',
   },
   {
+    to: '/v7',
+    title: 'Landing v7',
+    description:
+      'Segunda seção da v5 em layout duas colunas — texto e cubo mágico 3D formando o isotipo.',
+    tag: 'Experimento',
+  },
+  {
     to: '/viewer',
     title: 'Viewer GLB',
     description: 'Scroll que scruba a timeline Summary de modelos .glb exportados do Blender.',
