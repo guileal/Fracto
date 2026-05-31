@@ -1,0 +1,26 @@
+---
+description: Páginas Vue Fracto — preview local, rotas de protótipo
+globs: src/pages/**,src/router.ts
+alwaysApply: false
+---
+
+# Vue Pages — preview
+
+Ver **`AGENTS.md`** §5D.
+
+## Rotas de referência 3D
+
+| Rota | Página | O que valida |
+|------|--------|--------------|
+| `/v5` | `LandingPageV5.vue` | Grid hero → asset `background-grid-black` |
+| `/v7` | `Page7.vue` | Isotipo → asset `logo-01-black` |
+
+## Escopo
+
+- `src/pages/` e layout Vue **não vão para WordPress**
+- Alterações aqui afetam só preview (`npm run dev`)
+- Comportamento 3D partilhado está em `src/three/` — alterações lá exigem `npm run build:wp` para WP
+
+## Meta
+
+Rotas protótipo usam `meta: { bare: true }` — sem chrome da app.

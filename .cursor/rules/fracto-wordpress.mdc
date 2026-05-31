@@ -1,0 +1,47 @@
+---
+description: WordPress child theme Fracto — assets, shortcodes, WPBakery
+globs: wordpress/**
+alwaysApply: false
+---
+
+# WordPress — Fracto
+
+Ver **`AGENTS.md`** e **`wordpress/WORKFLOW.md`**.
+
+## Estrutura
+
+- Tema: `wordpress/themes/Fracto/` → deploy `wp-content/themes/Fracto/`
+- PHP: `inc/fracto-3d.php` (shortcodes, vc_map, enqueue)
+- Assets gerados: `assets/3d/<asset-id>/` — **não editar manualmente**
+
+## Packages (glue only)
+
+```
+packages/background-grid-black/src/  → index.ts + embed.css
+packages/logo-01-black/src/          → index.ts + embed.css
+```
+
+Alias Vite: `@fracto` → `../../src` (definido em `packages/vite-shared.ts`).
+
+## Enqueue
+
+- Base URI: `get_stylesheet_directory_uri() . '/assets/3d'`
+- `wp_register_*` no hook `wp_enqueue_scripts`
+- `wp_enqueue_*` **dentro do shortcode** (sob demanda)
+
+## Shortcodes
+
+| Shortcode | data-fracto-3d | Ficheiros |
+|-----------|----------------|-----------|
+| `fracto3d_grid` | `background-grid-black` | `.min.js` + `.css` |
+| `fracto3d_logo` | `logo-01-black` | `.min.js` + `.css` |
+
+## Não fazer
+
+- Apontar para `uploads/fracto-3d/` (legado)
+- Exigir Node/Vite na Hostinger
+- Recriar `template-fracto-showcase.php`
+
+## Build
+
+`npm run build:wp` na raiz do repo.

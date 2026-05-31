@@ -1,0 +1,33 @@
+---
+description: Harness Fracto — invariantes, arquitetura e workflows (ler AGENTS.md)
+alwaysApply: true
+---
+
+# Fracto Harness
+
+Fonte canónica: **`AGENTS.md`** na raiz. Consulte antes de alterar código.
+
+## O que é este projeto
+
+Monorepo: **Vue/Three.js (preview)** + **WordPress child theme `Fracto` (produção Hostinger)**.
+Mesmo código 3D; dois destinos.
+
+## Invariantes críticos
+
+1. Cenas 3D **só** em `src/three/` + `src/lib/` — packages WP = glue (`index.ts` + `embed.css`)
+2. Build WP: `npm run build:wp` → `wordpress/themes/Fracto/assets/3d/`
+3. Deploy: só `themes/Fracto/` → `wp-content/themes/Fracto/` (F maiúsculo)
+4. Assets no child theme, **não** em `uploads/`
+5. `npm run dev` = preview Vue; **nunca** gera bundles WP
+6. Não duplicar `template-fracto-showcase.php`
+
+## Assets registados
+
+| Asset | Vue | Shortcode |
+|-------|-----|-----------|
+| `background-grid-black` | `/v5` | `[fracto3d_grid]` |
+| `logo-01-black` | `/v7` | `[fracto3d_logo]` |
+
+## Fluxo 3D
+
+Editar `src/` → `npm run dev` (testar) → `npm run build:wp` → deploy tema.

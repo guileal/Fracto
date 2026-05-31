@@ -1,0 +1,10 @@
+{
+  "name": "@fracto/wordpress-assets",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --prefix packages/background-grid-black && npm run build --prefix packages/logo-01-black && npm run build --prefix packages/magic-cube",
+    "build:grid": "npm run build --prefix packages/background-grid-black",
+    "build:logo": "npm run build --prefix packages/logo-01-black",
+    "build:magic-cube": "npm run build --prefix packages/magic-cube"
+  }
+}

@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vue-tsc -b && vite build",
+    "build:wp": "npm run build --prefix wordpress",
     "preview": "vite preview"
   },
   "dependencies": {

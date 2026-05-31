@@ -1,0 +1,34 @@
+---
+description: Fonte única Three.js — src/three e src/lib (Fracto)
+globs: src/three/**,src/lib/**,src/components/InstancedGrid*.vue,src/components/MagicCube*.vue
+alwaysApply: false
+---
+
+# Cenas 3D — fonte única
+
+Ver **`AGENTS.md`** §2 (I1), §4, §5A.
+
+## Regras
+
+- Toda lógica de cena (grid, logo, materiais, animação) vive em `src/three/` e `src/lib/`
+- **Nunca** copiar estes ficheiros para `wordpress/packages/`
+- Packages WP importam via alias `@fracto` no build — não editar cenas lá
+
+## Mapeamento
+
+| Ficheiro | Asset WP | Rota preview |
+|----------|----------|--------------|
+| `instancedGridSceneV5.ts` | `background-grid-black` | `/v5` |
+| `MagicCubeScene.ts` + `magicCubeConfig.ts` | `logo-01-black` | `/v7` |
+| `gridLightingV4.ts` | defaults do grid | `/v5` |
+
+## Após alterar cena
+
+1. `npm run dev` → validar rota
+2. `npm run build:wp`
+3. Bundles em `themes/Fracto/assets/3d/`
+
+## Vue vs WP
+
+Componentes Vue (`InstancedGridBackgroundV5.vue`, `Page7.vue`) = lifecycle + UI + props.
+O embed WP usa a **mesma** função/classe Three.js, sem Vue.

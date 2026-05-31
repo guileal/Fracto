@@ -1,42 +1,31 @@
 # Fracto 3D — WordPress
 
-Cada efeito 3D é um **asset separado**: código e bundle próprios, pasta própria no upload.
+Cada efeito 3D é um **bundle standalone** (IIFE + Three.js embutido).  
+A cena Three.js vem de **`src/`** (mesmo código do Vue) via alias `@fracto` no build.
+
+Guia completo de workflow: [`WORKFLOW.md`](./WORKFLOW.md)
 
 ## Estrutura
 
 ```text
 wordpress/
-├── packages/                    # código-fonte + build (no Mac)
-│   ├── grid-background/         # fundo de quadrados v5
-│   └── magic-cube/              # isotipo 3D animado (/v7)
-└── uploads/fracto-3d/           # subir para o servidor
-    ├── README.md
-    ├── grid-background/
-    └── magic-cube/
+├── WORKFLOW.md
+├── package.json
+├── packages/
+│   ├── vite-shared.ts              # alias @fracto → ../../src
+│   ├── background-grid-black/      # glue WP + embed.css
+│   └── logo-01-black/
+└── themes/Fracto/
+    ├── inc/fracto-3d.php
+    └── assets/3d/                  # saída do build
 ```
-
-No Hostinger:
-
-```text
-wp-content/uploads/fracto-3d/
-├── grid-background/
-└── magic-cube/         ← uma pasta por asset
-```
-
-**Por que separado?** Cada `.min.js` traz Three.js (~500 KB). No WP você enfileira só o asset da página — não um bundle gigante com tudo.
-
-## Novo asset no futuro
-
-1. Copie `packages/grid-background/` como modelo → `packages/meu-asset/`
-2. Ajuste `vite.config.ts` (`assetId` e pasta de saída)
-3. `npm run build` → gera `uploads/fracto-3d/meu-asset/`
-4. Enfileire só esse JS/CSS no WordPress
 
 ## Build
 
 ```bash
-cd wordpress/packages/grid-background && npm run build
-cd wordpress/packages/magic-cube && npm run build
+npm run build:wp    # na raiz do repo
 ```
 
-Detalhes: [`packages/grid-background/README.md`](./packages/grid-background/README.md), [`packages/magic-cube/README.md`](./packages/magic-cube/README.md)
+## Deploy
+
+Copie `themes/Fracto/` → `wp-content/themes/Fracto/` na Hostinger.

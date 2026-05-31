@@ -1,10 +1,11 @@
-# packages/
+# Packages WordPress
 
-Um diretório por asset 3D. Cada um tem `package.json`, `vite build` e saída em `../uploads/fracto-3d/<asset-id>/`.
+Um diretório por asset 3D. Cada um gera um bundle IIFE standalone em `themes/Fracto/assets/3d/<asset-id>/`.
 
-| Pacote | Upload |
-|--------|--------|
-| [`grid-background/`](./grid-background/) | `uploads/fracto-3d/grid-background/` |
-| [`magic-cube/`](./magic-cube/) | `uploads/fracto-3d/magic-cube/` |
+| Package | Asset | Destino | Origem Vue |
+|---------|-------|---------|------------|
+| [`background-grid-black/`](./background-grid-black/) | Grade preta do hero | `themes/Fracto/assets/3d/` | `/v5` |
+| [`logo-01-black/`](./logo-01-black/) | Isotipo animado | `themes/Fracto/assets/3d/` | `/v7` |
+| [`magic-cube/`](./magic-cube/) | Isotipo animado (uploads) | `uploads/fracto-3d/magic-cube/` | `/v7` |
 
-Código do Fracto principal não é alterado — são cópias locais em `src/` de cada pacote.
+Build de todos: `npm run build:wp` na raiz do repo. Só o embed uploads: `npm run build:magic-cube --prefix wordpress`.
