@@ -28,7 +28,7 @@ export function formatMagicCubeCopyPayload(config: MagicCubeConfig): string {
 
   return `Contexto Fracto — /v7 Magic Cube (Editor de Materiais)
 
-Use este bloco para fixar os defaults em src/lib/magicCubeConfig.ts e, depois, empacotar um embed 3D para WordPress/WP Bakery — no mesmo modelo de wordpress/uploads/fracto-3d/grid-background (JS + CSS em wp-content/uploads/fracto-3d/...).
+Use este bloco para fixar os defaults em src/lib/magicCubeConfig.ts e, depois, correr npm run build:wp — o bundle logo-01-black vai para wordpress/themes/Fracto/assets/3d/ e é enfileirado pelo shortcode [fracto3d_logo].
 
 O Editor de Materiais permanece no projeto para ajustes futuros; o objetivo agora é capturar o visual aprovado e gerar um elemento 3D que o cliente adiciona no WP Bakery com um clique.
 
