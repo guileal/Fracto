@@ -27,7 +27,17 @@ Alias Vite: `@fracto` → `../../src` (definido em `packages/vite-shared.ts`).
 
 - Base URI: `get_stylesheet_directory_uri() . '/assets/3d'`
 - `wp_register_*` no hook `wp_enqueue_scripts`
-- `wp_enqueue_*` **dentro do shortcode** (sob demanda)
+- `wp_enqueue_*` **dentro do shortcode** ou ao renderizar row com `fracto_brand_bg`
+
+## Row Background (Salient)
+
+**Plano A:** dropdown na aba **Background** — `Fracto — Fundo da marca`.
+
+**Plano B:** classe em **Extra Class Name** (aba Advanced):
+- `fracto-background-grid-black` → grid /v5
+- `fracto-logo-01-black` → logo /v7
+
+Implementação: `inc/fracto-row-background.php` + filter `vc_shortcode_output`. Dropdown tem prioridade sobre classe.
 
 ## Shortcodes
 

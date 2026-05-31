@@ -1,7 +1,7 @@
-/** Posição 3D de um cubo em um estado da animação */
+/** Posição 3D de um cubo em um estado da animação do isotipo */
 export type Vec3 = [number, number, number]
 
-export interface MagicCubeState {
+export interface FractoLogoState {
   positions: Vec3[]
 }
 
@@ -43,7 +43,7 @@ const ARC_FORMATION: Vec3[] = [
 
 export const CUBE_COUNT = LOGO_ISOTYPE.length
 
-export const MAGIC_CUBE_STATES: MagicCubeState[] = [
+export const FRACTO_LOGO_STATES: FractoLogoState[] = [
   { positions: LOGO_ISOTYPE },
   { positions: SCATTERED },
   { positions: ARC_FORMATION },

@@ -2,24 +2,24 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { normalizeHexColor } from '../lib/colorHex'
 import {
-  DEFAULT_MAGIC_CUBE_CONFIG,
-  MAGIC_CUBE_BEVEL,
-  MAGIC_CUBE_MATERIAL,
-  type MagicCubeConfig,
-  type MagicCubeMaterialConfig,
-} from '../lib/magicCubeConfig'
-import { formatMagicCubeCopyPayload } from '../lib/magicCubeReference'
+  DEFAULT_FRACTO_LOGO_CONFIG,
+  FRACTO_LOGO_BEVEL,
+  FRACTO_LOGO_MATERIAL,
+  type FractoLogoConfig,
+  type FractoLogoMaterialConfig,
+} from '../lib/fractoLogoConfig'
+import { formatFractoLogoCopyPayload } from '../lib/fractoLogoReference'
 
 const EDGE_HIDE_THRESHOLD = 44
 const DRAG_CLICK_THRESHOLD = 6
 
 const props = withDefaults(
   defineProps<{
-    config?: MagicCubeConfig
-    apply?: (partial: Partial<MagicCubeConfig>) => void
+    config?: FractoLogoConfig
+    apply?: (partial: Partial<FractoLogoConfig>) => void
   }>(),
   {
-    config: () => ({ ...DEFAULT_MAGIC_CUBE_CONFIG }),
+    config: () => ({ ...DEFAULT_FRACTO_LOGO_CONFIG }),
     apply: () => {},
   },
 )
@@ -34,7 +34,7 @@ const isDragging = ref(false)
 const copyFeedback = ref('')
 let copyTimer = 0
 
-const copyPayload = computed(() => formatMagicCubeCopyPayload(props.config))
+const copyPayload = computed(() => formatFractoLogoCopyPayload(props.config))
 
 const dockStyle = computed(() => {
   if (!panelOpen.value || !dockPos.value) return undefined
@@ -80,7 +80,7 @@ function hidePanel() {
 }
 
 function onHeaderPointerDown(event: PointerEvent) {
-  if ((event.target as HTMLElement).closest('.cube-dock__toggle')) return
+  if ((event.target as HTMLElement).closest('.logo-dock__toggle')) return
 
   const el = dockRef.value
   if (!el) return
@@ -167,7 +167,7 @@ watch(
   },
 )
 
-function patch(partial: Partial<MagicCubeConfig>) {
+function patch(partial: Partial<FractoLogoConfig>) {
   props.apply(partial)
 }
 
@@ -215,7 +215,7 @@ function onAccentHexBlur() {
 
 function onMaterialInput(
   target: 'cubeMaterial' | 'accentMaterial',
-  key: keyof MagicCubeMaterialConfig,
+  key: keyof FractoLogoMaterialConfig,
   event: Event,
 ) {
   const value = Number((event.target as HTMLInputElement).value)
@@ -252,52 +252,52 @@ onBeforeUnmount(() => {
 <template>
   <aside
     ref="dockRef"
-    class="cube-dock"
+    class="logo-dock"
     :class="{
-      'cube-dock--hidden': !panelOpen,
-      'cube-dock--materials-collapsed': !materialEditorExpanded,
-      'cube-dock--dragged': panelOpen && dockPos !== null,
-      'cube-dock--dragging': isDragging,
+      'logo-dock--hidden': !panelOpen,
+      'logo-dock--materials-collapsed': !materialEditorExpanded,
+      'logo-dock--dragged': panelOpen && dockPos !== null,
+      'logo-dock--dragging': isDragging,
     }"
     :style="dockStyle"
     aria-label="Editor de Materiais"
   >
     <div
-      class="cube-dock__header"
-      :class="{ 'cube-dock__header--peek': !panelOpen }"
+      class="logo-dock__header"
+      :class="{ 'logo-dock__header--peek': !panelOpen }"
       @pointerdown="onHeaderPointerDown"
     >
-      <p class="cube-dock__title">Editor de Materiais</p>
+      <p class="logo-dock__title">Editor de Materiais</p>
       <button
         v-if="panelOpen"
         type="button"
-        class="cube-dock__toggle"
+        class="logo-dock__toggle"
         :aria-expanded="materialEditorExpanded"
-        aria-controls="cube-dock-materials"
+        aria-controls="logo-dock-materials"
         @click="toggleMaterialEditor"
       >
         {{ materialEditorExpanded ? 'Minimizar' : 'Materiais' }}
       </button>
-      <span v-else class="cube-dock__peek-hint" aria-hidden="true">Abrir</span>
+      <span v-else class="logo-dock__peek-hint" aria-hidden="true">Abrir</span>
     </div>
 
-    <div v-show="panelOpen" class="cube-dock__body">
-      <label class="cube-dock__row">
-        <span class="cube-dock__label">Bevel</span>
+    <div v-show="panelOpen" class="logo-dock__body">
+      <label class="logo-dock__row">
+        <span class="logo-dock__label">Bevel</span>
         <input
           type="range"
-          :min="MAGIC_CUBE_BEVEL.min"
-          :max="MAGIC_CUBE_BEVEL.max"
-          :step="MAGIC_CUBE_BEVEL.step"
+          :min="FRACTO_LOGO_BEVEL.min"
+          :max="FRACTO_LOGO_BEVEL.max"
+          :step="FRACTO_LOGO_BEVEL.step"
           :value="config.bevelRadius"
           @input="onBevelInput"
         />
-        <output class="cube-dock__value">{{ config.bevelRadius.toFixed(3) }}</output>
+        <output class="logo-dock__value">{{ config.bevelRadius.toFixed(3) }}</output>
       </label>
 
-      <div class="cube-dock__row cube-dock__row--color">
-        <span class="cube-dock__label">Cor cubos</span>
-        <label class="cube-dock__swatch">
+      <div class="logo-dock__row logo-dock__row--color">
+        <span class="logo-dock__label">Cor cubos</span>
+        <label class="logo-dock__swatch">
           <span class="sr-only">Cor dos cubos</span>
           <input
             type="color"
@@ -308,7 +308,7 @@ onBeforeUnmount(() => {
         <input
           v-model="cubeHexInput"
           type="text"
-          class="cube-dock__hex"
+          class="logo-dock__hex"
           spellcheck="false"
           maxlength="7"
           aria-label="Cor dos cubos em hexadecimal"
@@ -320,53 +320,53 @@ onBeforeUnmount(() => {
 
       <div
         v-show="materialEditorExpanded"
-        id="cube-dock-materials"
-        class="cube-dock__materials"
+        id="logo-dock-materials"
+        class="logo-dock__materials"
       >
-        <p class="cube-dock__section">Material preto</p>
+        <p class="logo-dock__section">Material preto</p>
 
-        <label class="cube-dock__row">
-          <span class="cube-dock__label">Rugosidade</span>
+        <label class="logo-dock__row">
+          <span class="logo-dock__label">Rugosidade</span>
           <input
             type="range"
-            :min="MAGIC_CUBE_MATERIAL.roughness.min"
-            :max="MAGIC_CUBE_MATERIAL.roughness.max"
-            :step="MAGIC_CUBE_MATERIAL.roughness.step"
+            :min="FRACTO_LOGO_MATERIAL.roughness.min"
+            :max="FRACTO_LOGO_MATERIAL.roughness.max"
+            :step="FRACTO_LOGO_MATERIAL.roughness.step"
             :value="config.cubeMaterial.roughness"
             @input="onMaterialInput('cubeMaterial', 'roughness', $event)"
           />
-          <output class="cube-dock__value">{{ config.cubeMaterial.roughness.toFixed(2) }}</output>
+          <output class="logo-dock__value">{{ config.cubeMaterial.roughness.toFixed(2) }}</output>
         </label>
 
-        <label class="cube-dock__row">
-          <span class="cube-dock__label">Verniz</span>
+        <label class="logo-dock__row">
+          <span class="logo-dock__label">Verniz</span>
           <input
             type="range"
-            :min="MAGIC_CUBE_MATERIAL.clearcoat.min"
-            :max="MAGIC_CUBE_MATERIAL.clearcoat.max"
-            :step="MAGIC_CUBE_MATERIAL.clearcoat.step"
+            :min="FRACTO_LOGO_MATERIAL.clearcoat.min"
+            :max="FRACTO_LOGO_MATERIAL.clearcoat.max"
+            :step="FRACTO_LOGO_MATERIAL.clearcoat.step"
             :value="config.cubeMaterial.clearcoat"
             @input="onMaterialInput('cubeMaterial', 'clearcoat', $event)"
           />
-          <output class="cube-dock__value">{{ config.cubeMaterial.clearcoat.toFixed(2) }}</output>
+          <output class="logo-dock__value">{{ config.cubeMaterial.clearcoat.toFixed(2) }}</output>
         </label>
 
-        <label class="cube-dock__row">
-          <span class="cube-dock__label">Reflexo</span>
+        <label class="logo-dock__row">
+          <span class="logo-dock__label">Reflexo</span>
           <input
             type="range"
-            :min="MAGIC_CUBE_MATERIAL.envMapIntensity.min"
-            :max="MAGIC_CUBE_MATERIAL.envMapIntensity.max"
-            :step="MAGIC_CUBE_MATERIAL.envMapIntensity.step"
+            :min="FRACTO_LOGO_MATERIAL.envMapIntensity.min"
+            :max="FRACTO_LOGO_MATERIAL.envMapIntensity.max"
+            :step="FRACTO_LOGO_MATERIAL.envMapIntensity.step"
             :value="config.cubeMaterial.envMapIntensity"
             @input="onMaterialInput('cubeMaterial', 'envMapIntensity', $event)"
           />
-          <output class="cube-dock__value">{{ config.cubeMaterial.envMapIntensity.toFixed(2) }}</output>
+          <output class="logo-dock__value">{{ config.cubeMaterial.envMapIntensity.toFixed(2) }}</output>
         </label>
 
-        <div class="cube-dock__row cube-dock__row--color">
-          <span class="cube-dock__label">Cor destaque</span>
-          <label class="cube-dock__swatch">
+        <div class="logo-dock__row logo-dock__row--color">
+          <span class="logo-dock__label">Cor destaque</span>
+          <label class="logo-dock__swatch">
             <span class="sr-only">Cor do cubo de destaque</span>
             <input
               type="color"
@@ -377,7 +377,7 @@ onBeforeUnmount(() => {
           <input
             v-model="accentHexInput"
             type="text"
-            class="cube-dock__hex"
+            class="logo-dock__hex"
             spellcheck="false"
             maxlength="7"
             aria-label="Cor do destaque em hexadecimal"
@@ -387,66 +387,66 @@ onBeforeUnmount(() => {
           />
         </div>
 
-        <p class="cube-dock__section">Material laranja</p>
+        <p class="logo-dock__section">Material laranja</p>
 
-        <label class="cube-dock__row">
-          <span class="cube-dock__label">Rugosidade</span>
+        <label class="logo-dock__row">
+          <span class="logo-dock__label">Rugosidade</span>
           <input
             type="range"
-            :min="MAGIC_CUBE_MATERIAL.roughness.min"
-            :max="MAGIC_CUBE_MATERIAL.roughness.max"
-            :step="MAGIC_CUBE_MATERIAL.roughness.step"
+            :min="FRACTO_LOGO_MATERIAL.roughness.min"
+            :max="FRACTO_LOGO_MATERIAL.roughness.max"
+            :step="FRACTO_LOGO_MATERIAL.roughness.step"
             :value="config.accentMaterial.roughness"
             @input="onMaterialInput('accentMaterial', 'roughness', $event)"
           />
-          <output class="cube-dock__value">{{ config.accentMaterial.roughness.toFixed(2) }}</output>
+          <output class="logo-dock__value">{{ config.accentMaterial.roughness.toFixed(2) }}</output>
         </label>
 
-        <label class="cube-dock__row">
-          <span class="cube-dock__label">Verniz</span>
+        <label class="logo-dock__row">
+          <span class="logo-dock__label">Verniz</span>
           <input
             type="range"
-            :min="MAGIC_CUBE_MATERIAL.clearcoat.min"
-            :max="MAGIC_CUBE_MATERIAL.clearcoat.max"
-            :step="MAGIC_CUBE_MATERIAL.clearcoat.step"
+            :min="FRACTO_LOGO_MATERIAL.clearcoat.min"
+            :max="FRACTO_LOGO_MATERIAL.clearcoat.max"
+            :step="FRACTO_LOGO_MATERIAL.clearcoat.step"
             :value="config.accentMaterial.clearcoat"
             @input="onMaterialInput('accentMaterial', 'clearcoat', $event)"
           />
-          <output class="cube-dock__value">{{ config.accentMaterial.clearcoat.toFixed(2) }}</output>
+          <output class="logo-dock__value">{{ config.accentMaterial.clearcoat.toFixed(2) }}</output>
         </label>
 
-        <label class="cube-dock__row">
-          <span class="cube-dock__label">Reflexo</span>
+        <label class="logo-dock__row">
+          <span class="logo-dock__label">Reflexo</span>
           <input
             type="range"
-            :min="MAGIC_CUBE_MATERIAL.envMapIntensity.min"
-            :max="MAGIC_CUBE_MATERIAL.envMapIntensity.max"
-            :step="MAGIC_CUBE_MATERIAL.envMapIntensity.step"
+            :min="FRACTO_LOGO_MATERIAL.envMapIntensity.min"
+            :max="FRACTO_LOGO_MATERIAL.envMapIntensity.max"
+            :step="FRACTO_LOGO_MATERIAL.envMapIntensity.step"
             :value="config.accentMaterial.envMapIntensity"
             @input="onMaterialInput('accentMaterial', 'envMapIntensity', $event)"
           />
-          <output class="cube-dock__value">{{ config.accentMaterial.envMapIntensity.toFixed(2) }}</output>
+          <output class="logo-dock__value">{{ config.accentMaterial.envMapIntensity.toFixed(2) }}</output>
         </label>
 
-        <label class="cube-dock__row">
-          <span class="cube-dock__label">Emissão</span>
+        <label class="logo-dock__row">
+          <span class="logo-dock__label">Emissão</span>
           <input
             type="range"
-            :min="MAGIC_CUBE_MATERIAL.emissiveIntensity.min"
-            :max="MAGIC_CUBE_MATERIAL.emissiveIntensity.max"
-            :step="MAGIC_CUBE_MATERIAL.emissiveIntensity.step"
+            :min="FRACTO_LOGO_MATERIAL.emissiveIntensity.min"
+            :max="FRACTO_LOGO_MATERIAL.emissiveIntensity.max"
+            :step="FRACTO_LOGO_MATERIAL.emissiveIntensity.step"
             :value="config.accentMaterial.emissiveIntensity"
             @input="onMaterialInput('accentMaterial', 'emissiveIntensity', $event)"
           />
-          <output class="cube-dock__value">{{ config.accentMaterial.emissiveIntensity.toFixed(2) }}</output>
+          <output class="logo-dock__value">{{ config.accentMaterial.emissiveIntensity.toFixed(2) }}</output>
         </label>
       </div>
 
-      <div class="cube-dock__export">
-        <p class="cube-dock__export-hint">
+      <div class="logo-dock__export">
+        <p class="logo-dock__export-hint">
           Copie os materiais aprovados para colar no Cursor, fixar os defaults e depois gerar o embed WP Bakery (como grid-background).
         </p>
-        <button type="button" class="cube-dock__copy" @click="copyDefaultsReference">
+        <button type="button" class="logo-dock__copy" @click="copyDefaultsReference">
           {{ copyFeedback || 'Copiar defaults dos materiais' }}
         </button>
       </div>
@@ -467,7 +467,7 @@ onBeforeUnmount(() => {
   border: 0;
 }
 
-.cube-dock {
+.logo-dock {
   position: fixed;
   left: 1.25rem;
   bottom: 1.35rem;
@@ -494,7 +494,7 @@ onBeforeUnmount(() => {
     padding 0.28s ease;
 }
 
-.cube-dock--hidden {
+.logo-dock--hidden {
   left: 50%;
   bottom: 0;
   width: min(280px, calc(100vw - 2rem));
@@ -507,12 +507,12 @@ onBeforeUnmount(() => {
   touch-action: auto;
 }
 
-.cube-dock--hidden:not(.cube-dock--dragging) {
+.logo-dock--hidden:not(.logo-dock--dragging) {
   transform: translate(-50%, calc(100% - 2.35rem));
 }
 
-@media (max-width: 900px) {
-  .cube-dock:not(.cube-dock--hidden):not(.cube-dock--dragged) {
+@media (max-width: 899px) {
+  .logo-dock:not(.logo-dock--hidden):not(.logo-dock--dragged) {
     left: 50%;
     bottom: 1rem;
     transform: translateX(-50%);
@@ -520,25 +520,25 @@ onBeforeUnmount(() => {
   }
 }
 
-.cube-dock--dragged {
+.logo-dock--dragged {
   touch-action: none;
 }
 
-.cube-dock--dragging {
+.logo-dock--dragging {
   transition: none;
 }
 
-.cube-dock--materials-collapsed {
+.logo-dock--materials-collapsed {
   max-height: none;
 }
 
-.cube-dock__body {
+.logo-dock__body {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
 }
 
-.cube-dock__header {
+.logo-dock__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -551,18 +551,18 @@ onBeforeUnmount(() => {
   user-select: none;
 }
 
-.cube-dock__header--peek {
+.logo-dock__header--peek {
   margin: 0;
   padding: 0;
   border-bottom: none;
   cursor: pointer;
 }
 
-.cube-dock--dragging .cube-dock__header {
+.logo-dock--dragging .logo-dock__header {
   cursor: grabbing;
 }
 
-.cube-dock__title {
+.logo-dock__title {
   margin: 0;
   font-size: 0.68rem;
   font-weight: 600;
@@ -571,14 +571,14 @@ onBeforeUnmount(() => {
   color: rgba(255, 255, 255, 0.45);
 }
 
-.cube-dock__peek-hint {
+.logo-dock__peek-hint {
   flex-shrink: 0;
   font-size: 0.62rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.55);
 }
 
-.cube-dock__toggle {
+.logo-dock__toggle {
   flex-shrink: 0;
   padding: 0.28rem 0.55rem;
   font-size: 0.62rem;
@@ -592,18 +592,18 @@ onBeforeUnmount(() => {
   touch-action: auto;
 }
 
-.cube-dock__toggle:hover {
+.logo-dock__toggle:hover {
   color: #fff;
   border-color: rgba(255, 255, 255, 0.22);
 }
 
-.cube-dock__materials {
+.logo-dock__materials {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
 }
 
-.cube-dock__section {
+.logo-dock__section {
   margin: 0.35rem 0 0;
   padding-top: 0.45rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -614,30 +614,30 @@ onBeforeUnmount(() => {
   color: rgba(255, 255, 255, 0.38);
 }
 
-.cube-dock__row {
+.logo-dock__row {
   display: grid;
   grid-template-columns: 5.5rem 1fr auto;
   align-items: center;
   gap: 0.5rem;
 }
 
-.cube-dock__row--color {
+.logo-dock__row--color {
   grid-template-columns: 5.5rem auto 1fr;
 }
 
-.cube-dock__label {
+.logo-dock__label {
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.72);
 }
 
-.cube-dock__row input[type='range'] {
+.logo-dock__row input[type='range'] {
   width: 100%;
   height: 4px;
   accent-color: var(--fracto-brand);
   cursor: pointer;
 }
 
-.cube-dock__value {
+.logo-dock__value {
   font-family: ui-monospace, monospace;
   font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.55);
@@ -645,7 +645,7 @@ onBeforeUnmount(() => {
   text-align: right;
 }
 
-.cube-dock__swatch input[type='color'] {
+.logo-dock__swatch input[type='color'] {
   display: block;
   width: 28px;
   height: 28px;
@@ -656,7 +656,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-.cube-dock__hex {
+.logo-dock__hex {
   width: 100%;
   padding: 0.3rem 0.45rem;
   font-family: ui-monospace, monospace;
@@ -667,12 +667,12 @@ onBeforeUnmount(() => {
   border-radius: 6px;
 }
 
-.cube-dock__hex:focus {
+.logo-dock__hex:focus {
   outline: none;
   border-color: var(--fracto-brand-border);
 }
 
-.cube-dock__export {
+.logo-dock__export {
   margin-top: 0.35rem;
   padding-top: 0.65rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -681,14 +681,14 @@ onBeforeUnmount(() => {
   gap: 0.5rem;
 }
 
-.cube-dock__export-hint {
+.logo-dock__export-hint {
   margin: 0;
   font-size: 0.62rem;
   line-height: 1.45;
   color: rgba(255, 255, 255, 0.42);
 }
 
-.cube-dock__copy {
+.logo-dock__copy {
   width: 100%;
   padding: 0.45rem 0.65rem;
   font-size: 0.68rem;
@@ -700,7 +700,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-.cube-dock__copy:hover {
+.logo-dock__copy:hover {
   background: rgba(245, 94, 29, 0.28);
   border-color: rgba(245, 94, 29, 0.5);
 }

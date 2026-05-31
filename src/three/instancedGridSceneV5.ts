@@ -7,6 +7,8 @@ import {
   type SceneLightingConfig,
 } from '../lib/gridLighting'
 import { createPerfSampler } from '../lib/perfMonitor'
+import { normalizeHexColor } from '../lib/colorHex'
+import { deriveGridV5LiftColor, resolveGridV5Theme } from '../lib/gridThemeV5'
 import { observeStableContainerResize } from '../lib/stableContainerResize'
 import type { InstancedGridHandle, InstancedGridOptions } from './instancedGridScene'
 
@@ -28,14 +30,6 @@ const LIFT_LERP = 0.13
 const MOUSE_LERP = 0.12
 const LIFT_EPSILON = 0.004
 
-const COLOR_REST = new THREE.Color(0x282830)
-const COLOR_LIFT = new THREE.Color(0x5a6270)
-const COLOR_LOGO_DARK = new THREE.Color(0x0e0e12)
-const COLOR_LOGO_WHITE = new THREE.Color(0xf4f6fa)
-const COLOR_BRAND = new THREE.Color(0xf55e1d)
-const COLOR_FLICKER_WHITE = new THREE.Color(0xe8ecf4)
-const COLOR_FLICKER_ORANGE = new THREE.Color(0xf55e1d)
-
 type FlickerKind = 'white' | 'orange'
 
 interface GridFlicker {
@@ -55,10 +49,23 @@ export function createInstancedGridSceneV5(
   container: HTMLElement,
   options: InstancedGridOptions = {},
 ): InstancedGridHandle {
-  const { cols, rows, cellSize, onStats, lowPower = false, pointerTarget } = {
+  const { cols, rows, cellSize, onStats, lowPower = false, pointerTarget, theme, cubeColor } = {
     ...DEFAULTS,
     ...options,
   }
+  const resolvedTheme = theme ?? 'dark'
+  container.dataset.gridTheme = resolvedTheme
+  const isLight = resolvedTheme === 'light'
+  const palette = resolveGridV5Theme(resolvedTheme)
+  const bgColor = palette.background
+  const COLOR_REST = new THREE.Color(palette.colorRest)
+  const COLOR_LIFT = new THREE.Color(palette.colorLift)
+  const COLOR_LOGO_DARK = new THREE.Color(palette.colorLogoDark)
+  const COLOR_LOGO_WHITE = new THREE.Color(palette.colorLogoWhite)
+  const COLOR_BRAND = new THREE.Color(palette.colorBrand)
+  const COLOR_FLICKER_WHITE = new THREE.Color(palette.colorFlickerWhite)
+  const COLOR_FLICKER_ORANGE = new THREE.Color(palette.colorFlickerOrange)
+  let cubeColorHex = palette.defaultCubeColor
   const pointerEl = pointerTarget ?? container
   const frameBudgetMs = lowPower ? 1000 / 30 : 0
   const flickerSpawnMs = lowPower ? 320 : 140
@@ -69,7 +76,7 @@ export function createInstancedGridSceneV5(
   const count = cols * rows
 
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x000000)
+  scene.background = new THREE.Color(bgColor)
 
   const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 200)
   camera.position.set(0, 0, 16)
@@ -81,19 +88,21 @@ export function createInstancedGridSceneV5(
     alpha: false,
     powerPreference: lowPower ? 'low-power' : 'high-performance',
   })
-  renderer.setClearColor(0x000000, 1)
+  renderer.setClearColor(bgColor, 1)
   container.appendChild(renderer.domElement)
 
-  scene.add(new THREE.HemisphereLight(0x7a828c, 0x101014, 0.7))
-  scene.add(new THREE.AmbientLight(0x3c3c44, 0.32))
+  if (!isLight) {
+    scene.add(new THREE.HemisphereLight(palette.hemiSky, palette.hemiGround, palette.hemiIntensity))
+    scene.add(new THREE.AmbientLight(palette.ambient, palette.ambientIntensity))
 
-  const key = new THREE.DirectionalLight(0xe8ecf4, 1.15)
-  key.position.set(-8, 12, 10)
-  scene.add(key)
+    const key = new THREE.DirectionalLight(palette.keyLight, palette.keyIntensity)
+    key.position.set(-8, 12, 10)
+    scene.add(key)
 
-  const fill = new THREE.DirectionalLight(0x9098a8, 0.38)
-  fill.position.set(7, 3, 8)
-  scene.add(fill)
+    const fill = new THREE.DirectionalLight(palette.fillLight, palette.fillIntensity)
+    fill.position.set(7, 3, 8)
+    scene.add(fill)
+  }
 
   const mouseLight = new THREE.PointLight(
     lightingConfig.mouse.color,
@@ -103,18 +112,31 @@ export function createInstancedGridSceneV5(
   )
 
   const geometry = new RoundedBoxGeometry(1, 1, CUBE_DEPTH, BEVEL_SEGMENTS, BEVEL_RADIUS)
-  const material = new THREE.MeshPhongMaterial({
-    color: 0x282830,
-    vertexColors: true,
-    specular: 0x505058,
-    shininess: 18,
-  })
+  const material: THREE.MeshBasicMaterial | THREE.MeshPhongMaterial = isLight
+    ? new THREE.MeshBasicMaterial({ color: palette.colorRest })
+    : new THREE.MeshPhongMaterial({
+        color: palette.materialColor,
+        vertexColors: true,
+        specular: palette.specular,
+        shininess: palette.shininess,
+      })
+
+  container.dataset.sceneBg = bgColor.toString(16).padStart(6, '0')
+
+  const applyCubePalette = (hex: string): boolean => {
+    const normalized = normalizeHexColor(hex)
+    if (!normalized) return false
+    cubeColorHex = normalized
+    COLOR_REST.set(normalized)
+    COLOR_LIFT.set(deriveGridV5LiftColor(normalized, resolvedTheme))
+    material.color.set(COLOR_REST)
+    return true
+  }
+
+  applyCubePalette(cubeColor ?? palette.defaultCubeColor)
 
   const mesh = new THREE.InstancedMesh(geometry, material, count)
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
-
-  const colorAttr = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3)
-  mesh.instanceColor = colorAttr
 
   const baseX = new Float32Array(count)
   const baseY = new Float32Array(count)
@@ -131,11 +153,11 @@ export function createInstancedGridSceneV5(
     for (let col = 0; col < cols; col++) {
       baseX[idx] = col * cellSize - offsetX
       baseY[idx] = row * cellSize - offsetY
-      mesh.setColorAt(idx, COLOR_REST)
+      if (!isLight) mesh.setColorAt(idx, COLOR_REST)
       idx++
     }
   }
-  colorAttr.needsUpdate = true
+  if (!isLight && mesh.instanceColor) mesh.instanceColor.needsUpdate = true
 
   const logo = buildLogoCellMap(cols, rows, baseX, baseY)
   const logoFlickers = new Map<number, LogoFlicker>()
@@ -181,7 +203,7 @@ export function createInstancedGridSceneV5(
 
   const updateMouseLight = () => {
     const m = lightingConfig.mouse
-    if (!m.enabled || isTouchLike()) {
+    if (isLight || !m.enabled || isTouchLike()) {
       mouseLight.intensity = 0
       return
     }
@@ -259,6 +281,7 @@ export function createInstancedGridSceneV5(
   }
 
   const spawnAmbientFlickers = (time: number) => {
+    if (isLight) return
     if (time - lastFlickerSpawn < flickerSpawnMs) return
     lastFlickerSpawn = time
 
@@ -272,7 +295,7 @@ export function createInstancedGridSceneV5(
       })
     }
 
-    if (!lowPower && Math.random() < 0.38) {
+    if (!lowPower && !isLight && Math.random() < 0.38) {
       gridFlickers.push({
         index: pickNonLogoIndex(),
         until: time + 220 + Math.random() * 380,
@@ -304,6 +327,11 @@ export function createInstancedGridSceneV5(
     time: number,
     accent: boolean,
   ) => {
+    if (isLight) {
+      applyGridFlickerColor(i, lift, time)
+      return
+    }
+
     const dx = baseX[i]! - mouseGridX
     const dy = baseY[i]! - mouseGridY
     const distSq = dx * dx + dy * dy
@@ -345,10 +373,12 @@ export function createInstancedGridSceneV5(
   }
 
   const applyGridFlickerColor = (i: number, lift: number, time: number) => {
+    if (isLight) return
     const active = gridFlickers.find((f) => f.index === i && f.until > time)
     color.copy(COLOR_REST)
     const liftT = Math.min(1, lift / MAX_LIFT)
-    color.lerp(COLOR_LIFT, liftT)
+    const liftMix = isLight ? liftT * 1.45 : liftT
+    color.lerp(COLOR_LIFT, liftMix)
 
     if (active) {
       const pulse =
@@ -397,13 +427,13 @@ export function createInstancedGridSceneV5(
 
     const mouseMoved = updateMouseOnGrid()
     let matrixDirty = mouseActive || mouseMoved
-    let colorDirty = true
+    let colorDirty = !isLight
 
     const influenceRadiusSq = MOUSE_RADIUS_SQ * 1.25
 
     for (let i = 0; i < count; i++) {
       const isLogo = logo.cells.has(i)
-      const hasFlicker = gridFlickers.some((f) => f.index === i && f.until > time)
+      const hasFlicker = !isLight && gridFlickers.some((f) => f.index === i && f.until > time)
       const liftBefore = currentLift[i]!
       let targetLift = 0
 
@@ -414,7 +444,7 @@ export function createInstancedGridSceneV5(
         if (distSq <= influenceRadiusSq) {
           targetLift = radialInfluence(distSq, MOUSE_RADIUS_SQ) * MAX_LIFT
         }
-      } else if (liftBefore < LIFT_EPSILON && !isLogo && !hasFlicker) {
+      } else if (!isLight && liftBefore < LIFT_EPSILON && !isLogo && !hasFlicker) {
         continue
       }
 
@@ -429,14 +459,14 @@ export function createInstancedGridSceneV5(
       }
 
       if (isLogo) {
-        applyLogoColor(i, currentLift[i]!, time, logo.cells.get(i)!)
-      } else if (hasFlicker || matrixChanged || mouseActive) {
+        if (!isLight) applyLogoColor(i, currentLift[i]!, time, logo.cells.get(i)!)
+      } else if (!isLight && (hasFlicker || matrixChanged || mouseActive)) {
         applyGridFlickerColor(i, currentLift[i]!, time)
       }
     }
 
     if (matrixDirty) mesh.instanceMatrix.needsUpdate = true
-    if (colorDirty) colorAttr.needsUpdate = true
+    if (colorDirty && mesh.instanceColor) mesh.instanceColor.needsUpdate = true
 
     return matrixDirty || colorDirty || mouseActive
   }
@@ -539,6 +569,21 @@ export function createInstancedGridSceneV5(
     getLighting: () => ({
       mouse: { ...lightingConfig.mouse },
     }),
+    setCubeColor: (hex: string) => {
+      if (!applyCubePalette(hex)) return
+      if (isLight) {
+        renderer.render(scene, camera)
+        return
+      }
+      for (let i = 0; i < count; i++) {
+        if (logo.cells.has(i)) continue
+        mesh.setColorAt(i, COLOR_REST)
+      }
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+      updateInstances(clock)
+      renderer.render(scene, camera)
+    },
+    getCubeColor: () => cubeColorHex,
     getCols: () => cols,
     getRows: () => rows,
   }

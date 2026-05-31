@@ -18,12 +18,18 @@ export interface InstancedGridOptions {
   lowPower?: boolean
   /** Área que repassa mouse para a grade (ex.: `.hero--grid`); usa capture para incluir overlays. */
   pointerTarget?: HTMLElement
+  /** Paleta escura (padrão) ou clara — asset `background-grid-light`. */
+  theme?: 'dark' | 'light'
+  /** Cor base dos cubos (#rrggbb). */
+  cubeColor?: string
 }
 
 export interface InstancedGridHandle {
   dispose: () => void
   setLighting: (config: SceneLightingConfig) => void
   getLighting: () => SceneLightingConfig
+  setCubeColor?: (color: string) => void
+  getCubeColor?: () => string
   getCols: () => number
   getRows: () => number
 }

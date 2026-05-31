@@ -1,6 +1,6 @@
 ---
 description: Fonte única Three.js — src/three e src/lib (Fracto)
-globs: src/three/**,src/lib/**,src/components/InstancedGrid*.vue,src/components/MagicCube*.vue
+globs: src/three/**,src/lib/**,src/components/InstancedGrid*.vue,src/components/FractoLogo*.vue
 alwaysApply: false
 ---
 
@@ -19,7 +19,7 @@ Ver **`AGENTS.md`** §2 (I1), §4, §5A.
 | Ficheiro | Asset WP | Rota preview |
 |----------|----------|--------------|
 | `instancedGridSceneV5.ts` | `background-grid-black` | `/v5` |
-| `MagicCubeScene.ts` + `magicCubeConfig.ts` | `logo-01-black` | `/v7` |
+| `FractoLogoScene.ts` + `fractoLogoConfig.ts` | `logo-01-black` | `/v7` |
 | `gridLightingV4.ts` | defaults do grid | `/v5` |
 
 ## Após alterar cena

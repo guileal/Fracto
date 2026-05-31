@@ -21,7 +21,7 @@ Fracto/
 ├── src/                              ← EDITA AQUI (cenas 3D)
 │   ├── three/
 │   │   ├── instancedGridSceneV5.ts   ← grid /v5
-│   │   └── MagicCubeScene.ts         ← logo /v7
+│   │   └── FractoLogoScene.ts         ← logo /v7
 │   ├── lib/                          ← configs, luz, padrões
 │   └── pages/                        ← páginas Vue (layout + UI)
 │
@@ -53,13 +53,13 @@ Abre o browser em `http://localhost:5173` e trabalha nas rotas:
 | Rota | O quê testar |
 |------|--------------|
 | `/v5` | Grid preto do hero (`InstancedGridBackgroundV5`) |
-| `/v7` | Isotipo 3D (`MagicCubeScene`) |
+| `/v7` | Isotipo 3D (`FractoLogoScene`) |
 
 **Onde editar:**
 
 - Comportamento da grade → `src/three/instancedGridSceneV5.ts`
-- Comportamento do logo → `src/three/MagicCubeScene.ts`
-- Cores, luz, defaults → `src/lib/gridLightingV4.ts`, `src/lib/magicCubeConfig.ts`
+- Comportamento do logo → `src/three/FractoLogoScene.ts`
+- Cores, luz, defaults → `src/lib/gridLightingV4.ts`, `src/lib/fractoLogoConfig.ts`
 - Layout da página (texto, botões, seções) → `src/pages/LandingPageV5.vue`, `Page7.vue`
 
 O hot reload atualiza o browser em tempo real. **Não precisas de build para preview.**
@@ -117,8 +117,8 @@ Na Hostinger não precisas de Node, Vite nem alias — só ficheiros estáticos 
 |--------------|----------|--------|
 | Movimento / cor dos cubos do grid | `src/three/instancedGridSceneV5.ts` | `npm run dev` → `/v5` → `npm run build:wp` |
 | Luz padrão do grid | `src/lib/gridLightingV4.ts` ou defaults em `packages/.../index.ts` | idem |
-| Animação do isotipo | `src/three/MagicCubeScene.ts` | `npm run dev` → `/v7` → `npm run build:wp` |
-| Cores do cubo (preto/laranja) | `src/lib/magicCubeConfig.ts` | idem |
+| Animação do isotipo | `src/three/FractoLogoScene.ts` | `npm run dev` → `/v7` → `npm run build:wp` |
+| Cores do cubo (preto/laranja) | `src/lib/fractoLogoConfig.ts` | idem |
 | Shortcode / WPBakery / enqueue | `wordpress/themes/Fracto/inc/fracto-3d.php` | copiar tema (sem build) |
 | Estilos do embed no WP | `packages/*/src/embed.css` | `npm run build:wp` |
 | Layout hero Vue (texto, botões) | `src/pages/LandingPageV5.vue` | só `npm run dev` (não afeta WP) |

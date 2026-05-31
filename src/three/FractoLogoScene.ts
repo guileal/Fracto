@@ -3,21 +3,20 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { normalizeHexColor } from '../lib/colorHex'
 import {
-  DEFAULT_MAGIC_CUBE_CONFIG,
-  type MagicCubeConfig,
-  type MagicCubeMaterialConfig,
-} from '../lib/magicCubeConfig'
+  DEFAULT_FRACTO_LOGO_CONFIG,
+  type FractoLogoConfig,
+  type FractoLogoMaterialConfig,
+} from '../lib/fractoLogoConfig'
 import {
   ACCENT_CUBE_INDEX,
   CUBE_COUNT,
-  MAGIC_CUBE_STATES,
-  type MagicCubeState,
+  FRACTO_LOGO_STATES,
+  type FractoLogoState,
   type Vec3,
-} from './magicCubeStates'
+} from './fractoLogoStates'
 
 const CUBE_SIZE = 0.48
 const BEVEL_SEGMENTS = 2
-const GROUP_SCALE = 0.78
 const GROUP_TILT_X = -0.16
 const SPIN_SPEED_Y = 0.42
 
@@ -59,7 +58,7 @@ function createCubeGeometry(bevelRadius: number): RoundedBoxGeometry {
 
 function applyMaterialProps(
   material: THREE.MeshPhysicalMaterial,
-  props: MagicCubeMaterialConfig,
+  props: FractoLogoMaterialConfig,
   color: string,
   emissiveColor?: string,
 ): void {
@@ -85,7 +84,7 @@ function createPhysicalMaterial(): THREE.MeshPhysicalMaterial {
   })
 }
 
-export class MagicCubeScene {
+export class FractoLogoScene {
   private readonly canvas: HTMLCanvasElement
   private readonly scene = new THREE.Scene()
   private readonly camera: THREE.PerspectiveCamera
@@ -99,11 +98,11 @@ export class MagicCubeScene {
   private readonly clock = new THREE.Clock()
   private readonly resizeHandler: () => void
 
-  private config: MagicCubeConfig
+  private config: FractoLogoConfig
   private raf = 0
   private disposed = false
 
-  constructor(canvas: HTMLCanvasElement, initialConfig: MagicCubeConfig = DEFAULT_MAGIC_CUBE_CONFIG) {
+  constructor(canvas: HTMLCanvasElement, initialConfig: FractoLogoConfig = DEFAULT_FRACTO_LOGO_CONFIG) {
     this.canvas = canvas
     this.config = { ...initialConfig }
 
@@ -146,9 +145,10 @@ export class MagicCubeScene {
 
     this.group.add(this.regularMesh)
     this.group.add(this.accentMesh)
-    this.group.scale.setScalar(GROUP_SCALE)
     this.group.rotation.x = GROUP_TILT_X
     this.scene.add(this.group)
+
+    this.applyLayout()
 
     this.resizeHandler = () => this.resize()
     window.addEventListener('resize', this.resizeHandler)
@@ -157,7 +157,7 @@ export class MagicCubeScene {
     this.animate()
   }
 
-  applyConfig(partial: Partial<MagicCubeConfig>): void {
+  applyConfig(partial: Partial<FractoLogoConfig>): void {
     const prevBevel = this.config.bevelRadius
     this.config = {
       ...this.config,
@@ -178,10 +178,16 @@ export class MagicCubeScene {
     }
 
     this.applyMaterials()
+    this.applyLayout()
   }
 
-  getConfig(): MagicCubeConfig {
+  getConfig(): FractoLogoConfig {
     return { ...this.config }
+  }
+
+  private applyLayout(): void {
+    this.group.scale.setScalar(this.config.scale)
+    this.group.position.set(this.config.offsetX, this.config.offsetY, 0)
   }
 
   private applyMaterials(): void {
@@ -217,9 +223,9 @@ export class MagicCubeScene {
 
   private getTransitionBlend(elapsed: number): { from: number; to: number; t: number } {
     const block = HOLD_SECONDS + TRANSITION_SECONDS
-    const cycle = block * MAGIC_CUBE_STATES.length
+    const cycle = block * FRACTO_LOGO_STATES.length
     const cycleT = elapsed % cycle
-    const stateIndex = Math.floor(cycleT / block) % MAGIC_CUBE_STATES.length
+    const stateIndex = Math.floor(cycleT / block) % FRACTO_LOGO_STATES.length
     const localT = cycleT % block
 
     if (localT <= HOLD_SECONDS) {
@@ -229,15 +235,15 @@ export class MagicCubeScene {
     const blend = easeInOutCubic((localT - HOLD_SECONDS) / TRANSITION_SECONDS)
     return {
       from: stateIndex,
-      to: (stateIndex + 1) % MAGIC_CUBE_STATES.length,
+      to: (stateIndex + 1) % FRACTO_LOGO_STATES.length,
       t: blend,
     }
   }
 
   private cubePosition(
     cubeIndex: number,
-    fromState: MagicCubeState,
-    toState: MagicCubeState,
+    fromState: FractoLogoState,
+    toState: FractoLogoState,
     blend: number,
     floatY: number,
   ): THREE.Vector3 {
@@ -249,8 +255,8 @@ export class MagicCubeScene {
 
   private updateInstances(elapsed: number): void {
     const { from, to, t } = this.getTransitionBlend(elapsed)
-    const fromState = MAGIC_CUBE_STATES[from]!
-    const toState = MAGIC_CUBE_STATES[to]!
+    const fromState = FRACTO_LOGO_STATES[from]!
+    const toState = FRACTO_LOGO_STATES[to]!
     const blend = from === to ? 0 : t
     const floatY = Math.sin(elapsed * 0.55) * 0.04
 

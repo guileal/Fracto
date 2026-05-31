@@ -2,7 +2,7 @@
 
 Glue WordPress para o isotipo `/v7`.
 
-**Cena Three.js:** `src/three/MagicCubeScene.ts` + `src/lib/magicCubeConfig.ts` (fonte única).
+**Cena Three.js:** `src/three/FractoLogoScene.ts` + `src/lib/fractoLogoConfig.ts` (fonte única).
 
 Este package só contém:
 

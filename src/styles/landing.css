@@ -32,6 +32,20 @@
   background: #000;
 }
 
+.hero.hero--grid.hero--grid-light {
+  color: #18181c;
+  background: #fff;
+}
+
+.hero.hero--grid.hero--grid-light .hero__headline {
+  color: #18181c;
+  text-shadow: none;
+}
+
+.hero.hero--grid.hero--grid-light .hero__headline strong {
+  color: #18181c;
+}
+
 .hero__nav {
   position: absolute;
   top: clamp(1rem, 3vw, 1.5rem);

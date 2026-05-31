@@ -41,7 +41,7 @@ Fracto/
 ├── src/
 │   ├── three/                        ← CENAS 3D (fonte única)
 │   │   ├── instancedGridSceneV5.ts   ← grid hero
-│   │   └── MagicCubeScene.ts         ← isotipo / logo
+│   │   └── FractoLogoScene.ts         ← isotipo / logo
 │   ├── lib/                          ← configs partilhadas (luz, cores, grid)
 │   ├── pages/                        ← layouts Vue (NÃO vão para WP)
 │   └── components/                   ← wrappers Vue (lifecycle, props, UI)
@@ -66,11 +66,11 @@ Fracto/
 
 | ID asset | Origem Vue | Package glue | Shortcode | `data-fracto-3d` |
 |----------|------------|--------------|-----------|------------------|
-| `background-grid-black` | `/v5` hero — `InstancedGridBackgroundV5` | `packages/background-grid-black/` | `[fracto3d_grid]` | `background-grid-black` |
-| `logo-01-black` | `/v7` — `MagicCubeScene` | `packages/logo-01-black/` | `[fracto3d_logo]` | `logo-01-black` |
+| `background-grid-black` | `/v5` hero — `InstancedGridBackgroundV5` | `packages/background-grid-black/` | `[fracto3d_grid]` ou Row → Grid preto | `background-grid-black` |
+| `logo-01-black` | `/v7` — `MagicCubeScene` | `packages/logo-01-black/` | `[fracto3d_logo]` ou Row → Logo 3D | `logo-01-black` |
 
-**Defaults baked (grid):** 16×12, luz `#c4d0e8` @ 1.35, fundo `#000`.  
-**Defaults baked (logo):** cubo `#000000`, accent `#f72f00` (`DEFAULT_MAGIC_CUBE_CONFIG`).
+**Defaults baked (grid):** 16×12, luz `#c4d0e8` @ 0.10, fundo `#000`.  
+**Defaults baked (logo):** cubo `#000000`, accent `#f72f00` (`DEFAULT_FRACTO_LOGO_CONFIG`).
 
 **Ficheiros gerados por asset:**
 
@@ -102,6 +102,21 @@ assets/3d/<asset-id>/
 1. Editar `wordpress/packages/*/src/embed.css`
 2. `npm run build:wp`
 3. Deploy tema
+
+### C2. Fundo da marca na Row (Salient)
+
+**Plano A — dropdown (aba Background):** `Fracto — Fundo da marca` → Grid preto / Logo 3D.
+
+**Plano B — classe CSS (aba Advanced → Extra Class Name):**
+
+| Classe na row | Asset |
+|---------------|-------|
+| `fracto-background-grid-black` | Grid /v5 |
+| `fracto-logo-01-black` | Logo /v7 |
+
+Deixe o dropdown em "Nenhum" e use só a classe. Dropdown tem prioridade se ambos estiverem definidos.
+
+PHP: `inc/fracto-row-background.php`
 
 ### D. Alterar layout Vue (texto, botões, seções)
 

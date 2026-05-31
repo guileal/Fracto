@@ -36,6 +36,13 @@ const pages = [
     tag: 'Experimento',
   },
   {
+    to: '/background-grid-light',
+    title: 'Background grid claro',
+    description:
+      'Mesma grade interativa da v5 em fundo branco — preview do widget WP background-grid-light.',
+    tag: 'Widget WP',
+  },
+  {
     to: '/v6',
     title: 'Landing v6',
     description:
@@ -46,7 +53,7 @@ const pages = [
     to: '/v7',
     title: 'Landing v7',
     description:
-      'Segunda seção da v5 em layout duas colunas — texto e cubo mágico 3D formando o isotipo.',
+      'Segunda seção da v5 em layout duas colunas — texto e isotipo 3D animado da Fracto.',
     tag: 'Experimento',
   },
   {

@@ -29,6 +29,11 @@ body[data-landing] {
   color: #0a0a0a;
 }
 
+body[data-landing-grid-light] {
+  background: #fff;
+  color: #18181c;
+}
+
 body[data-landing-v3],
 body[data-landing-v4],
 body[data-landing-v5],

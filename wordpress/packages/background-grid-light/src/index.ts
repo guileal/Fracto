@@ -3,23 +3,27 @@ import {
   bootstrapFracto3dAutoInit,
   resolveGridPointerTarget,
 } from '@fracto/lib/fracto3dDomBootstrap'
-import { buildV4Lighting, V4_DEFAULT_LIGHTING } from '@fracto/lib/gridLightingV4'
+import { buildV4Lighting } from '@fracto/lib/gridLightingV4'
+import { GRID_V5_THEMES } from '@fracto/lib/gridThemeV5'
 import type { SceneLightingConfig } from '@fracto/lib/gridLighting'
 import type { InstancedGridHandle } from '@fracto/three/instancedGridScene'
 import { createInstancedGridSceneV5 } from '@fracto/three/instancedGridSceneV5'
 
-export const ASSET_ID = 'background-grid-black' as const
+export const ASSET_ID = 'background-grid-light' as const
 
-/** Defaults do hero /v5 (desktop): 16×12, luz #c4d0e8 @ 0.10. */
+const lightDefaults = GRID_V5_THEMES.light
+
+/** Defaults do hero claro: 16×12, luz #8890a0 @ 0.10. */
 export const BG_DEFAULTS = {
   cols: 16,
   rows: 12,
-  lightingIntensity: 0.10,
-  lightingColor: V4_DEFAULT_LIGHTING.mouse.color,
+  lightingIntensity: lightDefaults.defaultLightingIntensity,
+  lightingColor: lightDefaults.defaultLightingColor,
+  cubeColor: lightDefaults.defaultCubeColor,
 } as const
 
 const BG_SELECTOR = `[data-fracto-3d="${ASSET_ID}"]`
-const BG_CLASS = 'fracto-3d-background-grid-black'
+const BG_CLASS = 'fracto-3d-background-grid-light'
 
 export interface MountOptions {
   cols?: number
@@ -28,6 +32,7 @@ export interface MountOptions {
   lightingColor?: string
   lighting?: SceneLightingConfig
   lowPower?: boolean
+  cubeColor?: string
 }
 
 const handles = new WeakMap<HTMLElement, InstancedGridHandle>()
@@ -51,6 +56,8 @@ export function mount(container: HTMLElement, options: MountOptions = {}): Insta
     lighting: resolveLighting(options),
     lowPower: options.lowPower,
     pointerTarget: resolveGridPointerTarget(container),
+    theme: 'light',
+    cubeColor: options.cubeColor,
   })
   handles.set(container, handle)
   return handle
@@ -76,6 +83,7 @@ function readMountOptions(el: HTMLElement): MountOptions {
     rows: Number.isFinite(rows) ? rows : undefined,
     lightingIntensity: Number.isFinite(lightingIntensity) ? lightingIntensity : undefined,
     lightingColor: el.dataset.lightColor,
+    cubeColor: el.dataset.cubeColor,
     lowPower: el.dataset.lowPower === 'true',
   }
 }
@@ -112,11 +120,8 @@ declare global {
   interface Window {
     Fracto3d?: {
       assets?: Record<string, GridBackgroundApi>
-      gridBackground?: GridBackgroundApi
+      gridBackgroundLight?: GridBackgroundApi
     }
-    /** @deprecated use Fracto3d.gridBackground */
-    FractoGridBg?: GridBackgroundApi
-    FractoGridV5?: GridBackgroundApi
   }
 }
 
@@ -133,9 +138,7 @@ if (typeof window !== 'undefined') {
   window.Fracto3d = window.Fracto3d ?? {}
   window.Fracto3d.assets = window.Fracto3d.assets ?? {}
   window.Fracto3d.assets[ASSET_ID] = api
-  window.Fracto3d.gridBackground = api
-  window.FractoGridBg = api
-  window.FractoGridV5 = api
+  window.Fracto3d.gridBackgroundLight = api
 
   bootstrapFracto3dAutoInit(autoInit)
 }

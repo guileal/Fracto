@@ -22,10 +22,13 @@ import '../styles/landing.css'
 
 const route = useRoute()
 
+/** Brilho padrão do slider de luz no hero v5. */
+const V5_DEFAULT_LIGHT_INTENSITY = 0.10
+
 function initialFromQuery(): { lighting: SceneLightingConfig; grid: GridConfig } {
   const q = route.query
   let color = V4_DEFAULT_LIGHTING.mouse.color
-  let intensity = V4_DEFAULT_LIGHTING.mouse.intensity
+  let intensity = V5_DEFAULT_LIGHT_INTENSITY
   let grid = { ...DEFAULT_GRID_CONFIG }
 
   if (typeof q.c === 'string') {

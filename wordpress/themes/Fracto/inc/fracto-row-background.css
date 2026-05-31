@@ -1,0 +1,95 @@
+/**
+ * Fundo Fracto 3D na Row (Salient) — só a camada de background.
+ * Colunas / texto / botões ficam SEMPRE acima (row_col_wrap_12).
+ */
+
+/* Row = stacking context; 3D não pode cobrir colunas */
+.row.fracto-row-has-brand-bg,
+.vc_row.fracto-row-has-brand-bg {
+	position: relative;
+	isolation: isolate;
+	overflow: hidden;
+}
+
+/* Camada Salient de background (cor, imagem, overlay) — atrás */
+.row.fracto-row-has-brand-bg .row-bg-wrap,
+.vc_row.fracto-row-has-brand-bg .row-bg-wrap {
+	z-index: 0 !important;
+	pointer-events: none;
+}
+
+/* Nosso 3D dentro do row-bg-wrap, no fundo da pilha */
+.row.fracto-row-has-brand-bg .fracto-row-brand-bg,
+.vc_row.fracto-row-has-brand-bg .fracto-row-brand-bg {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.fracto-row-brand-bg [data-fracto-3d] {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/*
+ * Reset dos estilos de embed “hero full page” — na row o 3D
+ * preenche só a row, não 100vh / 120vw.
+ */
+.fracto-row-brand-bg [data-fracto-3d='background-grid-black'],
+.fracto-row-brand-bg .fracto-3d-background-grid-black {
+	min-width: 0 !important;
+	margin-left: 0 !important;
+	min-height: 0 !important;
+	height: 100% !important;
+	max-height: 100% !important;
+	background: #000;
+}
+
+.fracto-row-brand-bg [data-fracto-3d='background-grid-light'],
+.fracto-row-brand-bg .fracto-3d-background-grid-light {
+	min-width: 0 !important;
+	margin-left: 0 !important;
+	min-height: 0 !important;
+	height: 100% !important;
+	max-height: 100% !important;
+	background: #fff;
+}
+
+.fracto-row-brand-bg [data-fracto-3d='logo-01-black'],
+.fracto-row-brand-bg .fracto-3d-logo-01-black {
+	min-height: 0 !important;
+	height: 100% !important;
+}
+
+.fracto-row-brand-bg canvas {
+	display: block;
+	width: 100% !important;
+	height: 100% !important;
+}
+
+/*
+ * Conteúdo da row (colunas WPBakery) — SEMPRE acima do 3D
+ */
+.row.fracto-row-has-brand-bg > .row_col_wrap_12,
+.row.fracto-row-has-brand-bg > .row_col_wrap_12_outer,
+.row.fracto-row-has-brand-bg > .container,
+.vc_row.fracto-row-has-brand-bg > .row_col_wrap_12,
+.vc_row.fracto-row-has-brand-bg > .row_col_wrap_12_outer,
+.vc_row.fracto-row-has-brand-bg > .container {
+	position: relative !important;
+	z-index: 2 !important;
+}
+
+.row.fracto-row-has-brand-bg .wpb_row,
+.row.fracto-row-has-brand-bg .wpb_column,
+.row.fracto-row-has-brand-bg .vc_column_container,
+.row.fracto-row-has-brand-bg .vc_column-inner {
+	position: relative;
+	z-index: auto;
+}

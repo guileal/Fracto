@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, shallowRef, toRaw } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from 'vue'
 import {
   DEFAULT_GRID_CONFIG,
   MOBILE_GRID_CONFIG,
@@ -21,6 +21,8 @@ const props = defineProps<{
   rows?: number
   lighting?: SceneLightingConfig
   lowPower?: boolean
+  theme?: 'dark' | 'light'
+  cubeColor?: string
 }>()
 
 const host = ref<HTMLElement | null>(null)
@@ -43,6 +45,7 @@ function mountScene(cols: number, rows: number) {
   if (!host.value) return
 
   const savedLighting = props.lighting ?? handle.value?.getLighting()
+  const savedCubeColor = props.cubeColor ?? handle.value?.getCubeColor?.()
   handle.value?.dispose()
 
   const pointerTarget = host.value.closest('.hero--grid') as HTMLElement | null
@@ -54,6 +57,8 @@ function mountScene(cols: number, rows: number) {
     onStats: (stats) => emit('stats', stats),
     lowPower: props.lowPower,
     pointerTarget: pointerTarget ?? undefined,
+    theme: props.theme,
+    cubeColor: savedCubeColor,
   }
 
   handle.value = createInstancedGridSceneV5(host.value, options)
@@ -79,9 +84,31 @@ function setLighting(config: SceneLightingConfig) {
   handle.value?.setLighting(cloneLighting(config))
 }
 
+function setCubeColor(color: string) {
+  handle.value?.setCubeColor?.(color)
+}
+
+watch(
+  () => props.cubeColor,
+  (color) => {
+    if (color && handle.value) setCubeColor(color)
+  },
+)
+
+watch(
+  () => props.theme,
+  () => {
+    if (!host.value) return
+    const { cols, rows } = defaultGridSize()
+    mountScene(cols, rows)
+  },
+)
+
 defineExpose({
   setLighting,
+  setCubeColor,
   getLighting: () => handle.value?.getLighting(),
+  getCubeColor: () => handle.value?.getCubeColor?.(),
   rebuildGrid,
   getGridSize: (): GridConfig => ({
     cols: handle.value?.getCols() ?? DEFAULT_GRID_CONFIG.cols,
@@ -91,7 +118,12 @@ defineExpose({
 </script>
 
 <template>
-  <div ref="host" class="grid-bg" aria-hidden />
+  <div
+    ref="host"
+    class="grid-bg"
+    :class="{ 'grid-bg--light': theme === 'light' }"
+    aria-hidden
+  />
 </template>
 
 <style scoped>
@@ -101,6 +133,10 @@ defineExpose({
   z-index: 0;
   overflow: hidden;
   background: #000;
+}
+
+.grid-bg--light {
+  background: #fff;
 }
 
 .grid-bg :deep(canvas) {
