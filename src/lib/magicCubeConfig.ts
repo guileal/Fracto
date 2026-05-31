@@ -27,21 +27,21 @@ export const MAGIC_CUBE_MATERIAL = {
 } as const
 
 const DEFAULT_CUBE_MATERIAL: MagicCubeMaterialConfig = {
-  roughness: 0.60,
-  clearcoat: 0.14,
-  envMapIntensity: 0.11,
+  roughness: 0.4,
+  clearcoat: 0,
+  envMapIntensity: 0.8,
   emissiveIntensity: 0,
 }
 
 const DEFAULT_ACCENT_MATERIAL: MagicCubeMaterialConfig = {
   roughness: 1,
   clearcoat: 0,
-  envMapIntensity: 0.27,
+  envMapIntensity: 0.8,
   emissiveIntensity: 0,
 }
 
 export const DEFAULT_MAGIC_CUBE_CONFIG: MagicCubeConfig = {
-  bevelRadius: 0.020,
+  bevelRadius: 0.02,
   cubeColor: '#000000',
   accentColor: '#f72f00',
   cubeMaterial: { ...DEFAULT_CUBE_MATERIAL },

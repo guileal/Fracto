@@ -50,6 +50,13 @@ const pages = [
     tag: 'Experimento',
   },
   {
+    to: '/v8',
+    title: 'Landing v8',
+    description:
+      'Cubo mágico voxel 4×4×4 (64 instâncias) — isotipo volumétrico e letras C-U-I-F-R-A-T-O com núcleo laranja.',
+    tag: 'Experimento',
+  },
+  {
     to: '/viewer',
     title: 'Viewer GLB',
     description: 'Scroll que scruba a timeline Summary de modelos .glb exportados do Blender.',

@@ -7,6 +7,7 @@ import LandingPageV4 from './pages/LandingPageV4.vue'
 import LandingPageV5 from './pages/LandingPageV5.vue'
 import LandingPageV6 from './pages/LandingPageV6.vue'
 import Page7 from './pages/Page7.vue'
+import Page8 from './pages/Page8.vue'
 import HomePage from './pages/HomePage.vue'
 import IridescentPage from './pages/IridescentPage.vue'
 
@@ -21,6 +22,7 @@ const router = createRouter({
     { path: '/v5', name: 'landing-v5', component: LandingPageV5, meta: { bare: true } },
     { path: '/v6', name: 'landing-v6', component: LandingPageV6, meta: { bare: true } },
     { path: '/v7', name: 'page-v7', component: Page7, meta: { bare: true } },
+    { path: '/v8', name: 'page-v8', component: Page8, meta: { bare: true } },
     { path: '/viewer', name: 'viewer', component: HomePage },
     { path: '/iridescent', name: 'iridescent', component: IridescentPage },
   ],

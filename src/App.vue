@@ -19,6 +19,7 @@ const showLogoCorner = computed(() => !route.meta.bare)
       <RouterLink to="/v5">Landing v5</RouterLink>
       <RouterLink to="/v6">Landing v6</RouterLink>
       <RouterLink to="/v7">Landing v7</RouterLink>
+      <RouterLink to="/v8">Landing v8</RouterLink>
       <RouterLink to="/viewer">Viewer</RouterLink>
       <RouterLink to="/iridescent">Iridescent</RouterLink>
     </nav>
