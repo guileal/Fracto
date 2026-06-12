@@ -68,7 +68,7 @@ async function onResolveShape() {
   position: relative;
   min-height: 100vh;
   min-height: 100svh;
-  background: #0a0a0e;
+  background: var(--fracto-site-bg, #121212);
   color: #f2f2f4;
   font-family:
     'DM Sans',

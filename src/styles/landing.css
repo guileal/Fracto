@@ -29,7 +29,7 @@
   flex-direction: column;
   color: #fff;
   overflow: hidden;
-  background: #000;
+  background: var(--fracto-site-bg, #121212);
 }
 
 .hero.hero--grid.hero--grid-light {

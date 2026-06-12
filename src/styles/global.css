@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+:root {
+  --fracto-site-bg: #121212;
+}
+
 html,
 body,
 #app {
@@ -16,7 +20,7 @@ body {
     system-ui,
     -apple-system,
     sans-serif;
-  background: #0a0a0a;
+  background: var(--fracto-site-bg);
   color: #e8e8e8;
 }
 
@@ -38,7 +42,7 @@ body[data-landing-v3],
 body[data-landing-v4],
 body[data-landing-v5],
 body[data-landing-v6] {
-  background: #000;
+  background: var(--fracto-site-bg);
 }
 
 a {
@@ -54,7 +58,7 @@ a {
   justify-content: flex-end;
   padding: 0.85rem 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(10, 10, 10, 0.9);
+  background: rgba(18, 18, 18, 0.9);
   backdrop-filter: blur(10px);
 }
 

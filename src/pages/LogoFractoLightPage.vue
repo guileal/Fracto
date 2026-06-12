@@ -52,7 +52,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .logo-light {
   min-height: 100svh;
-  background: #000;
+  background: var(--fracto-site-bg, #121212);
   color: #f5f5f5;
 }
 
