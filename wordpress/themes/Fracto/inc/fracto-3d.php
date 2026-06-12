@@ -3,12 +3,14 @@
  * Fracto 3D — shortcodes, WPBakery e enqueue de assets standalone.
  *
  * Assets compilados em: themes/Fracto/assets/3d/
- * Gerados com: npm run build:wp (na raiz do repo Vue)
+ * Manifesto: wordpress/wp-assets.manifest.jsonc → npm run build:wp → assets/wp-registry.json
  *
  * @package Fracto
  */
 
 defined( 'ABSPATH' ) || exit;
+
+require_once get_stylesheet_directory() . '/inc/fracto-registry.php';
 
 function fracto3d_assets_base_uri() {
 	return trailingslashit( get_stylesheet_directory_uri() . '/assets/3d' );
@@ -24,15 +26,6 @@ function fracto3d_theme_file_version( $relative_path ) {
 	return file_exists( $file ) ? (string) filemtime( $file ) : '1.0.0';
 }
 
-/**
- * IDs de assets 3D registados.
- *
- * @return string[]
- */
-function fracto3d_registered_asset_ids() {
-	return array( 'background-grid-black', 'background-grid-light', 'logo-01-black' );
-}
-
 function fracto3d_sanitize_asset_id( $asset_id ) {
 	$asset_id = sanitize_key( (string) $asset_id );
 	return in_array( $asset_id, fracto3d_registered_asset_ids(), true ) ? $asset_id : '';
@@ -40,19 +33,6 @@ function fracto3d_sanitize_asset_id( $asset_id ) {
 
 function fracto3d_wpbakery_category() {
 	return 'Fracto Widgets';
-}
-
-/**
- * Plano B — classes CSS na row (Extra Class Name) → asset 3D.
- *
- * @return array<string, string> class => asset_id
- */
-function fracto3d_row_class_asset_map() {
-	return array(
-		'fracto-background-grid-black' => 'background-grid-black',
-		'fracto-background-grid-light' => 'background-grid-light',
-		'fracto-logo-01-black'         => 'logo-01-black',
-	);
 }
 
 /**
@@ -120,23 +100,29 @@ function fracto3d_enqueue_asset( $asset_id ) {
 	}
 
 	fracto3d_mark_asset_needed( $asset_id );
+	wp_enqueue_style( fracto3d_asset_style_handle( $asset_id ) );
+	wp_enqueue_script( fracto3d_asset_script_handle( $asset_id ) );
+}
 
-	if ( $asset_id === 'background-grid-black' ) {
-		wp_enqueue_style( 'fracto3d-background-grid-black-css' );
-		wp_enqueue_script( 'fracto3d-background-grid-black-js' );
-		return;
+/**
+ * @param array<string,mixed> $asset Registry entry.
+ * @return array<string, array<string, string>>
+ */
+function fracto3d_grid_shortcode_atts_defaults( $asset ) {
+	$defaults = array(
+		'cols'            => '',
+		'rows'            => '',
+		'light_intensity' => '',
+		'light_color'     => '',
+		'low_power'       => 'false',
+	);
+
+	$options = isset( $asset['gridOptions'] ) && is_array( $asset['gridOptions'] ) ? $asset['gridOptions'] : array();
+	if ( in_array( 'cube_color', $options, true ) ) {
+		$defaults['cube_color'] = '';
 	}
 
-	if ( $asset_id === 'background-grid-light' ) {
-		wp_enqueue_style( 'fracto3d-background-grid-light-css' );
-		wp_enqueue_script( 'fracto3d-background-grid-light-js' );
-		return;
-	}
-
-	if ( $asset_id === 'logo-01-black' ) {
-		wp_enqueue_style( 'fracto3d-logo-01-black-css' );
-		wp_enqueue_script( 'fracto3d-logo-01-black-js' );
-	}
+	return $defaults;
 }
 
 /**
@@ -151,7 +137,14 @@ function fracto3d_render_asset_inner_markup( $asset_id, $options = array() ) {
 		return '';
 	}
 
-	if ( $asset_id === 'background-grid-black' || $asset_id === 'background-grid-light' ) {
+	$asset = fracto3d_get_registry_asset( $asset_id );
+	if ( ! $asset ) {
+		return '';
+	}
+
+	$type = isset( $asset['type'] ) ? (string) $asset['type'] : '';
+
+	if ( $type === 'grid' ) {
 		$html  = '<div data-fracto-3d="' . esc_attr( $asset_id ) . '" style="position: absolute !important; width: 100% !important; height: 100% !important;"';
 		if ( ! empty( $options['cols'] ) ) {
 			$html .= ' data-cols="' . esc_attr( $options['cols'] ) . '"';
@@ -175,8 +168,8 @@ function fracto3d_render_asset_inner_markup( $asset_id, $options = array() ) {
 		return $html;
 	}
 
-	if ( $asset_id === 'logo-01-black' ) {
-		return '<div data-fracto-3d="logo-01-black"></div>';
+	if ( $type === 'logo' ) {
+		return '<div data-fracto-3d="' . esc_attr( $asset_id ) . '"></div>';
 	}
 
 	return '';
@@ -186,55 +179,32 @@ add_action( 'wp_enqueue_scripts', 'fracto3d_register_all_assets' );
 function fracto3d_register_all_assets() {
 	$base = fracto3d_assets_base_uri();
 
-	wp_register_style(
-		'fracto3d-background-grid-black-css',
-		$base . 'background-grid-black/background-grid-black.css',
-		array(),
-		fracto3d_asset_version( 'background-grid-black/background-grid-black.css' )
-	);
+	foreach ( fracto3d_registry_assets() as $asset ) {
+		if ( empty( $asset['id'] ) ) {
+			continue;
+		}
 
-	wp_register_script(
-		'fracto3d-background-grid-black-js',
-		$base . 'background-grid-black/background-grid-black.min.js',
-		array(),
-		fracto3d_asset_version( 'background-grid-black/background-grid-black.min.js' ),
-		true
-	);
+		$asset_id = (string) $asset['id'];
+		$rel_css  = $asset_id . '/' . $asset_id . '.css';
+		$rel_js   = $asset_id . '/' . $asset_id . '.min.js';
 
-	wp_register_style(
-		'fracto3d-background-grid-light-css',
-		$base . 'background-grid-light/background-grid-light.css',
-		array(),
-		fracto3d_asset_version( 'background-grid-light/background-grid-light.css' )
-	);
+		wp_register_style(
+			fracto3d_asset_style_handle( $asset_id ),
+			$base . $rel_css,
+			array(),
+			fracto3d_asset_version( $rel_css )
+		);
 
-	wp_register_script(
-		'fracto3d-background-grid-light-js',
-		$base . 'background-grid-light/background-grid-light.min.js',
-		array(),
-		fracto3d_asset_version( 'background-grid-light/background-grid-light.min.js' ),
-		true
-	);
-
-	wp_register_style(
-		'fracto3d-logo-01-black-css',
-		$base . 'logo-01-black/logo-01-black.css',
-		array(),
-		fracto3d_asset_version( 'logo-01-black/logo-01-black.css' )
-	);
-
-	wp_register_script(
-		'fracto3d-logo-01-black-js',
-		$base . 'logo-01-black/logo-01-black.min.js',
-		array(),
-		fracto3d_asset_version( 'logo-01-black/logo-01-black.min.js' ),
-		true
-	);
+		wp_register_script(
+			fracto3d_asset_script_handle( $asset_id ),
+			$base . $rel_js,
+			array(),
+			fracto3d_asset_version( $rel_js ),
+			true
+		);
+	}
 }
 
-/**
- * Garante scripts mesmo quando o shortcode enfileira após wp_enqueue_scripts (row filter).
- */
 add_action( 'wp_footer', 'fracto3d_enqueue_pending_assets', 1 );
 function fracto3d_enqueue_pending_assets() {
 	global $fracto3d_pending_assets;
@@ -248,9 +218,6 @@ function fracto3d_enqueue_pending_assets() {
 	}
 }
 
-/**
- * Frontend editor WPBakery — carrega bundles antes do iframe renderizar.
- */
 add_action( 'wp_enqueue_scripts', 'fracto3d_editor_assets', 30 );
 function fracto3d_editor_assets() {
 	if ( ! fracto3d_is_wpbakery_editing() ) {
@@ -273,213 +240,169 @@ function fracto3d_vc_front_enqueue() {
 	wp_enqueue_style( 'fracto3d-row-background' );
 }
 
-add_shortcode( 'fracto3d_grid', 'fracto3d_grid_shortcode' );
-function fracto3d_grid_shortcode( $atts ) {
-	fracto3d_enqueue_asset( 'background-grid-black' );
-
-	$atts = shortcode_atts(
-		array(
-			'cols'            => '',
-			'rows'            => '',
-			'light_intensity' => '',
-			'light_color'     => '',
-			'low_power'       => 'false',
-		),
-		$atts,
-		'fracto3d_grid'
-	);
-
-	$inner = fracto3d_render_asset_inner_markup(
-		'background-grid-black',
-		array(
-			'cols'            => $atts['cols'],
-			'rows'            => $atts['rows'],
-			'light_intensity' => $atts['light_intensity'],
-			'light_color'     => $atts['light_color'],
-			'low_power'       => $atts['low_power'],
-		)
-	);
-
-	return '<div class="fracto-3d-wrapper" style="position: relative !important; top: 0; left: 0; width: 100% !important; height: 100% !important; z-index: 0 !important; pointer-events: none !important; overflow: hidden !important;">' . $inner . '</div>';
-}
-
-add_shortcode( 'fracto3d_grid_light', 'fracto3d_grid_light_shortcode' );
-function fracto3d_grid_light_shortcode( $atts ) {
-	fracto3d_enqueue_asset( 'background-grid-light' );
-
-	$atts = shortcode_atts(
-		array(
-			'cols'            => '',
-			'rows'            => '',
-			'light_intensity' => '',
-			'light_color'     => '',
-			'cube_color'      => '',
-			'low_power'       => 'false',
-		),
-		$atts,
-		'fracto3d_grid_light'
-	);
-
-	$inner = fracto3d_render_asset_inner_markup(
-		'background-grid-light',
-		array(
-			'cols'            => $atts['cols'],
-			'rows'            => $atts['rows'],
-			'light_intensity' => $atts['light_intensity'],
-			'light_color'     => $atts['light_color'],
-			'cube_color'      => $atts['cube_color'],
-			'low_power'       => $atts['low_power'],
-		)
-	);
-
-	return '<div class="fracto-3d-wrapper" style="position: relative !important; top: 0; left: 0; width: 100% !important; height: 100% !important; z-index: 0 !important; pointer-events: none !important; overflow: hidden !important;">' . $inner . '</div>';
-}
-
-add_shortcode( 'fracto3d_logo', 'fracto3d_logo_shortcode' );
-function fracto3d_logo_shortcode( $atts ) {
-	fracto3d_enqueue_asset( 'logo-01-black' );
-
-	shortcode_atts(
-		array(
-			'model' => 'default',
-		),
-		$atts,
-		'fracto3d_logo'
-	);
-
-	return fracto3d_render_asset_inner_markup( 'logo-01-black' );
-}
-
-add_action( 'vc_before_init', 'fracto3d_grid_vc_map' );
-function fracto3d_grid_vc_map() {
-	if ( ! function_exists( 'vc_map' ) ) {
-		return;
+/**
+ * Shortcode genérico — tag mapeada via wp-registry.json.
+ *
+ * @param array<string,string>|string $atts Shortcode attributes.
+ * @param string|null                 $content Inner content.
+ * @param string                      $tag Shortcode tag.
+ */
+function fracto3d_asset_shortcode( $atts, $content = '', $tag = '' ) {
+	$asset = fracto3d_get_registry_asset_by_shortcode( $tag );
+	if ( ! $asset || empty( $asset['id'] ) ) {
+		return '';
 	}
 
-	vc_map(
-		array(
-			'name'        => 'Background 3D (Fracto)',
-			'base'        => 'fracto3d_grid',
-			'category'    => fracto3d_wpbakery_category(),
-			'icon'        => 'icon-wpb-images-stack',
-			'description' => 'Fundo interativo 3D — hero /v5 (background-grid-black).',
-			'params'      => array(
-				array(
-					'type'       => 'colorpicker',
-					'heading'    => 'Cor da Iluminação',
-					'param_name' => 'light_color',
-					'value'      => '',
-				),
-				array(
-					'type'       => 'textfield',
-					'heading'    => 'Intensidade da Luz',
-					'param_name' => 'light_intensity',
-					'value'      => '',
-				),
-				array(
-					'type'       => 'textfield',
-					'heading'    => 'Colunas (Densidade)',
-					'param_name' => 'cols',
-					'value'      => '',
-				),
-				array(
-					'type'       => 'textfield',
-					'heading'    => 'Linhas (Densidade)',
-					'param_name' => 'rows',
-					'value'      => '',
-				),
-				array(
-					'type'       => 'checkbox',
-					'heading'    => 'Modo de Economia',
-					'param_name' => 'low_power',
-					'value'      => array( 'Ativar' => 'true' ),
-				),
-			),
-		)
-	);
-}
+	$asset_id = (string) $asset['id'];
+	$type     = isset( $asset['type'] ) ? (string) $asset['type'] : '';
 
-add_action( 'vc_before_init', 'fracto3d_grid_light_vc_map' );
-function fracto3d_grid_light_vc_map() {
-	if ( ! function_exists( 'vc_map' ) ) {
-		return;
+	fracto3d_enqueue_asset( $asset_id );
+
+	if ( $type === 'grid' ) {
+		$defaults = fracto3d_grid_shortcode_atts_defaults( $asset );
+		$atts     = shortcode_atts( $defaults, $atts, $tag );
+
+		$inner = fracto3d_render_asset_inner_markup(
+			$asset_id,
+			array(
+				'cols'            => $atts['cols'],
+				'rows'            => $atts['rows'],
+				'light_intensity' => $atts['light_intensity'],
+				'light_color'     => $atts['light_color'],
+				'cube_color'      => isset( $atts['cube_color'] ) ? $atts['cube_color'] : '',
+				'low_power'       => $atts['low_power'],
+			)
+		);
+
+		return '<div class="fracto-3d-wrapper" style="position: relative !important; top: 0; left: 0; width: 100% !important; height: 100% !important; z-index: 0 !important; pointer-events: none !important; overflow: hidden !important;">' . $inner . '</div>';
 	}
 
-	vc_map(
+	if ( $type === 'logo' ) {
+		shortcode_atts( array( 'model' => 'default' ), $atts, $tag );
+		return fracto3d_render_asset_inner_markup( $asset_id );
+	}
+
+	return '';
+}
+
+add_action( 'init', 'fracto3d_register_shortcodes' );
+function fracto3d_register_shortcodes() {
+	foreach ( fracto3d_registry_assets() as $asset ) {
+		if ( empty( $asset['shortcode'] ) ) {
+			continue;
+		}
+		add_shortcode( (string) $asset['shortcode'], 'fracto3d_asset_shortcode' );
+	}
+}
+
+/**
+ * @return array<int, array<string, mixed>>
+ */
+function fracto3d_grid_vc_params( $asset ) {
+	$params = array(
 		array(
-			'name'        => 'Background 3D Claro (Fracto)',
-			'base'        => 'fracto3d_grid_light',
-			'category'    => fracto3d_wpbakery_category(),
-			'icon'        => 'icon-wpb-images-stack',
-			'description' => 'Fundo interativo 3D claro — grade /v5 em fundo branco (background-grid-light).',
-			'params'      => array(
-				array(
-					'type'       => 'colorpicker',
-					'heading'    => 'Cor da Iluminação',
-					'param_name' => 'light_color',
-					'value'      => '',
-				),
+			'type'       => 'colorpicker',
+			'heading'    => 'Cor da Iluminação',
+			'param_name' => 'light_color',
+			'value'      => '',
+		),
+		array(
+			'type'       => 'textfield',
+			'heading'    => 'Intensidade da Luz',
+			'param_name' => 'light_intensity',
+			'value'      => '',
+		),
+		array(
+			'type'       => 'textfield',
+			'heading'    => 'Colunas (Densidade)',
+			'param_name' => 'cols',
+			'value'      => '',
+		),
+		array(
+			'type'       => 'textfield',
+			'heading'    => 'Linhas (Densidade)',
+			'param_name' => 'rows',
+			'value'      => '',
+		),
+		array(
+			'type'       => 'checkbox',
+			'heading'    => 'Modo de Economia',
+			'param_name' => 'low_power',
+			'value'      => array( 'Ativar' => 'true' ),
+		),
+	);
+
+	$options = isset( $asset['gridOptions'] ) && is_array( $asset['gridOptions'] ) ? $asset['gridOptions'] : array();
+	if ( in_array( 'cube_color', $options, true ) ) {
+		array_splice(
+			$params,
+			1,
+			0,
+			array(
 				array(
 					'type'       => 'colorpicker',
 					'heading'    => 'Cor do Quadrado',
 					'param_name' => 'cube_color',
 					'value'      => '',
 				),
-				array(
-					'type'       => 'textfield',
-					'heading'    => 'Intensidade da Luz',
-					'param_name' => 'light_intensity',
-					'value'      => '',
-				),
-				array(
-					'type'       => 'textfield',
-					'heading'    => 'Colunas (Densidade)',
-					'param_name' => 'cols',
-					'value'      => '',
-				),
-				array(
-					'type'       => 'textfield',
-					'heading'    => 'Linhas (Densidade)',
-					'param_name' => 'rows',
-					'value'      => '',
-				),
-				array(
-					'type'       => 'checkbox',
-					'heading'    => 'Modo de Economia',
-					'param_name' => 'low_power',
-					'value'      => array( 'Ativar' => 'true' ),
-				),
-			),
-		)
-	);
+			)
+		);
+	}
+
+	return $params;
 }
 
-add_action( 'vc_before_init', 'fracto3d_logo_vc_map' );
-function fracto3d_logo_vc_map() {
+add_action( 'vc_before_init', 'fracto3d_register_vc_maps' );
+function fracto3d_register_vc_maps() {
 	if ( ! function_exists( 'vc_map' ) ) {
 		return;
 	}
 
-	vc_map(
-		array(
-			'name'        => 'Objeto 3D (Logo)',
-			'base'        => 'fracto3d_logo',
-			'category'    => fracto3d_wpbakery_category(),
-			'icon'        => 'icon-wpb-images-stack',
-			'description' => 'Isotipo 3D animado — /v7 (logo-01-black).',
-			'params'      => array(
+	foreach ( fracto3d_registry_assets() as $asset ) {
+		if ( empty( $asset['shortcode'] ) || empty( $asset['vcName'] ) ) {
+			continue;
+		}
+
+		$type = isset( $asset['type'] ) ? (string) $asset['type'] : '';
+		$desc = ! empty( $asset['description'] ) ? (string) $asset['description'] : '';
+
+		if ( $type === 'grid' ) {
+			vc_map(
 				array(
-					'type'       => 'dropdown',
-					'heading'    => 'Escolher Modelo',
-					'param_name' => 'model',
-					'value'      => array(
-						'Logo Padrão' => 'default',
+					'name'        => (string) $asset['vcName'],
+					'base'        => (string) $asset['shortcode'],
+					'category'    => fracto3d_wpbakery_category(),
+					'icon'        => 'icon-wpb-images-stack',
+					'description' => $desc,
+					'params'      => fracto3d_grid_vc_params( $asset ),
+				)
+			);
+			continue;
+		}
+
+		if ( $type === 'logo' ) {
+			vc_map(
+				array(
+					'name'        => (string) $asset['vcName'],
+					'base'        => (string) $asset['shortcode'],
+					'category'    => fracto3d_wpbakery_category(),
+					'icon'        => 'icon-wpb-images-stack',
+					'description' => $desc,
+					'params'      => array(
+						array(
+							'type'       => 'dropdown',
+							'heading'    => 'Escolher Modelo',
+							'param_name' => 'model',
+							'value'      => array(
+								'Logo Padrão' => 'default',
+							),
+							'std'        => 'default',
+						),
 					),
-					'std'        => 'default',
-				),
-			),
-		)
-	);
+				)
+			);
+		}
+	}
 }
 
 $row_bg_inc = get_stylesheet_directory() . '/inc/fracto-row-background.php';

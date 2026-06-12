@@ -1,34 +1,28 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import GridLightDock from '../components/GridLightDock.vue'
-import InstancedGridBackgroundV5 from '../components/InstancedGridBackgroundV5.vue'
-import LandingHeroIntro from '../components/landing/LandingHeroIntro.vue'
-import LandingButton from '../components/landing/LandingButton.vue'
-import PerfMonitor from '../components/PerfMonitor.vue'
-import SectionBadge from '../components/landing/SectionBadge.vue'
-import { normalizeHexColor } from '../lib/colorHex'
-import {
-  clampGrid,
-  DEFAULT_GRID_CONFIG,
-  MOBILE_GRID_CONFIG,
-  type GridConfig,
-} from '../lib/gridConfig'
-import type { SceneLightingConfig } from '../lib/gridLighting'
-import { buildV4Lighting, V4_DEFAULT_LIGHTING } from '../lib/gridLightingV4'
-import type { PerfStats } from '../lib/perfMonitor'
-import type { InstancedGridHandle } from '../three/instancedGridScene'
-import '../styles/landing.css'
+import GridLightDock from '../../components/GridLightDock.vue'
+import HeroGlbSlot from '../../components/HeroGlbSlot.vue'
+import InstancedGridBackgroundV5 from '../../components/InstancedGridBackgroundV5.vue'
+import { ISOTIPO_ANIM_GLB } from '../../lib/heroModels'
+import LandingHeroIntro from '../../components/landing/LandingHeroIntro.vue'
+import LandingButton from '../../components/landing/LandingButton.vue'
+import PerfMonitor from '../../components/PerfMonitor.vue'
+import SectionBadge from '../../components/landing/SectionBadge.vue'
+import { normalizeHexColor } from '../../lib/colorHex'
+import { clampGrid, DEFAULT_GRID_CONFIG, type GridConfig } from '../../lib/gridConfig'
+import type { SceneLightingConfig } from '../../lib/gridLighting'
+import { buildV4Lighting, V4_DEFAULT_LIGHTING } from '../../lib/gridLightingV4'
+import type { PerfStats } from '../../lib/perfMonitor'
+import type { InstancedGridHandle } from '../../three/instancedGridScene'
+import '../../styles/landing.css'
 
 const route = useRoute()
-
-/** Brilho padrão do slider de luz no hero v5. */
-const V5_DEFAULT_LIGHT_INTENSITY = 0.10
 
 function initialFromQuery(): { lighting: SceneLightingConfig; grid: GridConfig } {
   const q = route.query
   let color = V4_DEFAULT_LIGHTING.mouse.color
-  let intensity = V5_DEFAULT_LIGHT_INTENSITY
+  let intensity = V4_DEFAULT_LIGHTING.mouse.intensity
   let grid = { ...DEFAULT_GRID_CONFIG }
 
   if (typeof q.c === 'string') {
@@ -50,28 +44,15 @@ function initialFromQuery(): { lighting: SceneLightingConfig; grid: GridConfig }
   return { lighting: buildV4Lighting(intensity, color), grid }
 }
 
+const V6_GRID_DEFAULT: GridConfig = { cols: 12, rows: 9 }
+
 const initial = initialFromQuery()
 const perfStats = ref<PerfStats | null>(null)
 const lighting = ref<SceneLightingConfig>(structuredClone(initial.lighting))
-const gridConfig = ref<GridConfig>({ ...initial.grid })
+const gridConfig = ref<GridConfig>(
+  initial.grid.cols === DEFAULT_GRID_CONFIG.cols ? { ...V6_GRID_DEFAULT } : { ...initial.grid },
+)
 const gridBgRef = ref<InstanceType<typeof InstancedGridBackgroundV5> | null>(null)
-
-const DESKTOP_HERO_GRID: GridConfig = { cols: 16, rows: 12 }
-
-function heroGridForViewport(): GridConfig {
-  if (typeof window === 'undefined') return { ...DESKTOP_HERO_GRID }
-  return window.innerWidth < 768 ? { ...MOBILE_GRID_CONFIG } : { ...DESKTOP_HERO_GRID }
-}
-
-const heroGrid = ref<GridConfig>(heroGridForViewport())
-
-function syncHeroGridFromViewport() {
-  const next = heroGridForViewport()
-  if (next.cols === heroGrid.value.cols && next.rows === heroGrid.value.rows) return
-  heroGrid.value = next
-  gridConfig.value = { ...next }
-  gridBgRef.value?.rebuildGrid(next.cols, next.rows)
-}
 
 function onGridReady(handle: InstancedGridHandle) {
   gridConfig.value = {
@@ -96,12 +77,9 @@ function onApplyGrid(config: GridConfig) {
 
 onMounted(async () => {
   document.body.dataset.landing = ''
-  document.body.dataset.landingV5 = ''
-  heroGrid.value = heroGridForViewport()
-  gridConfig.value = { ...heroGrid.value }
+  document.body.dataset.landingV6 = ''
   await nextTick()
   gridBgRef.value?.setLighting(lighting.value)
-  window.addEventListener('resize', syncHeroGridFromViewport, { passive: true })
 })
 
 const services = [
@@ -126,20 +104,18 @@ const workItems = [
 ]
 
 onUnmounted(() => {
-  window.removeEventListener('resize', syncHeroGridFromViewport)
   delete document.body.dataset.landing
-  delete document.body.dataset.landingV5
+  delete document.body.dataset.landingV6
 })
 </script>
 
 <template>
-  <div class="landing-page landing-v5">
-    <section class="hero hero--grid">
+  <div class="landing-page landing-v6">
+    <section class="hero hero--grid hero--v6">
       <InstancedGridBackgroundV5
         ref="gridBgRef"
-        :cols="heroGrid.cols"
-        :rows="heroGrid.rows"
         :lighting="lighting"
+        low-power
         @stats="perfStats = $event"
         @ready="onGridReady"
       />
@@ -148,11 +124,21 @@ onUnmounted(() => {
 
       <nav class="hero__nav">
         <RouterLink to="/" class="hero__nav-link">Índice</RouterLink>
-        <RouterLink to="/landing" class="hero__nav-link">v1</RouterLink>
-        <RouterLink to="/v2" class="hero__nav-link">v2</RouterLink>
-        <RouterLink to="/v3" class="hero__nav-link">v3</RouterLink>
-        <RouterLink to="/v4" class="hero__nav-link">v4</RouterLink>
+        <RouterLink to="/backup/landing" class="hero__nav-link">v1</RouterLink>
+        <RouterLink to="/backup/v2" class="hero__nav-link">v2</RouterLink>
+        <RouterLink to="/backup/v3" class="hero__nav-link">v3</RouterLink>
+        <RouterLink to="/backup/v4" class="hero__nav-link">v4</RouterLink>
+        <RouterLink to="/grid-background-black" class="hero__nav-link">v5</RouterLink>
       </nav>
+
+      <div class="hero__isotipo hero__isotipo--ambient" aria-hidden>
+        <HeroGlbSlot
+          :default-model="ISOTIPO_ANIM_GLB"
+          transparent
+          chromeless
+          low-power
+        />
+      </div>
 
       <LandingHeroIntro>
         <h1 class="hero__headline">
@@ -168,7 +154,6 @@ onUnmounted(() => {
     </section>
 
     <GridLightDock
-      class="landing-v5__light-dock"
       :lighting="lighting"
       :grid="gridConfig"
       @update:lighting="onLightingUpdate"
@@ -241,6 +226,14 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.hero--v6 .hero__isotipo--ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0.42;
+  pointer-events: none;
+}
+
 .section {
   padding: clamp(4rem, 10vw, 7rem) clamp(1.5rem, 5vw, 4rem);
 }
@@ -377,12 +370,6 @@ onUnmounted(() => {
   margin: 0;
   font-size: 0.82rem;
   color: var(--fracto-muted);
-}
-
-@media (hover: none), (pointer: coarse), (max-width: 767px) {
-  .landing-v5__light-dock {
-    display: none !important;
-  }
 }
 
 @media (max-width: 720px) {

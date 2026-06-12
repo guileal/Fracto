@@ -1,10 +1,20 @@
 {
   "name": "@fracto/wordpress-assets",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "npm run build --prefix packages/background-grid-black && npm run build --prefix packages/background-grid-light && npm run build --prefix packages/logo-01-black",
-    "build:grid": "npm run build --prefix packages/background-grid-black",
-    "build:grid-light": "npm run build --prefix packages/background-grid-light",
-    "build:logo": "npm run build --prefix packages/logo-01-black"
+    "build": "node scripts/build-assets.mjs",
+    "build:grid": "node scripts/build-assets.mjs --only background-grid-black",
+    "build:grid-light": "node scripts/build-assets.mjs --only background-grid-light",
+    "build:logo": "node scripts/build-assets.mjs --only logo-01-black",
+    "build:logo-light": "node scripts/build-assets.mjs --only logo-01-light",
+    "wp": "node scripts/wp-cli.mjs"
+  },
+  "dependencies": {
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2",
+    "vite": "^6.0.5"
   }
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
-import { mountIridescentScene } from '../three/iridescentScene'
+import { mountIridescentScene } from '../../three/iridescentScene'
 
 const host = ref<HTMLElement | null>(null)
 let handle: ReturnType<typeof mountIridescentScene> | null = null

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
-import GlbViewerPanel from '../components/GlbViewerPanel.vue'
-import { progressFromScroll, type ScrollSection } from '../lib/scrollTimeline'
-import type { GlbViewerState } from '../three/glbViewer'
+import GlbViewerPanel from '../../components/GlbViewerPanel.vue'
+import { progressFromScroll, type ScrollSection } from '../../lib/scrollTimeline'
+import type { GlbViewerState } from '../../three/glbViewer'
 
 /** keyframe = posição 0–1 na timeline Summary (todas as keyframes). */
 const sections: ScrollSection[] = [

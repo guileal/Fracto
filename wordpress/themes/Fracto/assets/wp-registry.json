@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "generatedAt": "2026-06-12T22:52:36.089Z",
+  "assets": [
+    {
+      "id": "background-grid-black",
+      "label": "Grid preto",
+      "description": "Fundo interactivo 3D — grade preta",
+      "previewRoute": "/grid-background-black",
+      "type": "grid",
+      "shortcode": "fracto3d_grid",
+      "vcName": "Background 3D (Fracto)",
+      "rowClass": "fracto-background-grid-black",
+      "gridOptions": [
+        "cols",
+        "rows",
+        "light_intensity",
+        "light_color",
+        "low_power"
+      ]
+    },
+    {
+      "id": "background-grid-light",
+      "label": "Grid branco",
+      "description": "Mesma grade em fundo claro",
+      "previewRoute": "/grid-background-white",
+      "type": "grid",
+      "shortcode": "fracto3d_grid_light",
+      "vcName": "Background 3D Claro (Fracto)",
+      "rowClass": "fracto-background-grid-light",
+      "gridOptions": [
+        "cols",
+        "rows",
+        "light_intensity",
+        "light_color",
+        "cube_color",
+        "low_power"
+      ]
+    },
+    {
+      "id": "logo-01-black",
+      "label": "Logo Fracto",
+      "description": "Isotipo 3D animado",
+      "previewRoute": "/logo-fracto",
+      "type": "logo",
+      "shortcode": "fracto3d_logo",
+      "vcName": "Objeto 3D (Logo)",
+      "rowClass": "fracto-logo-01-black",
+      "gridOptions": []
+    },
+    {
+      "id": "logo-01-light",
+      "label": "Logo Fracto (claro)",
+      "description": "Isotipo 3D animado — cubos cinza claro para fundos escuros",
+      "previewRoute": "/logo-fracto-light",
+      "type": "logo",
+      "shortcode": "fracto3d_logo_light",
+      "vcName": "Objeto 3D (Logo claro)",
+      "rowClass": "fracto-logo-01-light",
+      "gridOptions": []
+    }
+  ]
+}

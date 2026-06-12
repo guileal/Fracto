@@ -143,7 +143,7 @@ onUnmounted(() => {
 
       <nav class="hero__nav hero__nav--light">
         <RouterLink to="/" class="hero__nav-link hero__nav-link--light">Índice</RouterLink>
-        <RouterLink to="/v5" class="hero__nav-link hero__nav-link--light">v5 (escuro)</RouterLink>
+        <RouterLink to="/grid-background-black" class="hero__nav-link hero__nav-link--light">Grid preto</RouterLink>
       </nav>
 
       <LandingHeroIntro class="hero__intro--light">

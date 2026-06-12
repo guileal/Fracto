@@ -25,10 +25,37 @@ function fracto3d_register_row_background_param() {
 		return;
 	}
 
+	$grid_asset_ids = array();
+	$row_class_hints = array();
+	foreach ( fracto3d_registry_assets() as $asset ) {
+		if ( empty( $asset['id'] ) ) {
+			continue;
+		}
+		if ( isset( $asset['type'] ) && $asset['type'] === 'grid' ) {
+			$grid_asset_ids[] = (string) $asset['id'];
+		}
+		if ( ! empty( $asset['rowClass'] ) ) {
+			$row_class_hints[] = (string) $asset['rowClass'];
+		}
+	}
+
 	$grid_only = array(
 		'element' => 'fracto_brand_bg',
-		'value'   => array( 'background-grid-black', 'background-grid-light' ),
+		'value'   => $grid_asset_ids,
 	);
+
+	$row_dropdown = array( 'Nenhum' => '' );
+	foreach ( fracto3d_registry_assets() as $asset ) {
+		if ( empty( $asset['id'] ) ) {
+			continue;
+		}
+		$label = ! empty( $asset['label'] ) ? (string) $asset['label'] : (string) $asset['id'];
+		$row_dropdown[ $label ] = (string) $asset['id'];
+	}
+
+	$row_class_description = $row_class_hints
+		? implode( ', ', $row_class_hints )
+		: 'fracto-background-grid-black';
 
 	vc_add_param(
 		'vc_row',
@@ -38,14 +65,9 @@ function fracto3d_register_row_background_param() {
 			'param_name'  => 'fracto_brand_bg',
 			'group'       => fracto3d_row_background_group(),
 			'weight'      => 1,
-			'value'       => array(
-				'Nenhum'            => '',
-				'Grid preto (v5)'   => 'background-grid-black',
-				'Grid claro (v5)'   => 'background-grid-light',
-				'Logo 3D (v7)'      => 'logo-01-black',
-			),
+			'value'       => $row_dropdown,
 			'std'         => '',
-			'description' => 'Plano A: preset aqui. Plano B: deixe Nenhum e use Extra Class Name → fracto-background-grid-black, fracto-background-grid-light ou fracto-logo-01-black.',
+			'description' => 'Plano A: preset aqui. Plano B: deixe Nenhum e use Extra Class Name → ' . $row_class_description . '.',
 		)
 	);
 

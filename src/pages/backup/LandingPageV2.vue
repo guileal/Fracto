@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import HeroGlbSlot from '../components/HeroGlbSlot.vue'
-import PageBackgroundPicker from '../components/PageBackgroundPicker.vue'
-import { usePageBackground } from '../composables/usePageBackground'
+import HeroGlbSlot from '../../components/HeroGlbSlot.vue'
+import PageBackgroundPicker from '../../components/PageBackgroundPicker.vue'
+import { usePageBackground } from '../../composables/usePageBackground'
 
 const {
   src,
@@ -60,8 +60,8 @@ onUnmounted(() => {
           @apply-file="setFromFile"
           @clear="clear"
         />
-        <RouterLink to="/landing" class="landing-v2__link">v1</RouterLink>
-        <RouterLink to="/viewer" class="landing-v2__link">Viewer</RouterLink>
+        <RouterLink to="/backup/landing" class="landing-v2__link">v1</RouterLink>
+        <RouterLink to="/backup/viewer" class="landing-v2__link">Viewer</RouterLink>
       </div>
     </header>
 

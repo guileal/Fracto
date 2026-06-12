@@ -62,3 +62,15 @@ export const DEFAULT_FRACTO_LOGO_CONFIG: FractoLogoConfig = {
   offsetX: 0,
   offsetY: 0,
 }
+
+/** Variante para fundos escuros — cubos #cfcfcf (asset WP logo-01-light). */
+export const DEFAULT_FRACTO_LOGO_LIGHT_CONFIG: FractoLogoConfig = {
+  bevelRadius: 0.02,
+  cubeColor: '#cfcfcf',
+  accentColor: '#f72f00',
+  cubeMaterial: { ...DEFAULT_CUBE_MATERIAL },
+  accentMaterial: { ...DEFAULT_ACCENT_MATERIAL },
+  scale: 0.83,
+  offsetX: 0,
+  offsetY: 0,
+}

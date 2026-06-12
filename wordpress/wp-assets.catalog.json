@@ -1,0 +1,67 @@
+{
+  "background-grid-black": {
+    "label": "Grid preto",
+    "description": "Fundo interactivo 3D — grade preta",
+    "previewRoute": "/grid-background-black",
+    "type": "grid",
+    "shortcode": "fracto3d_grid",
+    "vcName": "Background 3D (Fracto)",
+    "rowClass": "fracto-background-grid-black",
+    "packageDir": "packages/background-grid-black",
+    "iifeName": "Fracto3dBackgroundGridBlack",
+    "scene": "createInstancedGridSceneV5",
+    "gridOptions": ["cols", "rows", "light_intensity", "light_color", "low_power"]
+  },
+  "background-grid-light": {
+    "label": "Grid branco",
+    "description": "Mesma grade em fundo claro",
+    "previewRoute": "/grid-background-white",
+    "type": "grid",
+    "shortcode": "fracto3d_grid_light",
+    "vcName": "Background 3D Claro (Fracto)",
+    "rowClass": "fracto-background-grid-light",
+    "packageDir": "packages/background-grid-light",
+    "iifeName": "Fracto3dBackgroundGridLight",
+    "scene": "createInstancedGridSceneV5",
+    "gridTheme": "light",
+    "gridOptions": ["cols", "rows", "light_intensity", "light_color", "cube_color", "low_power"]
+  },
+  "logo-01-black": {
+    "label": "Logo Fracto",
+    "description": "Isotipo 3D animado",
+    "previewRoute": "/logo-fracto",
+    "type": "logo",
+    "shortcode": "fracto3d_logo",
+    "vcName": "Objeto 3D (Logo)",
+    "rowClass": "fracto-logo-01-black",
+    "packageDir": "packages/logo-01-black",
+    "iifeName": "Fracto3dLogo01Black",
+    "scene": "FractoLogoScene",
+    "sceneConfig": "DEFAULT_FRACTO_LOGO_CONFIG"
+  },
+  "logo-01-light": {
+    "label": "Logo Fracto (claro)",
+    "description": "Isotipo 3D animado — cubos cinza claro para fundos escuros",
+    "previewRoute": "/logo-fracto-light",
+    "type": "logo",
+    "shortcode": "fracto3d_logo_light",
+    "vcName": "Objeto 3D (Logo claro)",
+    "rowClass": "fracto-logo-01-light",
+    "packageDir": "packages/logo-01-light",
+    "iifeName": "Fracto3dLogo01Light",
+    "scene": "FractoLogoScene",
+    "sceneConfig": "DEFAULT_FRACTO_LOGO_LIGHT_CONFIG"
+  },
+  "magic-cube-v8": {
+    "label": "Cubo mágico",
+    "description": "Cubo voxel 4×4×4 — preview /cubo-magico",
+    "previewRoute": "/cubo-magico",
+    "type": "logo",
+    "shortcode": "fracto3d_magic_cube",
+    "vcName": "Cubo Mágico 3D (Fracto)",
+    "rowClass": "fracto-magic-cube-v8",
+    "packageDir": "packages/magic-cube-v8",
+    "iifeName": "Fracto3dMagicCubeV8",
+    "scene": "MagicCubeV8Scene"
+  }
+}

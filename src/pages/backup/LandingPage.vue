@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
-import HeroCubesScene from '../components/HeroCubesScene.vue'
-import LandingHeroIntro from '../components/landing/LandingHeroIntro.vue'
-import LandingButton from '../components/landing/LandingButton.vue'
-import SectionBadge from '../components/landing/SectionBadge.vue'
-import '../styles/landing.css'
+import HeroCubesScene from '../../components/HeroCubesScene.vue'
+import LandingHeroIntro from '../../components/landing/LandingHeroIntro.vue'
+import LandingButton from '../../components/landing/LandingButton.vue'
+import SectionBadge from '../../components/landing/SectionBadge.vue'
+import '../../styles/landing.css'
 
 const services = [
   {

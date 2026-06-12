@@ -1,10 +1,18 @@
 # Packages WordPress
 
-Um diretório por asset 3D. Cada um gera um bundle IIFE standalone em `themes/Fracto/assets/3d/<asset-id>/`.
+Glue por asset (`src/index.ts` + `embed.css`). **Catálogo e exports:** `wp-assets.catalog.json` + `wp-assets.exports.json` (índice humano: `wp-assets.INDEX.md`).
 
-| Package | Asset | Origem Vue |
-|---------|-------|------------|
-| [`background-grid-black/`](./background-grid-black/) | Grade preta do hero | `/v5` |
-| [`logo-01-black/`](./logo-01-black/) | Isotipo animado | `/v7` |
+```bash
+npm run wp:list                              # ver catálogo
+npm run wp:scaffold -- <id> --type logo --route /x --scene Nome [--export]
+npm run wp:export -- <id>                    # activar na build WP
+npm run build:wp                             # compilar + wp-registry.json
+```
 
-Build de todos: `npm run build:wp` na raiz do repo.
+| Package | Asset | Preview |
+|---------|-------|---------|
+| [`background-grid-black/`](./background-grid-black/) | Grade preta | `/grid-background-black` |
+| [`background-grid-light/`](./background-grid-light/) | Grade clara | `/grid-background-white` |
+| [`logo-01-black/`](./logo-01-black/) | Isotipo | `/logo-fracto` |
+
+Novos assets: entrada no catálogo do manifesto → pasta `packages/<id>/` → incluir em `exports`.

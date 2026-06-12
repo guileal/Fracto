@@ -38,7 +38,8 @@ onBeforeUnmount(() => {
   <div class="page7 landing-page">
     <nav class="page7__nav">
       <RouterLink to="/" class="page7__nav-link">Índice</RouterLink>
-      <RouterLink to="/v5" class="page7__nav-link">v5</RouterLink>
+      <RouterLink to="/logo-fracto-light" class="page7__nav-link">Logo claro</RouterLink>
+      <RouterLink to="/grid-background-black" class="page7__nav-link">Grid preto</RouterLink>
     </nav>
 
     <section class="page7__section">

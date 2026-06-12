@@ -12,8 +12,12 @@ Ver **`AGENTS.md`** §5D.
 
 | Rota | Página | O que valida |
 |------|--------|--------------|
-| `/v5` | `LandingPageV5.vue` | Grid hero → asset `background-grid-black` |
-| `/v7` | `Page7.vue` | Isotipo → asset `logo-01-black` |
+| `/grid-background-black` | `GridBackgroundBlackPage.vue` | Grid hero → asset `background-grid-black` |
+| `/grid-background-white` | `GridBackgroundWhitePage.vue` | Grid claro → asset `background-grid-light` |
+| `/logo-fracto` | `LogoFractoPage.vue` | Isotipo → asset `logo-01-black` |
+| `/cubo-magico` | `CuboMagicoPage.vue` | Preview local (sem export WP ainda) |
+
+Protótipos antigos: `src/pages/backup/` (rotas `/backup/*`).
 
 ## Escopo
 

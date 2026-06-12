@@ -33,7 +33,7 @@ async function onResolveShape() {
   <div class="page8">
     <nav class="page8__nav">
       <RouterLink to="/" class="page8__nav-link">Índice</RouterLink>
-      <RouterLink to="/v7" class="page8__nav-link">v7</RouterLink>
+      <RouterLink to="/logo-fracto" class="page8__nav-link">Logo</RouterLink>
     </nav>
 
     <section class="page8__layout">

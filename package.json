@@ -10,6 +10,12 @@
     "dev": "vite --host",
     "build": "vue-tsc -b && vite build",
     "build:wp": "npm run build --prefix wordpress",
+    "wp": "npm run wp --prefix wordpress --",
+    "wp:list": "npm run wp --prefix wordpress -- list",
+    "wp:scaffold": "npm run wp --prefix wordpress -- scaffold",
+    "wp:export": "npm run wp --prefix wordpress -- export",
+    "wp:unexport": "npm run wp --prefix wordpress -- unexport",
+    "wp:sync": "npm run wp --prefix wordpress -- sync",
     "preview": "vite preview"
   },
   "dependencies": {

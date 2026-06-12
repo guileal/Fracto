@@ -67,6 +67,12 @@
 	height: 100% !important;
 }
 
+.fracto-row-brand-bg [data-fracto-3d='logo-01-light'],
+.fracto-row-brand-bg .fracto-3d-logo-01-light {
+	min-height: 0 !important;
+	height: 100% !important;
+}
+
 .fracto-row-brand-bg canvas {
 	display: block;
 	width: 100% !important;

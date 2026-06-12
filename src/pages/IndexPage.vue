@@ -1,79 +1,84 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 
-const pages = [
+const activePages = [
   {
-    to: '/landing',
-    title: 'Landing fracto.br',
-    description: 'Hero 3D em cubos, seções Sobre, Trabalho, Serviços e CTAs.',
-    tag: 'Produção',
+    to: '/grid-background-black',
+    title: 'Grid background black',
+    description:
+      'Grade interactiva em fundo preto — preview do widget WP background-grid-black.',
+    tag: 'Widget WP',
+    assetId: 'background-grid-black',
   },
   {
-    to: '/v2',
+    to: '/grid-background-white',
+    title: 'Grid background white',
+    description:
+      'Mesma grade em fundo claro — preview do widget WP background-grid-light.',
+    tag: 'Widget WP',
+    assetId: 'background-grid-light',
+  },
+  {
+    to: '/logo-fracto',
+    title: 'Logo Fracto',
+    description: 'Isotipo 3D animado — preview do widget WP logo-01-black.',
+    tag: 'Widget WP',
+    assetId: 'logo-01-black',
+  },
+  {
+    to: '/logo-fracto-light',
+    title: 'Logo Fracto (claro)',
+    description:
+      'Isotipo com cubos #cfcfcf — preview do widget WP logo-01-light (fundo escuro).',
+    tag: 'Widget WP',
+    assetId: 'logo-01-light',
+  },
+  {
+    to: '/cubo-magico',
+    title: 'Cubo mágico',
+    description: 'Cubo voxel 4×4×4 — preview do widget WP magic-cube-v8.',
+    tag: 'Widget WP',
+    assetId: 'magic-cube-v8',
+  },
+]
+
+const backupPages = [
+  {
+    to: '/backup/landing',
+    title: 'Landing fracto.br (v1)',
+    description: 'Hero 3D em cubos, seções Sobre, Trabalho, Serviços e CTAs.',
+  },
+  {
+    to: '/backup/v2',
     title: 'Landing v2',
     description: 'Background customizável (YouTube, Vimeo ou imagem) + modelo 3D transparente.',
-    tag: 'Experimento',
   },
   {
-    to: '/v3',
+    to: '/backup/v3',
     title: 'Landing v3',
     description:
       'Parede preta de quadrados em InstancedMesh — grade encaixada, oscilação senoidal e reação ao mouse.',
-    tag: 'Experimento',
   },
   {
-    to: '/v4',
+    to: '/backup/v4',
     title: 'Landing v4',
     description:
       'Grade 3D com luz difusa do mouse — slider de intensidade, cor livre, grade por atalho e bolha de referência.',
-    tag: 'Experimento',
   },
   {
-    to: '/v5',
-    title: 'Landing v5',
-    description:
-      'Logotipo Fracto integrado na grade — acende perto do mouse, piscadas estilizadas e quadrados aleatórios em branco e laranja.',
-    tag: 'Experimento',
-  },
-  {
-    to: '/background-grid-light',
-    title: 'Background grid claro',
-    description:
-      'Mesma grade interativa da v5 em fundo branco — preview do widget WP background-grid-light.',
-    tag: 'Widget WP',
-  },
-  {
-    to: '/v6',
+    to: '/backup/v6',
     title: 'Landing v6',
-    description:
-      'Fundo da v5 + isotipo animado em GLB em tela cheia sobre o título.',
-    tag: 'Experimento',
+    description: 'Fundo da v5 + isotipo animado em GLB em tela cheia sobre o título.',
   },
   {
-    to: '/v7',
-    title: 'Landing v7',
-    description:
-      'Segunda seção da v5 em layout duas colunas — texto e isotipo 3D animado da Fracto.',
-    tag: 'Experimento',
-  },
-  {
-    to: '/v8',
-    title: 'Landing v8',
-    description:
-      'Cubo mágico voxel 4×4×4 (64 instâncias) — isotipo volumétrico e letras C-U-I-F-R-A-T-O com núcleo laranja.',
-    tag: 'Experimento',
-  },
-  {
-    to: '/viewer',
+    to: '/backup/viewer',
     title: 'Viewer GLB',
     description: 'Scroll que scruba a timeline Summary de modelos .glb exportados do Blender.',
-    tag: 'Ferramenta',
   },
   {
-    to: '/iridescent',
+    to: '/backup/iridescent',
     title: 'Lab iridescente',
     description: 'Demo de material iridescente com Three.js.',
-    tag: 'Lab',
   },
 ]
 </script>
@@ -81,21 +86,43 @@ const pages = [
 <template>
   <div class="index">
     <header class="index__header">
-      <p class="index__lead">Índice das páginas do projeto Vue + Three.js</p>
+      <p class="index__lead">Preview Vue dos assets 3D Fracto + protótipos arquivados.</p>
     </header>
 
-    <ul class="index__list">
-      <li v-for="page in pages" :key="page.to">
-        <RouterLink :to="page.to" class="index__card">
-          <div class="index__card-top">
-            <h2>{{ page.title }}</h2>
-            <span class="index__tag">{{ page.tag }}</span>
-          </div>
-          <p>{{ page.description }}</p>
-          <span class="index__path">{{ page.to }}</span>
-        </RouterLink>
-      </li>
-    </ul>
+    <section class="index__section">
+      <h2 class="index__section-title">Activos</h2>
+      <p class="index__section-lead">Páginas alinhadas com widgets WordPress ou pipeline de export.</p>
+      <ul class="index__list">
+        <li v-for="page in activePages" :key="page.to">
+          <RouterLink :to="page.to" class="index__card">
+            <div class="index__card-top">
+              <h3>{{ page.title }}</h3>
+              <span class="index__tag">{{ page.tag }}</span>
+            </div>
+            <p>{{ page.description }}</p>
+            <span class="index__path">{{ page.to }}</span>
+            <span v-if="page.assetId" class="index__asset">WP: {{ page.assetId }}</span>
+          </RouterLink>
+        </li>
+      </ul>
+    </section>
+
+    <section class="index__section">
+      <h2 class="index__section-title">Backup</h2>
+      <p class="index__section-lead">Protótipos antigos — não exportados para WordPress.</p>
+      <ul class="index__list">
+        <li v-for="page in backupPages" :key="page.to">
+          <RouterLink :to="page.to" class="index__card index__card--backup">
+            <div class="index__card-top">
+              <h3>{{ page.title }}</h3>
+              <span class="index__tag index__tag--muted">Backup</span>
+            </div>
+            <p>{{ page.description }}</p>
+            <span class="index__path">{{ page.to }}</span>
+          </RouterLink>
+        </li>
+      </ul>
+    </section>
   </div>
 </template>
 
@@ -116,6 +143,25 @@ const pages = [
   color: #888;
   font-size: 0.95rem;
   line-height: 1.5;
+}
+
+.index__section {
+  margin-bottom: 2.75rem;
+}
+
+.index__section-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fracto-brand-soft);
+}
+
+.index__section-lead {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: #777;
 }
 
 .index__list {
@@ -141,6 +187,10 @@ const pages = [
     transform 0.15s ease;
 }
 
+.index__card--backup {
+  opacity: 0.88;
+}
+
 .index__card:hover {
   border-color: var(--fracto-brand-border);
   background: var(--fracto-brand-dim);
@@ -155,7 +205,7 @@ const pages = [
   margin-bottom: 0.4rem;
 }
 
-.index__card h2 {
+.index__card h3 {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
@@ -173,6 +223,11 @@ const pages = [
   background: var(--fracto-brand-dim);
 }
 
+.index__tag--muted {
+  color: #888;
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .index__card p {
   margin: 0 0 0.65rem;
   font-size: 0.88rem;
@@ -181,8 +236,17 @@ const pages = [
 }
 
 .index__path {
+  display: block;
   font-size: 0.78rem;
   font-family: ui-monospace, monospace;
   color: #666;
+}
+
+.index__asset {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  font-family: ui-monospace, monospace;
+  color: #555;
 }
 </style>

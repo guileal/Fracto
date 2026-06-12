@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import GridDevPanel from '../components/GridDevPanel.vue'
-import InstancedGridBackground from '../components/InstancedGridBackground.vue'
-import LandingHeroIntro from '../components/landing/LandingHeroIntro.vue'
-import LandingButton from '../components/landing/LandingButton.vue'
-import PerfMonitor from '../components/PerfMonitor.vue'
-import SectionBadge from '../components/landing/SectionBadge.vue'
-import { DEFAULT_GRID_CONFIG, type GridConfig } from '../lib/gridConfig'
-import { DEFAULT_SCENE_LIGHTING, type SceneLightingConfig } from '../lib/gridLighting'
-import type { PerfStats } from '../lib/perfMonitor'
-import type { InstancedGridHandle } from '../three/instancedGridScene'
-import '../styles/landing.css'
+import GridDevPanel from '../../components/GridDevPanel.vue'
+import InstancedGridBackground from '../../components/InstancedGridBackground.vue'
+import LandingHeroIntro from '../../components/landing/LandingHeroIntro.vue'
+import LandingButton from '../../components/landing/LandingButton.vue'
+import PerfMonitor from '../../components/PerfMonitor.vue'
+import SectionBadge from '../../components/landing/SectionBadge.vue'
+import { DEFAULT_GRID_CONFIG, type GridConfig } from '../../lib/gridConfig'
+import { DEFAULT_SCENE_LIGHTING, type SceneLightingConfig } from '../../lib/gridLighting'
+import type { PerfStats } from '../../lib/perfMonitor'
+import type { InstancedGridHandle } from '../../three/instancedGridScene'
+import '../../styles/landing.css'
 
 const perfStats = ref<PerfStats | null>(null)
 const lighting = ref<SceneLightingConfig>(structuredClone(DEFAULT_SCENE_LIGHTING))
@@ -89,8 +89,8 @@ onUnmounted(() => {
 
       <nav class="hero__nav">
         <RouterLink to="/" class="hero__nav-link">Índice</RouterLink>
-        <RouterLink to="/landing" class="hero__nav-link">v1</RouterLink>
-        <RouterLink to="/v2" class="hero__nav-link">v2</RouterLink>
+        <RouterLink to="/backup/landing" class="hero__nav-link">v1</RouterLink>
+        <RouterLink to="/backup/v2" class="hero__nav-link">v2</RouterLink>
       </nav>
 
       <LandingHeroIntro>
