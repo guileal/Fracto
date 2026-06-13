@@ -3,11 +3,14 @@ import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { normalizeHexColor } from '../lib/colorHex'
+import {
+  applyFractoLogoMaterialProps,
+  createFractoLogoPhysicalMaterial,
+} from '../lib/fractoLogoMaterial'
 import { addFractoLogoLighting } from '../lib/fractoLogoLighting'
 import {
   DEFAULT_MAGIC_CUBE_CONFIG,
   type MagicCubeConfig,
-  type MagicCubeMaterialConfig,
 } from '../lib/magicCubeConfig'
 
 const GRID_COORDS = [-1.5, -0.5, 0.5, 1.5] as const
@@ -15,9 +18,6 @@ const SLICE_TOLERANCE = 0.1
 const CUBE_SIZE = 0.98
 const SPACING = 1
 const BEVEL_SEGMENTS = 2
-/** Câmera fixa — layout usa só scale/offset no cubo (como /logo-fracto-light). */
-const CAMERA_Y = 0.2
-const CAMERA_Z = 11
 
 /** Face frontal do isotipo Fracto — linha 0 = topo, col 0 = esquerda. */
 const FRONT_PATTERN = [
@@ -69,30 +69,26 @@ function waitSeconds(seconds: number): Promise<void> {
   })
 }
 
-function roundPosition(mesh: THREE.Mesh): void {
-  mesh.position.x = Math.round(mesh.position.x * 10) / 10
-  mesh.position.y = Math.round(mesh.position.y * 10) / 10
-  mesh.position.z = Math.round(mesh.position.z * 10) / 10
-}
-
-function applyMaterialProps(
-  material: THREE.MeshPhysicalMaterial,
-  props: MagicCubeMaterialConfig,
-  color: string,
-  emissiveColor?: string,
-): void {
-  material.color.setStyle(color)
-  material.roughness = props.roughness
-  material.clearcoat = props.clearcoat
-  material.clearcoatRoughness = Math.min(props.roughness + 0.08, 0.95)
-  material.reflectivity = THREE.MathUtils.lerp(0.85, 0.15, props.roughness)
-  material.envMapIntensity = props.envMapIntensity
-  material.emissiveIntensity = props.emissiveIntensity
-  if (emissiveColor && props.emissiveIntensity > 0) {
-    material.emissive.setStyle(emissiveColor)
-  } else {
-    material.emissive.setHex(0x000000)
+function snapToGrid(mesh: THREE.Mesh): void {
+  const snapAxis = (value: number): number => {
+    let best: number = GRID_COORDS[0]
+    let minDist = Math.abs(value - best)
+    for (const coord of GRID_COORDS) {
+      const dist = Math.abs(value - coord)
+      if (dist < minDist) {
+        minDist = dist
+        best = coord
+      }
+    }
+    return best
   }
+
+  mesh.position.set(
+    snapAxis(mesh.position.x),
+    snapAxis(mesh.position.y),
+    snapAxis(mesh.position.z),
+  )
+  mesh.rotation.set(0, 0, 0)
 }
 
 function createCubeGeometry(bevelRadius: number): RoundedBoxGeometry {
@@ -105,19 +101,13 @@ function createCubeGeometry(bevelRadius: number): RoundedBoxGeometry {
   )
 }
 
-function createPhysicalMaterial(): THREE.MeshPhysicalMaterial {
-  return new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    metalness: 0,
-    emissive: 0x000000,
-  })
-}
-
 export class MagicCubeV8Scene {
   private readonly canvas: HTMLCanvasElement
   private readonly scene = new THREE.Scene()
   private readonly camera: THREE.PerspectiveCamera
   private readonly renderer: THREE.WebGLRenderer
+  private readonly layoutGroup = new THREE.Group()
+  private readonly isoGroup = new THREE.Group()
   private readonly cubeContainer = new THREE.Group()
   private readonly cubes: THREE.Mesh[] = []
   private cubeGeometry: RoundedBoxGeometry
@@ -144,8 +134,7 @@ export class MagicCubeV8Scene {
     }
 
     this.camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100)
-    this.camera.position.set(0, CAMERA_Y, CAMERA_Z)
-    this.camera.lookAt(0, 0, 0)
+    this.applyView()
 
     this.renderer = new THREE.WebGLRenderer({
       canvas,
@@ -163,14 +152,22 @@ export class MagicCubeV8Scene {
 
     addFractoLogoLighting(this.scene)
 
-    this.whiteMaterial = createPhysicalMaterial()
-    this.accentMaterial = createPhysicalMaterial()
+    this.whiteMaterial = createFractoLogoPhysicalMaterial()
+    this.accentMaterial = createFractoLogoPhysicalMaterial()
     this.applyMaterials()
 
     this.cubeGeometry = createCubeGeometry(this.config.bevelRadius)
     this.buildCubeMatrix()
-    this.scene.add(this.cubeContainer)
+
+    this.layoutGroup.name = 'layoutGroup'
+    this.isoGroup.name = 'isoGroup'
+    this.cubeContainer.name = 'cubeContainer'
+
+    this.scene.add(this.layoutGroup)
+    this.layoutGroup.add(this.isoGroup)
+    this.isoGroup.add(this.cubeContainer)
     this.applyLayout()
+    this.applyView()
 
     this.resizeHandler = () => this.resize()
     this.resizeObserver = new ResizeObserver(this.resizeHandler)
@@ -210,6 +207,7 @@ export class MagicCubeV8Scene {
 
     this.applyMaterials()
     this.applyLayout()
+    this.applyView()
   }
 
   getConfig(): MagicCubeConfig {
@@ -221,13 +219,23 @@ export class MagicCubeV8Scene {
   }
 
   private applyLayout(): void {
-    this.cubeContainer.scale.setScalar(this.config.scale)
-    this.cubeContainer.position.set(this.config.offsetX, this.config.offsetY, 0)
+    this.layoutGroup.scale.setScalar(this.config.scale)
+    this.layoutGroup.position.set(this.config.offsetX, this.config.offsetY, 0)
+  }
+
+  private applyView(): void {
+    this.isoGroup.rotation.set(
+      this.config.pivotRotX,
+      this.config.pivotRotY,
+      this.config.pivotRotZ,
+    )
+    this.camera.position.set(this.config.cameraX, this.config.cameraY, this.config.cameraZ)
+    this.camera.lookAt(0, 0, 0)
   }
 
   private applyMaterials(): void {
-    applyMaterialProps(this.whiteMaterial, this.config.cubeMaterial, this.config.cubeColor)
-    applyMaterialProps(
+    applyFractoLogoMaterialProps(this.whiteMaterial, this.config.cubeMaterial, this.config.cubeColor)
+    applyFractoLogoMaterialProps(
       this.accentMaterial,
       this.config.accentMaterial,
       this.config.accentColor,
@@ -272,13 +280,13 @@ export class MagicCubeV8Scene {
 
     const pivot = new THREE.Group()
     pivot.name = 'slicePivot'
-    this.scene.add(pivot)
+    this.cubeContainer.add(pivot)
 
     for (const mesh of blocks) {
       pivot.attach(mesh)
     }
 
-    pivot.rotation[axis] = 0
+    pivot.rotation.set(0, 0, 0)
 
     await new Promise<void>((resolve) => {
       gsap.to(pivot.rotation, {
@@ -288,9 +296,10 @@ export class MagicCubeV8Scene {
         onComplete: () => {
           for (const mesh of blocks) {
             this.cubeContainer.attach(mesh)
-            roundPosition(mesh)
+            snapToGrid(mesh)
           }
-          this.scene.remove(pivot)
+          this.cubeContainer.remove(pivot)
+          pivot.rotation.set(0, 0, 0)
           resolve()
         },
       })

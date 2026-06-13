@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import MagicCubeDock from '../components/MagicCubeDock.vue'
 import MagicCubeLayoutDock from '../components/MagicCubeLayoutDock.vue'
+import MagicCubePivotDock from '../components/MagicCubePivotDock.vue'
+import MagicCubeDock from '../components/MagicCubeDock.vue'
 import { DEFAULT_MAGIC_CUBE_CONFIG, type MagicCubeConfig } from '../lib/magicCubeConfig'
 import { MagicCubeV8Scene } from '../three/MagicCubeV8Scene'
 import '../styles/landing.css'
@@ -46,9 +47,9 @@ onBeforeUnmount(() => {
           Giros de fatia, explosão e retorno ao isotipo Fracto
         </h1>
         <p class="page8__body">
-          Casca 4×4 com peças em falta formando o isotipo na face frontal: branco
-          <strong>#FFFFFF</strong>, laranja <strong>#F72F00</strong> — cubos grandes (v1)
-          com bevel, materiais e iluminação de /logo-fracto-light.
+          Casca 4×4 com peças em falta formando o isotipo na face frontal: cinza claro
+          <strong>#CFCFCF</strong>, laranja <strong>#F72F00</strong> — mesmos materiais e
+          iluminação de /logo-fracto-light.
         </p>
       </div>
 
@@ -58,6 +59,7 @@ onBeforeUnmount(() => {
     </section>
 
     <MagicCubeLayoutDock :config="cubeConfig" :apply="onCubeConfigUpdate" />
+    <MagicCubePivotDock :config="cubeConfig" :apply="onCubeConfigUpdate" />
     <MagicCubeDock :config="cubeConfig" :apply="onCubeConfigUpdate" />
   </div>
 </template>

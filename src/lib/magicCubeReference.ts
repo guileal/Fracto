@@ -23,6 +23,12 @@ export const DEFAULT_MAGIC_CUBE_CONFIG: MagicCubeConfig = {
   scale: ${config.scale},
   offsetX: ${config.offsetX},
   offsetY: ${config.offsetY},
+  pivotRotX: ${config.pivotRotX},
+  pivotRotY: ${config.pivotRotY},
+  pivotRotZ: ${config.pivotRotZ},
+  cameraX: ${config.cameraX},
+  cameraY: ${config.cameraY},
+  cameraZ: ${config.cameraZ},
   sliceDuration: ${config.sliceDuration},
   explodeDuration: ${config.explodeDuration},
   resetDuration: ${config.resetDuration},
@@ -47,6 +53,7 @@ Parâmetros atuais:
 - Material cubos — rugosidade ${config.cubeMaterial.roughness}, verniz ${config.cubeMaterial.clearcoat}, reflexo ${config.cubeMaterial.envMapIntensity}, emissão ${config.cubeMaterial.emissiveIntensity}
 - Material laranja — rugosidade ${config.accentMaterial.roughness}, verniz ${config.accentMaterial.clearcoat}, reflexo ${config.accentMaterial.envMapIntensity}, emissão ${config.accentMaterial.emissiveIntensity}
 - Layout — tamanho ${config.scale}, horizontal ${config.offsetX}, vertical ${config.offsetY}
+- Vista — pivot X ${config.pivotRotX} Y ${config.pivotRotY} Z ${config.pivotRotZ} rad | câmera (${config.cameraX}, ${config.cameraY}, ${config.cameraZ})
 - Timing — fatia ${config.sliceDuration}s, explosão ${config.explodeDuration}s, reset ${config.resetDuration}s, pausa inicial ${config.waitStart}s, pausa pré-explosão ${config.waitBeforeExplode}s
 
 Cole no Cursor e peça para:

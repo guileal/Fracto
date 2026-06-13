@@ -14,6 +14,14 @@ export interface MagicCubeConfig {
   offsetX: number
   /** Deslocamento vertical em unidades de cena (− baixo, + cima). */
   offsetY: number
+  /** Rotação do pivot isométrico (rad). */
+  pivotRotX: number
+  pivotRotY: number
+  pivotRotZ: number
+  /** Posição da câmera. */
+  cameraX: number
+  cameraY: number
+  cameraZ: number
   sliceDuration: number
   explodeDuration: number
   resetDuration: number
@@ -40,19 +48,34 @@ export const MAGIC_CUBE_LAYOUT = {
   offsetY: { min: -1.2, max: 1.2, step: 0.02 },
 } as const
 
+export const MAGIC_CUBE_PIVOT = {
+  rotDeg: { min: -90, max: 90, step: 0.5 },
+  cameraX: { min: -4, max: 4, step: 0.05 },
+  cameraY: { min: -2, max: 4, step: 0.05 },
+  cameraZ: { min: 6, max: 18, step: 0.1 },
+} as const
+
+export const MAGIC_CUBE_VIEW_DEFAULTS = {
+  pivotRotX: 0.15707963267948966,
+  pivotRotY: 0.09599310885968812,
+  pivotRotZ: -0.008726646259971648,
+  cameraX: 0.2,
+  cameraY: -1,
+  cameraZ: 12.8,
+} as const
+
 export const MAGIC_CUBE_TIMING = {
   sliceDuration: { min: 0.2, max: 2, step: 0.05 },
-  explodeDuration: { min: 0.2, max: 2, step: 0.05 },
-  resetDuration: { min: 0.2, max: 2.5, step: 0.05 },
+  explodeDuration: { min: 0.2, max: 3, step: 0.05 },
+  resetDuration: { min: 0.2, max: 3, step: 0.05 },
   waitStart: { min: 0, max: 3, step: 0.1 },
   waitBeforeExplode: { min: 0, max: 2, step: 0.1 },
 } as const
 
-/** Materiais alinhados a DEFAULT_FRACTO_LOGO_LIGHT_CONFIG (logo-fracto-light). */
 const DEFAULT_CUBE_MATERIAL: MagicCubeMaterialConfig = {
-  roughness: 0.4,
-  clearcoat: 0,
-  envMapIntensity: 0.8,
+  roughness: 1,
+  clearcoat: 0.21,
+  envMapIntensity: 0,
   emissiveIntensity: 0,
 }
 
@@ -63,19 +86,25 @@ const DEFAULT_ACCENT_MATERIAL: MagicCubeMaterialConfig = {
   emissiveIntensity: 0,
 }
 
-/** Defaults visuais: tamanho v1 + materiais/luz/bevel de /logo-fracto-light. */
+/** Defaults aprovados — /cubo-magico (independente do logo-fracto-light). */
 export const DEFAULT_MAGIC_CUBE_CONFIG: MagicCubeConfig = {
   bevelRadius: 0.02,
-  cubeColor: '#ffffff',
+  cubeColor: '#cfcfcf',
   accentColor: '#f72f00',
   cubeMaterial: { ...DEFAULT_CUBE_MATERIAL },
   accentMaterial: { ...DEFAULT_ACCENT_MATERIAL },
   scale: 1,
   offsetX: 0,
   offsetY: 0,
-  sliceDuration: 0.7,
-  explodeDuration: 0.85,
-  resetDuration: 1.05,
+  pivotRotX: MAGIC_CUBE_VIEW_DEFAULTS.pivotRotX,
+  pivotRotY: MAGIC_CUBE_VIEW_DEFAULTS.pivotRotY,
+  pivotRotZ: MAGIC_CUBE_VIEW_DEFAULTS.pivotRotZ,
+  cameraX: MAGIC_CUBE_VIEW_DEFAULTS.cameraX,
+  cameraY: MAGIC_CUBE_VIEW_DEFAULTS.cameraY,
+  cameraZ: MAGIC_CUBE_VIEW_DEFAULTS.cameraZ,
+  sliceDuration: 0.6,
+  explodeDuration: 1.9,
+  resetDuration: 2.4,
   waitStart: 1,
   waitBeforeExplode: 0.5,
 }
