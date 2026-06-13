@@ -36,9 +36,17 @@ const activePages = [
   {
     to: '/cubo-magico',
     title: 'Cubo mágico',
-    description: 'Cubo voxel 4×4×4 — preview do widget WP magic-cube-v8.',
+    description: 'Cubo voxel 4×4×4 — preview do widget WP magic-cube-v8 (v1).',
     tag: 'Widget WP',
     assetId: 'magic-cube-v8',
+  },
+  {
+    to: '/cubo-magico-2',
+    title: 'Cubo mágico v2',
+    description:
+      'Fragmentado + pivot infinito + 8 giros — preview do widget WP magic-cube-v2.',
+    tag: 'Widget WP',
+    assetId: 'magic-cube-v2',
   },
 ]
 

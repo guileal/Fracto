@@ -56,7 +56,7 @@ export const MAGIC_CUBE_PIVOT = {
 } as const
 
 export const MAGIC_CUBE_VIEW_DEFAULTS = {
-  pivotRotX: 0.24434609527920614,
+  pivotRotX: 0.6719517620178169,
   pivotRotY: 0.5061454830783556,
   pivotRotZ: -0.008726646259971648,
   cameraX: 0.2,
@@ -73,10 +73,10 @@ export const MAGIC_CUBE_TIMING = {
 } as const
 
 const DEFAULT_CUBE_MATERIAL: MagicCubeMaterialConfig = {
-  roughness: 1,
-  clearcoat: 0.21,
+  roughness: 0.98,
+  clearcoat: 0,
   envMapIntensity: 0,
-  emissiveIntensity: 0,
+  emissiveIntensity: 1.18,
 }
 
 const DEFAULT_ACCENT_MATERIAL: MagicCubeMaterialConfig = {
@@ -86,9 +86,12 @@ const DEFAULT_ACCENT_MATERIAL: MagicCubeMaterialConfig = {
   emissiveIntensity: 0,
 }
 
-/** Defaults aprovados — /cubo-magico (independente do logo-fracto-light). */
+/** Bevel aprovado — v1 (/cubo-magico). */
+export const MAGIC_CUBE_V1_BEVEL_RADIUS = 0.035
+
+/** Defaults aprovados — /cubo-magico */
 export const DEFAULT_MAGIC_CUBE_CONFIG: MagicCubeConfig = {
-  bevelRadius: 0.02,
+  bevelRadius: 0.035,
   cubeColor: '#cfcfcf',
   accentColor: '#f72f00',
   cubeMaterial: { ...DEFAULT_CUBE_MATERIAL },

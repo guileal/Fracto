@@ -1,0 +1,18 @@
+[data-fracto-3d='magic-cube-v2'],
+.fracto-3d-magic-cube-v2 {
+  position: relative;
+  width: 100%;
+  min-height: min(420px, 70vh);
+  pointer-events: none;
+  overflow: hidden;
+  background: transparent;
+}
+
+[data-fracto-3d='magic-cube-v2'] canvas,
+.fracto-3d-magic-cube-v2 canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}

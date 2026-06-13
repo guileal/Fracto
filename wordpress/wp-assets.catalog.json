@@ -63,5 +63,17 @@
     "packageDir": "packages/magic-cube-v8",
     "iifeName": "Fracto3dMagicCubeV8",
     "scene": "MagicCubeV8Scene"
+  },
+  "magic-cube-v2": {
+    "label": "Cubo mágico v2",
+    "description": "Cubo fragmentado — pivot infinito, 8 giros — preview /cubo-magico-2",
+    "previewRoute": "/cubo-magico-2",
+    "type": "logo",
+    "shortcode": "fracto3d_magic_cube_v2",
+    "vcName": "Cubo Mágico 3D v2 (Fracto)",
+    "rowClass": "fracto-magic-cube-v2",
+    "packageDir": "packages/magic-cube-v2",
+    "iifeName": "Fracto3dMagicCubeV2",
+    "scene": "MagicCubeV2Scene"
   }
 }

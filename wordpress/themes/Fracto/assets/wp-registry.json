@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-06-13T02:29:55.721Z",
+  "generatedAt": "2026-06-13T02:40:53.620Z",
   "assets": [
     {
       "id": "background-grid-black",
@@ -68,6 +68,17 @@
       "shortcode": "fracto3d_magic_cube",
       "vcName": "Cubo Mágico 3D (Fracto)",
       "rowClass": "fracto-magic-cube-v8",
+      "gridOptions": []
+    },
+    {
+      "id": "magic-cube-v2",
+      "label": "Cubo mágico v2",
+      "description": "Cubo fragmentado — pivot infinito, 8 giros — preview /cubo-magico-2",
+      "previewRoute": "/cubo-magico-2",
+      "type": "logo",
+      "shortcode": "fracto3d_magic_cube_v2",
+      "vcName": "Cubo Mágico 3D v2 (Fracto)",
+      "rowClass": "fracto-magic-cube-v2",
       "gridOptions": []
     }
   ]

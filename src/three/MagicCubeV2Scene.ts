@@ -10,15 +10,16 @@ import {
 import { addFractoLogoLighting } from '../lib/fractoLogoLighting'
 import {
   buildIsotipoBrandingLookup,
+  buildFragmentAccentLookup,
   FRAGMENT_VISIBLE_THRESHOLD,
   isAccentIsotipoColor,
   isFrontFacePosition,
   isotipoPosKey,
-} from '../lib/magicCubeBranding'
+} from '../lib/magicCube2Branding'
 import {
-  DEFAULT_MAGIC_CUBE_CONFIG,
+  DEFAULT_MAGIC_CUBE_2_CONFIG,
   type MagicCubeConfig,
-} from '../lib/magicCubeConfig'
+} from '../lib/magicCube2Config'
 
 const GRID_COORDS = [-1.5, -0.5, 0.5, 1.5] as const
 const SLICE_TOLERANCE = 0.1
@@ -30,6 +31,22 @@ const GRID_SIZE = 4
 const PIVOT_SPIN_DURATION = 24
 
 type Axis = 'x' | 'y' | 'z'
+
+/** Giros de fatia antes da explosão (8 movimentos). */
+const PRE_EXPLODE_SLICE_SEQUENCE: ReadonlyArray<{
+  axis: Axis
+  layerIndex: 0 | 1 | 2 | 3
+  angle: number
+}> = [
+  { axis: 'x', layerIndex: 2, angle: Math.PI / 2 },
+  { axis: 'y', layerIndex: 3, angle: -Math.PI / 2 },
+  { axis: 'z', layerIndex: 3, angle: Math.PI / 2 },
+  { axis: 'z', layerIndex: 1, angle: -Math.PI / 2 },
+  { axis: 'x', layerIndex: 0, angle: -Math.PI / 2 },
+  { axis: 'y', layerIndex: 2, angle: Math.PI / 2 },
+  { axis: 'x', layerIndex: 3, angle: Math.PI / 2 },
+  { axis: 'y', layerIndex: 1, angle: -Math.PI / 2 },
+]
 
 function gridToPosition(ix: number, iy: number, iz: number): THREE.Vector3 {
   return new THREE.Vector3(
@@ -77,7 +94,7 @@ function createCubeGeometry(bevelRadius: number): RoundedBoxGeometry {
   )
 }
 
-export class MagicCubeV8Scene {
+export class MagicCubeV2Scene {
   private readonly canvas: HTMLCanvasElement
   private readonly scene = new THREE.Scene()
   private readonly camera: THREE.PerspectiveCamera
@@ -93,6 +110,7 @@ export class MagicCubeV8Scene {
   private readonly resizeObserver: ResizeObserver
   private readonly resizeHandler: () => void
   private readonly isotipoLookup = buildIsotipoBrandingLookup()
+  private readonly fragmentAccentLookup = buildFragmentAccentLookup()
 
   private config: MagicCubeConfig
   private pivotSpinTween: gsap.core.Tween | null = null
@@ -102,7 +120,7 @@ export class MagicCubeV8Scene {
 
   constructor(
     canvas: HTMLCanvasElement,
-    initialConfig: MagicCubeConfig = DEFAULT_MAGIC_CUBE_CONFIG,
+    initialConfig: MagicCubeConfig = DEFAULT_MAGIC_CUBE_2_CONFIG,
   ) {
     this.canvas = canvas
     this.config = {
@@ -218,6 +236,9 @@ export class MagicCubeV8Scene {
             } else {
               mesh.scale.set(0, 0, 0)
             }
+          } else if (this.fragmentAccentLookup.has(posKey)) {
+            mesh.scale.set(1, 1, 1)
+            mesh.material = this.accentMaterial
           } else if (Math.random() > FRAGMENT_VISIBLE_THRESHOLD) {
             mesh.scale.set(1, 1, 1)
             mesh.material = this.whiteMaterial
@@ -406,21 +427,19 @@ export class MagicCubeV8Scene {
     if (this.sequenceRunning || this.disposed) return
     this.sequenceRunning = true
 
-    const lateralLayer = GRID_COORDS[2]!
-    const topLayer = GRID_COORDS[3]!
-    const frontLayer = GRID_COORDS[3]!
-
     while (!this.disposed) {
       await waitSeconds(this.config.waitStart)
       if (this.disposed) break
 
-      await this.rotateSlice('x', lateralLayer, Math.PI / 2, this.config.sliceDuration)
-      if (this.disposed) break
-
-      await this.rotateSlice('y', topLayer, -Math.PI / 2, this.config.sliceDuration)
-      if (this.disposed) break
-
-      await this.rotateSlice('z', frontLayer, Math.PI / 2, this.config.sliceDuration)
+      for (const move of PRE_EXPLODE_SLICE_SEQUENCE) {
+        await this.rotateSlice(
+          move.axis,
+          GRID_COORDS[move.layerIndex]!,
+          move.angle,
+          this.config.sliceDuration,
+        )
+        if (this.disposed) break
+      }
       if (this.disposed) break
 
       await waitSeconds(this.config.waitBeforeExplode)

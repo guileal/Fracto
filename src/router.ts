@@ -5,6 +5,7 @@ import GridBackgroundWhitePage from './pages/GridBackgroundWhitePage.vue'
 import LogoFractoPage from './pages/LogoFractoPage.vue'
 import LogoFractoLightPage from './pages/LogoFractoLightPage.vue'
 import CuboMagicoPage from './pages/CuboMagicoPage.vue'
+import CuboMagico2Page from './pages/CuboMagico2Page.vue'
 import LandingPage from './pages/backup/LandingPage.vue'
 import LandingPageV2 from './pages/backup/LandingPageV2.vue'
 import LandingPageV3 from './pages/backup/LandingPageV3.vue'
@@ -26,6 +27,7 @@ const router = createRouter({
     { path: '/logo-fracto', name: 'logo-fracto', component: LogoFractoPage, meta: bare },
     { path: '/logo-fracto-light', name: 'logo-fracto-light', component: LogoFractoLightPage, meta: bare },
     { path: '/cubo-magico', name: 'cubo-magico', component: CuboMagicoPage, meta: bare },
+    { path: '/cubo-magico-2', name: 'cubo-magico-2', component: CuboMagico2Page, meta: bare },
 
     // Redirecionamentos das rotas antigas
     { path: '/v5', redirect: '/grid-background-black' },

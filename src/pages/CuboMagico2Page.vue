@@ -3,21 +3,21 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import MagicCubeControlPanel from '../components/MagicCubeControlPanel.vue'
 import {
-  DEFAULT_MAGIC_CUBE_CONFIG,
+  DEFAULT_MAGIC_CUBE_2_CONFIG,
+  MAGIC_CUBE_2_VIEW_DEFAULTS,
   MAGIC_CUBE_V1_BEVEL_RADIUS,
-  MAGIC_CUBE_VIEW_DEFAULTS,
   type MagicCubeConfig,
-} from '../lib/magicCubeConfig'
-import { MagicCubeV8Scene } from '../three/MagicCubeV8Scene'
+} from '../lib/magicCube2Config'
+import { MagicCubeV2Scene } from '../three/MagicCubeV2Scene'
 import '../styles/landing.css'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const cubeConfig = ref<MagicCubeConfig>({ ...DEFAULT_MAGIC_CUBE_CONFIG })
-let scene: MagicCubeV8Scene | null = null
+const cubeConfig = ref<MagicCubeConfig>({ ...DEFAULT_MAGIC_CUBE_2_CONFIG })
+let scene: MagicCubeV2Scene | null = null
 
 onMounted(() => {
   if (!canvasRef.value) return
-  scene = new MagicCubeV8Scene(canvasRef.value, cubeConfig.value)
+  scene = new MagicCubeV2Scene(canvasRef.value, cubeConfig.value)
 })
 
 function onCubeConfigUpdate(partial: Partial<MagicCubeConfig>) {
@@ -40,20 +40,21 @@ onBeforeUnmount(() => {
   <div class="page8">
     <nav class="page8__nav">
       <RouterLink to="/" class="page8__nav-link">Índice</RouterLink>
-      <RouterLink to="/cubo-magico-2" class="page8__nav-link">Cubo v2</RouterLink>
-      <RouterLink to="/logo-fracto" class="page8__nav-link">Logo</RouterLink>
+      <RouterLink to="/cubo-magico" class="page8__nav-link">Cubo v1</RouterLink>
+      <RouterLink to="/logo-fracto-light" class="page8__nav-link">Logo</RouterLink>
     </nav>
 
     <section class="page8__layout">
       <div class="page8__text">
-        <p class="page8__badge">Cubo mágico 4×4×4</p>
+        <p class="page8__badge">Cubo mágico 4×4×4 — v2</p>
         <h1 class="page8__title">
-          Giros de fatia, explosão e retorno ao isotipo Fracto
+          Fragmentado, pivot infinito e 8 giros antes da explosão
         </h1>
         <p class="page8__body">
-          Casca 4×4 com peças em falta formando o isotipo na face frontal: cinza claro
-          <strong>#CFCFCF</strong>, laranja <strong>#F72F00</strong> — mesmos materiais e
-          iluminação de /logo-fracto-light.
+          Versão evoluída: laterais glitchy com laranjas extra, rotação contínua do pivot,
+          sequência longa de fatias — cinza <strong>#CFCFCF</strong>, laranja
+          <strong>#F72F00</strong>, mesmos materiais do v1. Widget WP
+          <strong>magic-cube-v2</strong>.
         </p>
       </div>
 
@@ -65,10 +66,10 @@ onBeforeUnmount(() => {
     <MagicCubeControlPanel
       :config="cubeConfig"
       :apply="onCubeConfigUpdate"
-      :default-config="DEFAULT_MAGIC_CUBE_CONFIG"
-      :view-defaults="MAGIC_CUBE_VIEW_DEFAULTS"
+      :default-config="DEFAULT_MAGIC_CUBE_2_CONFIG"
+      :view-defaults="MAGIC_CUBE_2_VIEW_DEFAULTS"
       :default-bevel="MAGIC_CUBE_V1_BEVEL_RADIUS"
-      variant="v1"
+      variant="v2"
     />
   </div>
 </template>
