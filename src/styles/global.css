@@ -28,7 +28,8 @@ body[data-landing-v2] {
   background: transparent;
 }
 
-body[data-landing] {
+body[data-landing],
+body[data-presentation] {
   background: #fff;
   color: #0a0a0a;
 }

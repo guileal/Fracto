@@ -6,6 +6,9 @@ import LogoFractoPage from './pages/LogoFractoPage.vue'
 import LogoFractoLightPage from './pages/LogoFractoLightPage.vue'
 import CuboMagicoPage from './pages/CuboMagicoPage.vue'
 import CuboMagico2Page from './pages/CuboMagico2Page.vue'
+import CuboMagicoLightPage from './pages/CuboMagicoLightPage.vue'
+import CuboMagicoLight2Page from './pages/CuboMagicoLight2Page.vue'
+import PresentationLandingPage from './pages/PresentationLandingPage.vue'
 import LandingPage from './pages/backup/LandingPage.vue'
 import LandingPageV2 from './pages/backup/LandingPageV2.vue'
 import LandingPageV3 from './pages/backup/LandingPageV3.vue'
@@ -20,6 +23,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', name: 'index', component: IndexPage, meta: bare },
+    { path: '/home', name: 'home', component: PresentationLandingPage, meta: bare },
 
     // Preview dos widgets WordPress (fonte activa)
     { path: '/grid-background-black', name: 'grid-background-black', component: GridBackgroundBlackPage, meta: bare },
@@ -28,6 +32,8 @@ const router = createRouter({
     { path: '/logo-fracto-light', name: 'logo-fracto-light', component: LogoFractoLightPage, meta: bare },
     { path: '/cubo-magico', name: 'cubo-magico', component: CuboMagicoPage, meta: bare },
     { path: '/cubo-magico-2', name: 'cubo-magico-2', component: CuboMagico2Page, meta: bare },
+    { path: '/cubo-magico-light', name: 'cubo-magico-light', component: CuboMagicoLightPage, meta: bare },
+    { path: '/cubo-magico-light-2', name: 'cubo-magico-light-2', component: CuboMagicoLight2Page, meta: bare },
 
     // Redirecionamentos das rotas antigas
     { path: '/v5', redirect: '/grid-background-black' },
@@ -44,7 +50,7 @@ const router = createRouter({
     { path: '/backup/viewer', name: 'backup-viewer', component: HomePage, meta: bare },
     { path: '/backup/iridescent', name: 'backup-iridescent', component: IridescentPage, meta: bare },
 
-    { path: '/landing', redirect: '/backup/landing' },
+    { path: '/landing', redirect: '/home' },
     { path: '/v2', redirect: '/backup/v2' },
     { path: '/v3', redirect: '/backup/v3' },
     { path: '/v4', redirect: '/backup/v4' },

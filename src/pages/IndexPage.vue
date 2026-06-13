@@ -3,6 +3,14 @@ import { RouterLink } from 'vue-router'
 
 const activePages = [
   {
+    to: '/home',
+    title: 'Landing de apresentação',
+    description:
+      'Home final com vídeo em loop no hero e showcase dos 8 widgets exportados para WordPress.',
+    tag: 'Landing',
+    assetId: null,
+  },
+  {
     to: '/grid-background-black',
     title: 'Grid background black',
     description:
@@ -36,7 +44,8 @@ const activePages = [
   {
     to: '/cubo-magico',
     title: 'Cubo mágico',
-    description: 'Cubo voxel 4×4×4 — preview do widget WP magic-cube-v8 (v1).',
+    description:
+      'Hero com isotipo em recomposição — copy e fundo claro alinhados ao site fracto.com.br.',
     tag: 'Widget WP',
     assetId: 'magic-cube-v8',
   },
@@ -44,9 +53,25 @@ const activePages = [
     to: '/cubo-magico-2',
     title: 'Cubo mágico v2',
     description:
-      'Fragmentado + pivot infinito + 8 giros — preview do widget WP magic-cube-v2.',
+      'Versão dinâmica da metáfora Fracto — menos ruído, mais estratégia — fundo claro.',
     tag: 'Widget WP',
     assetId: 'magic-cube-v2',
+  },
+  {
+    to: '/cubo-magico-light',
+    title: 'Cubo mágico (claro)',
+    description:
+      'Mesma mensagem de Sobre nós para blocos com fundo escuro — como no site Fracto.',
+    tag: 'Widget WP',
+    assetId: 'magic-cube-v8-light',
+  },
+  {
+    to: '/cubo-magico-light-2',
+    title: 'Cubo mágico v2 (claro)',
+    description:
+      'Narrativa expandida do cubo para fundos escuros — Inteligência Criativa Fracto.',
+    tag: 'Widget WP',
+    assetId: 'magic-cube-v2-light',
   },
 ]
 
@@ -110,6 +135,7 @@ const backupPages = [
             <p>{{ page.description }}</p>
             <span class="index__path">{{ page.to }}</span>
             <span v-if="page.assetId" class="index__asset">WP: {{ page.assetId }}</span>
+            <span v-else-if="page.tag === 'Landing'" class="index__asset">/home · /landing</span>
           </RouterLink>
         </li>
       </ul>
