@@ -1,32 +1,35 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import MagicCubeDock from '../components/MagicCubeDock.vue'
+import MagicCubeLayoutDock from '../components/MagicCubeLayoutDock.vue'
+import { DEFAULT_MAGIC_CUBE_CONFIG, type MagicCubeConfig } from '../lib/magicCubeConfig'
 import { MagicCubeV8Scene } from '../three/MagicCubeV8Scene'
 import '../styles/landing.css'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
+const cubeConfig = ref<MagicCubeConfig>({ ...DEFAULT_MAGIC_CUBE_CONFIG })
 let scene: MagicCubeV8Scene | null = null
-const resolving = ref(false)
 
 onMounted(() => {
   if (!canvasRef.value) return
-  scene = new MagicCubeV8Scene(canvasRef.value)
+  scene = new MagicCubeV8Scene(canvasRef.value, cubeConfig.value)
 })
+
+function onCubeConfigUpdate(partial: Partial<MagicCubeConfig>) {
+  cubeConfig.value = {
+    ...cubeConfig.value,
+    ...partial,
+    cubeMaterial: { ...cubeConfig.value.cubeMaterial, ...partial.cubeMaterial },
+    accentMaterial: { ...cubeConfig.value.accentMaterial, ...partial.accentMaterial },
+  }
+  scene?.applyConfig(cubeConfig.value)
+}
 
 onBeforeUnmount(() => {
   scene?.dispose()
   scene = null
 })
-
-async function onResolveShape() {
-  if (!scene || resolving.value) return
-  resolving.value = true
-  try {
-    await scene.resolveNextShape()
-  } finally {
-    resolving.value = false
-  }
-}
 </script>
 
 <template>
@@ -40,26 +43,22 @@ async function onResolveShape() {
       <div class="page8__text">
         <p class="page8__badge">Cubo mágico 4×4×4</p>
         <h1 class="page8__title">
-          Mecânica real de fatias para formar o isotipo Fracto
+          Giros de fatia, explosão e retorno ao isotipo Fracto
         </h1>
         <p class="page8__body">
-          Casca oca com 56 peças e seis isotipos na face frontal (iso02–iso06 +
-          isotipo): branco perolado, laranja <strong>#ff7300</strong> e células vazias.
+          Casca 4×4 com peças em falta formando o isotipo na face frontal: branco
+          <strong>#FFFFFF</strong>, laranja <strong>#F72F00</strong> — cubos grandes (v1)
+          com bevel, materiais e iluminação de /logo-fracto-light.
         </p>
-        <button
-          type="button"
-          class="page8__cta"
-          :disabled="resolving"
-          @click="onResolveShape"
-        >
-          {{ resolving ? 'Girando…' : 'Resolver Forma' }}
-        </button>
       </div>
 
       <div class="page8__canvas-wrap">
         <canvas ref="canvasRef" class="page8__canvas" aria-hidden="true" />
       </div>
     </section>
+
+    <MagicCubeLayoutDock :config="cubeConfig" :apply="onCubeConfigUpdate" />
+    <MagicCubeDock :config="cubeConfig" :apply="onCubeConfigUpdate" />
   </div>
 </template>
 
@@ -126,7 +125,7 @@ async function onResolveShape() {
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #ff7300;
+  color: #f05a28;
 }
 
 .page8__title {
@@ -146,34 +145,8 @@ async function onResolveShape() {
 }
 
 .page8__body strong {
-  color: #ff7300;
+  color: #f05a28;
   font-weight: 600;
-}
-
-.page8__cta {
-  align-self: flex-start;
-  margin-top: 0.5rem;
-  padding: 0.85rem 1.6rem;
-  border: none;
-  border-radius: 999px;
-  background: #ff7300;
-  color: #0a0a0e;
-  font-size: 0.95rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    opacity 0.2s ease;
-}
-
-.page8__cta:hover:not(:disabled) {
-  background: #ff8c33;
-}
-
-.page8__cta:disabled {
-  opacity: 0.55;
-  cursor: wait;
 }
 
 .page8__canvas-wrap {

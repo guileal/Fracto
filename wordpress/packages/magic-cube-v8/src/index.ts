@@ -1,5 +1,6 @@
 import './embed.css'
 import { bootstrapFracto3dAutoInit } from '@fracto/lib/fracto3dDomBootstrap'
+import { DEFAULT_MAGIC_CUBE_CONFIG } from '@fracto/lib/magicCubeConfig'
 import { MagicCubeV8Scene } from '@fracto/three/MagicCubeV8Scene'
 
 export const ASSET_ID = 'magic-cube-v8' as const
@@ -27,7 +28,7 @@ export function mount(container: HTMLElement): SceneHandle {
   unmount(container)
   container.setAttribute('data-fracto-3d', ASSET_ID)
   container.classList.add(LOGO_CLASS)
-  const scene = new MagicCubeV8Scene(ensureCanvas(container))
+  const scene = new MagicCubeV8Scene(ensureCanvas(container), DEFAULT_MAGIC_CUBE_CONFIG)
   const handle: SceneHandle = { dispose: () => scene.dispose() }
   handles.set(container, handle)
   return handle

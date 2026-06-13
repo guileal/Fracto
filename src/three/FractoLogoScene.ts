@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { normalizeHexColor } from '../lib/colorHex'
+import { addFractoLogoLighting } from '../lib/fractoLogoLighting'
 import {
   DEFAULT_FRACTO_LOGO_CONFIG,
   type FractoLogoConfig,
@@ -205,20 +206,7 @@ export class FractoLogoScene {
   }
 
   private setupLighting(): void {
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.42))
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xc8ccd8, 0.38))
-
-    const key = new THREE.DirectionalLight(0xfff8f2, 1.15)
-    key.position.set(-5, 7, 6)
-    this.scene.add(key)
-
-    const fill = new THREE.DirectionalLight(0xd8dce8, 0.48)
-    fill.position.set(6, 2, 4)
-    this.scene.add(fill)
-
-    const rim = new THREE.DirectionalLight(0xffffff, 0.35)
-    rim.position.set(2, 3, -6)
-    this.scene.add(rim)
+    addFractoLogoLighting(this.scene)
   }
 
   private getTransitionBlend(elapsed: number): { from: number; to: number; t: number } {
