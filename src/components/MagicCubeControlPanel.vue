@@ -22,7 +22,7 @@ const props = withDefaults(
       'pivotRotX' | 'pivotRotY' | 'pivotRotZ' | 'cameraX' | 'cameraY' | 'cameraZ'
     >
     defaultBevel?: number
-    variant?: 'v1' | 'v2'
+    variant?: 'v1' | 'v2' | 'v1-light' | 'v2-light'
   }>(),
   {
     defaultBevel: undefined,
@@ -40,24 +40,40 @@ let copyViewTimer = 0
 
 const bevelReset = computed(() => props.defaultBevel ?? props.defaultConfig.bevelRadius)
 
+const isV2Variant = computed(() => props.variant === 'v2' || props.variant === 'v2-light')
+
 const copyPayload = computed(() =>
-  props.variant === 'v2'
-    ? formatMagicCube2CopyPayload(props.config)
-    : formatMagicCubeCopyPayload(props.config),
+  isV2Variant.value
+    ? formatMagicCube2CopyPayload(props.config, props.variant)
+    : formatMagicCubeCopyPayload(props.config, props.variant),
 )
 const copyViewPayload = computed(() => formatMagicCubeViewCopyPayload(props.config, props.variant))
 
-const exportConfigHint = computed(() =>
-  props.variant === 'v2'
-    ? 'src/lib/magicCube2Config.ts → npm run build:wp (magic-cube-v2)'
-    : 'src/lib/magicCubeConfig.ts → npm run build:wp (magic-cube-v8)',
-)
+const exportConfigHint = computed(() => {
+  if (props.variant === 'v2-light') {
+    return 'src/lib/magicCube2Config.ts → npm run build:wp (magic-cube-v2-light)'
+  }
+  if (props.variant === 'v2') {
+    return 'src/lib/magicCube2Config.ts → npm run build:wp (magic-cube-v2)'
+  }
+  if (props.variant === 'v1-light') {
+    return 'src/lib/magicCubeConfig.ts → npm run build:wp (magic-cube-v8-light)'
+  }
+  return 'src/lib/magicCubeConfig.ts → npm run build:wp (magic-cube-v8)'
+})
 
-const exportViewHint = computed(() =>
-  props.variant === 'v2'
-    ? 'MAGIC_CUBE_2_VIEW_DEFAULTS + DEFAULT_MAGIC_CUBE_2_CONFIG em magicCube2Config.ts'
-    : 'MAGIC_CUBE_VIEW_DEFAULTS + DEFAULT_MAGIC_CUBE_CONFIG em magicCubeConfig.ts',
-)
+const exportViewHint = computed(() => {
+  if (props.variant === 'v2-light') {
+    return 'MAGIC_CUBE_2_VIEW_DEFAULTS + DEFAULT_MAGIC_CUBE_2_LIGHT_CONFIG em magicCube2Config.ts'
+  }
+  if (props.variant === 'v2') {
+    return 'MAGIC_CUBE_2_VIEW_DEFAULTS + DEFAULT_MAGIC_CUBE_2_CONFIG em magicCube2Config.ts'
+  }
+  if (props.variant === 'v1-light') {
+    return 'MAGIC_CUBE_VIEW_DEFAULTS + DEFAULT_MAGIC_CUBE_LIGHT_CONFIG em magicCubeConfig.ts'
+  }
+  return 'MAGIC_CUBE_VIEW_DEFAULTS + DEFAULT_MAGIC_CUBE_CONFIG em magicCubeConfig.ts'
+})
 
 const tabs: { id: PanelTab; label: string }[] = [
   { id: 'layout', label: 'Alinhamento' },

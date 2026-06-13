@@ -37,23 +37,25 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="page8">
+  <div class="page8 page8--light">
     <nav class="page8__nav">
       <RouterLink to="/" class="page8__nav-link">Índice</RouterLink>
+      <RouterLink to="/cubo-magico-light" class="page8__nav-link">Light v1</RouterLink>
       <RouterLink to="/cubo-magico-2" class="page8__nav-link">Cubo v2</RouterLink>
       <RouterLink to="/logo-fracto" class="page8__nav-link">Logo</RouterLink>
     </nav>
 
     <section class="page8__layout">
       <div class="page8__text">
-        <p class="page8__badge">Cubo mágico 4×4×4</p>
+        <p class="page8__badge">Sobre nós</p>
         <h1 class="page8__title">
-          Giros de fatia, explosão e retorno ao isotipo Fracto
+          Desconstruímos marcas e discursos para entender o que realmente importa
         </h1>
         <p class="page8__body">
-          Casca 4×4 com peças em falta formando o isotipo na face frontal: cinza claro
-          <strong>#CFCFCF</strong>, laranja <strong>#F72F00</strong> — mesmos materiais e
-          iluminação de /logo-fracto-light.
+          Consultoria de marketing digital que quebra a complexidade do seu negócio para
+          construir um sistema de marca coerente e estratégico, posicionando sua marca com
+          clareza e intenção. O cubo remonta o isotipo Fracto — peças em movimento até
+          restar só o que faz sentido para a sua estratégia.
         </p>
       </div>
 
@@ -79,14 +81,17 @@ onBeforeUnmount(() => {
   min-height: 100vh;
   min-height: 100svh;
   padding-bottom: 4.5rem;
-  background: var(--fracto-site-bg, #121212);
-  color: #f2f2f4;
   font-family:
     'DM Sans',
     system-ui,
     -apple-system,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+.page8--light {
+  background: #fff;
+  color: var(--fracto-black, #111);
 }
 
 .page8__nav {
@@ -98,14 +103,14 @@ onBeforeUnmount(() => {
   gap: 1rem;
 }
 
-.page8__nav-link {
+.page8--light .page8__nav-link {
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(0, 0, 0, 0.35);
   text-decoration: none;
 }
 
-.page8__nav-link:hover {
-  color: rgba(255, 255, 255, 0.85);
+.page8--light .page8__nav-link:hover {
+  color: rgba(0, 0, 0, 0.75);
 }
 
 .page8__layout {
@@ -148,15 +153,15 @@ onBeforeUnmount(() => {
   letter-spacing: -0.035em;
 }
 
-.page8__body {
+.page8--light .page8__body {
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--fracto-muted, rgba(0, 0, 0, 0.58));
   max-width: 32rem;
 }
 
-.page8__body strong {
+.page8--light .page8__body strong {
   color: #f05a28;
   font-weight: 600;
 }

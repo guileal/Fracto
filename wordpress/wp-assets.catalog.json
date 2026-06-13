@@ -54,7 +54,7 @@
   },
   "magic-cube-v8": {
     "label": "Cubo mágico",
-    "description": "Cubo voxel 4×4×4 — preview /cubo-magico",
+    "description": "Cubo voxel 4×4×4 — cubos pretos, fundo claro — preview /cubo-magico",
     "previewRoute": "/cubo-magico",
     "type": "logo",
     "shortcode": "fracto3d_magic_cube",
@@ -62,11 +62,25 @@
     "rowClass": "fracto-magic-cube-v8",
     "packageDir": "packages/magic-cube-v8",
     "iifeName": "Fracto3dMagicCubeV8",
-    "scene": "MagicCubeV8Scene"
+    "scene": "MagicCubeV8Scene",
+    "sceneConfig": "DEFAULT_MAGIC_CUBE_CONFIG"
+  },
+  "magic-cube-v8-light": {
+    "label": "Cubo mágico (claro)",
+    "description": "Cubos #cfcfcf para fundos escuros — preview /cubo-magico-light",
+    "previewRoute": "/cubo-magico-light",
+    "type": "logo",
+    "shortcode": "fracto3d_magic_cube_v8_light",
+    "vcName": "Cubo Mágico 3D claro (Fracto)",
+    "rowClass": "fracto-magic-cube-v8-light",
+    "packageDir": "packages/magic-cube-v8-light",
+    "iifeName": "Fracto3dMagicCubeV8Light",
+    "scene": "MagicCubeV8Scene",
+    "sceneConfig": "DEFAULT_MAGIC_CUBE_LIGHT_CONFIG"
   },
   "magic-cube-v2": {
     "label": "Cubo mágico v2",
-    "description": "Cubo fragmentado — pivot infinito, 8 giros — preview /cubo-magico-2",
+    "description": "Cubo fragmentado — cubos pretos, fundo claro — preview /cubo-magico-2",
     "previewRoute": "/cubo-magico-2",
     "type": "logo",
     "shortcode": "fracto3d_magic_cube_v2",
@@ -74,6 +88,20 @@
     "rowClass": "fracto-magic-cube-v2",
     "packageDir": "packages/magic-cube-v2",
     "iifeName": "Fracto3dMagicCubeV2",
-    "scene": "MagicCubeV2Scene"
+    "scene": "MagicCubeV2Scene",
+    "sceneConfig": "DEFAULT_MAGIC_CUBE_2_CONFIG"
+  },
+  "magic-cube-v2-light": {
+    "label": "Cubo mágico v2 (claro)",
+    "description": "v2 com cubos #cfcfcf para fundos escuros — preview /cubo-magico-light-2",
+    "previewRoute": "/cubo-magico-light-2",
+    "type": "logo",
+    "shortcode": "fracto3d_magic_cube_v2_light",
+    "vcName": "Cubo Mágico 3D v2 claro (Fracto)",
+    "rowClass": "fracto-magic-cube-v2-light",
+    "packageDir": "packages/magic-cube-v2-light",
+    "iifeName": "Fracto3dMagicCubeV2Light",
+    "scene": "MagicCubeV2Scene",
+    "sceneConfig": "DEFAULT_MAGIC_CUBE_2_LIGHT_CONFIG"
   }
 }

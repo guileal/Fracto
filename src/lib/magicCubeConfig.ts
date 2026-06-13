@@ -1,4 +1,7 @@
-import type { FractoLogoMaterialConfig } from './fractoLogoConfig'
+import {
+  DEFAULT_FRACTO_LOGO_CONFIG,
+  type FractoLogoMaterialConfig,
+} from './fractoLogoConfig'
 
 export type MagicCubeMaterialConfig = FractoLogoMaterialConfig
 
@@ -72,30 +75,61 @@ export const MAGIC_CUBE_TIMING = {
   waitBeforeExplode: { min: 0, max: 3, step: 0.1 },
 } as const
 
-const DEFAULT_CUBE_MATERIAL: MagicCubeMaterialConfig = {
+const DEFAULT_LIGHT_CUBE_MATERIAL: MagicCubeMaterialConfig = {
   roughness: 0.98,
   clearcoat: 0,
   envMapIntensity: 0,
   emissiveIntensity: 1.18,
 }
 
-const DEFAULT_ACCENT_MATERIAL: MagicCubeMaterialConfig = {
+const DEFAULT_LIGHT_ACCENT_MATERIAL: MagicCubeMaterialConfig = {
   roughness: 1,
   clearcoat: 0,
   envMapIntensity: 0.8,
   emissiveIntensity: 0,
 }
 
+const DEFAULT_BLACK_CUBE_MATERIAL: MagicCubeMaterialConfig = {
+  ...DEFAULT_FRACTO_LOGO_CONFIG.cubeMaterial,
+}
+
+const DEFAULT_BLACK_ACCENT_MATERIAL: MagicCubeMaterialConfig = {
+  ...DEFAULT_FRACTO_LOGO_CONFIG.accentMaterial,
+}
+
 /** Bevel aprovado — v1 (/cubo-magico). */
 export const MAGIC_CUBE_V1_BEVEL_RADIUS = 0.035
 
-/** Defaults aprovados — /cubo-magico */
-export const DEFAULT_MAGIC_CUBE_CONFIG: MagicCubeConfig = {
-  bevelRadius: 0.035,
+/** Variante clara — cubos #cfcfcf para fundos escuros (/cubo-magico-light). */
+export const DEFAULT_MAGIC_CUBE_LIGHT_CONFIG: MagicCubeConfig = {
+  bevelRadius: MAGIC_CUBE_V1_BEVEL_RADIUS,
   cubeColor: '#cfcfcf',
   accentColor: '#f72f00',
-  cubeMaterial: { ...DEFAULT_CUBE_MATERIAL },
-  accentMaterial: { ...DEFAULT_ACCENT_MATERIAL },
+  cubeMaterial: { ...DEFAULT_LIGHT_CUBE_MATERIAL },
+  accentMaterial: { ...DEFAULT_LIGHT_ACCENT_MATERIAL },
+  scale: 1,
+  offsetX: 0,
+  offsetY: 0,
+  pivotRotX: MAGIC_CUBE_VIEW_DEFAULTS.pivotRotX,
+  pivotRotY: MAGIC_CUBE_VIEW_DEFAULTS.pivotRotY,
+  pivotRotZ: MAGIC_CUBE_VIEW_DEFAULTS.pivotRotZ,
+  cameraX: MAGIC_CUBE_VIEW_DEFAULTS.cameraX,
+  cameraY: MAGIC_CUBE_VIEW_DEFAULTS.cameraY,
+  cameraZ: MAGIC_CUBE_VIEW_DEFAULTS.cameraZ,
+  sliceDuration: 0.6,
+  explodeDuration: 1.05,
+  resetDuration: 1.45,
+  waitStart: 1,
+  waitBeforeExplode: 1.3,
+}
+
+/** Defaults aprovados — /cubo-magico (cubos pretos, fundo claro). */
+export const DEFAULT_MAGIC_CUBE_CONFIG: MagicCubeConfig = {
+  bevelRadius: MAGIC_CUBE_V1_BEVEL_RADIUS,
+  cubeColor: '#000000',
+  accentColor: DEFAULT_FRACTO_LOGO_CONFIG.accentColor,
+  cubeMaterial: { ...DEFAULT_BLACK_CUBE_MATERIAL },
+  accentMaterial: { ...DEFAULT_BLACK_ACCENT_MATERIAL },
   scale: 1,
   offsetX: 0,
   offsetY: 0,

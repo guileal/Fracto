@@ -37,24 +37,24 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="page8">
+  <div class="page8 page8--light">
     <nav class="page8__nav">
       <RouterLink to="/" class="page8__nav-link">Índice</RouterLink>
       <RouterLink to="/cubo-magico" class="page8__nav-link">Cubo v1</RouterLink>
-      <RouterLink to="/logo-fracto-light" class="page8__nav-link">Logo</RouterLink>
+      <RouterLink to="/cubo-magico-light-2" class="page8__nav-link">Light v2</RouterLink>
+      <RouterLink to="/logo-fracto" class="page8__nav-link">Logo</RouterLink>
     </nav>
 
     <section class="page8__layout">
       <div class="page8__text">
-        <p class="page8__badge">Cubo mágico 4×4×4 — v2</p>
+        <p class="page8__badge">Inteligência criativa</p>
         <h1 class="page8__title">
-          Fragmentado, pivot infinito e 8 giros antes da explosão
+          Menos ruído e mais estratégia
         </h1>
         <p class="page8__body">
-          Versão evoluída: laterais glitchy com laranjas extra, rotação contínua do pivot,
-          sequência longa de fatias — cinza <strong>#CFCFCF</strong>, laranja
-          <strong>#F72F00</strong>, mesmos materiais do v1. Widget WP
-          <strong>magic-cube-v2</strong>.
+          Núcleo de Inteligência Criativa em branding, consultoria e comunicação digital.
+          Antes de recomor a marca, exploramos cada ângulo — giros, fragmentos e pausa —
+          até a essência voltar ao centro com clareza e intenção.
         </p>
       </div>
 
@@ -80,14 +80,17 @@ onBeforeUnmount(() => {
   min-height: 100vh;
   min-height: 100svh;
   padding-bottom: 4.5rem;
-  background: var(--fracto-site-bg, #121212);
-  color: #f2f2f4;
   font-family:
     'DM Sans',
     system-ui,
     -apple-system,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+.page8--light {
+  background: #fff;
+  color: var(--fracto-black, #111);
 }
 
 .page8__nav {
@@ -99,14 +102,14 @@ onBeforeUnmount(() => {
   gap: 1rem;
 }
 
-.page8__nav-link {
+.page8--light .page8__nav-link {
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(0, 0, 0, 0.35);
   text-decoration: none;
 }
 
-.page8__nav-link:hover {
-  color: rgba(255, 255, 255, 0.85);
+.page8--light .page8__nav-link:hover {
+  color: rgba(0, 0, 0, 0.75);
 }
 
 .page8__layout {
@@ -149,15 +152,15 @@ onBeforeUnmount(() => {
   letter-spacing: -0.035em;
 }
 
-.page8__body {
+.page8--light .page8__body {
   margin: 0;
   font-size: 1.05rem;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--fracto-muted, rgba(0, 0, 0, 0.58));
   max-width: 32rem;
 }
 
-.page8__body strong {
+.page8--light .page8__body strong {
   color: #f05a28;
   font-weight: 600;
 }

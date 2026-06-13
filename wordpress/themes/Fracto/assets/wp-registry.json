@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-06-13T02:40:53.620Z",
+  "generatedAt": "2026-06-13T03:09:23.736Z",
   "assets": [
     {
       "id": "background-grid-black",
@@ -62,7 +62,7 @@
     {
       "id": "magic-cube-v8",
       "label": "Cubo mágico",
-      "description": "Cubo voxel 4×4×4 — preview /cubo-magico",
+      "description": "Cubo voxel 4×4×4 — cubos pretos, fundo claro — preview /cubo-magico",
       "previewRoute": "/cubo-magico",
       "type": "logo",
       "shortcode": "fracto3d_magic_cube",
@@ -71,14 +71,36 @@
       "gridOptions": []
     },
     {
+      "id": "magic-cube-v8-light",
+      "label": "Cubo mágico (claro)",
+      "description": "Cubos #cfcfcf para fundos escuros — preview /cubo-magico-light",
+      "previewRoute": "/cubo-magico-light",
+      "type": "logo",
+      "shortcode": "fracto3d_magic_cube_v8_light",
+      "vcName": "Cubo Mágico 3D claro (Fracto)",
+      "rowClass": "fracto-magic-cube-v8-light",
+      "gridOptions": []
+    },
+    {
       "id": "magic-cube-v2",
       "label": "Cubo mágico v2",
-      "description": "Cubo fragmentado — pivot infinito, 8 giros — preview /cubo-magico-2",
+      "description": "Cubo fragmentado — cubos pretos, fundo claro — preview /cubo-magico-2",
       "previewRoute": "/cubo-magico-2",
       "type": "logo",
       "shortcode": "fracto3d_magic_cube_v2",
       "vcName": "Cubo Mágico 3D v2 (Fracto)",
       "rowClass": "fracto-magic-cube-v2",
+      "gridOptions": []
+    },
+    {
+      "id": "magic-cube-v2-light",
+      "label": "Cubo mágico v2 (claro)",
+      "description": "v2 com cubos #cfcfcf para fundos escuros — preview /cubo-magico-light-2",
+      "previewRoute": "/cubo-magico-light-2",
+      "type": "logo",
+      "shortcode": "fracto3d_magic_cube_v2_light",
+      "vcName": "Cubo Mágico 3D v2 claro (Fracto)",
+      "rowClass": "fracto-magic-cube-v2-light",
       "gridOptions": []
     }
   ]
