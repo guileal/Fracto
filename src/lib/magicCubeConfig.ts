@@ -56,8 +56,8 @@ export const MAGIC_CUBE_PIVOT = {
 } as const
 
 export const MAGIC_CUBE_VIEW_DEFAULTS = {
-  pivotRotX: 0.15707963267948966,
-  pivotRotY: 0.09599310885968812,
+  pivotRotX: 0.24434609527920614,
+  pivotRotY: 0.5061454830783556,
   pivotRotZ: -0.008726646259971648,
   cameraX: 0.2,
   cameraY: -1,
@@ -69,7 +69,7 @@ export const MAGIC_CUBE_TIMING = {
   explodeDuration: { min: 0.2, max: 3, step: 0.05 },
   resetDuration: { min: 0.2, max: 3, step: 0.05 },
   waitStart: { min: 0, max: 3, step: 0.1 },
-  waitBeforeExplode: { min: 0, max: 2, step: 0.1 },
+  waitBeforeExplode: { min: 0, max: 3, step: 0.1 },
 } as const
 
 const DEFAULT_CUBE_MATERIAL: MagicCubeMaterialConfig = {
@@ -103,8 +103,8 @@ export const DEFAULT_MAGIC_CUBE_CONFIG: MagicCubeConfig = {
   cameraY: MAGIC_CUBE_VIEW_DEFAULTS.cameraY,
   cameraZ: MAGIC_CUBE_VIEW_DEFAULTS.cameraZ,
   sliceDuration: 0.6,
-  explodeDuration: 1.9,
-  resetDuration: 2.4,
+  explodeDuration: 1.05,
+  resetDuration: 1.45,
   waitStart: 1,
-  waitBeforeExplode: 0.5,
+  waitBeforeExplode: 1.3,
 }

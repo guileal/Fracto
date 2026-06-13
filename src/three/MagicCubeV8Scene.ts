@@ -9,6 +9,13 @@ import {
 } from '../lib/fractoLogoMaterial'
 import { addFractoLogoLighting } from '../lib/fractoLogoLighting'
 import {
+  buildIsotipoBrandingLookup,
+  FRAGMENT_VISIBLE_THRESHOLD,
+  isAccentIsotipoColor,
+  isFrontFacePosition,
+  isotipoPosKey,
+} from '../lib/magicCubeBranding'
+import {
   DEFAULT_MAGIC_CUBE_CONFIG,
   type MagicCubeConfig,
 } from '../lib/magicCubeConfig'
@@ -18,38 +25,9 @@ const SLICE_TOLERANCE = 0.1
 const CUBE_SIZE = 0.98
 const SPACING = 1
 const BEVEL_SEGMENTS = 2
-
-/** Face frontal do isotipo Fracto — linha 0 = topo, col 0 = esquerda. */
-const FRONT_PATTERN = [
-  ['-', 'B', '-', 'O'],
-  ['B', '-', '-', '-'],
-  ['B', '-', '-', 'B'],
-  ['-', 'B', 'B', '-'],
-] as const
-
-/** Grid 3D: iy=0 → y baixo; padrão 2D: linha 0 → topo. */
-function patternRowFromGrid(iy: number): number {
-  return 3 - iy
-}
-
-function frontCellAt(ix: number, iy: number): (typeof FRONT_PATTERN)[number][number] {
-  return FRONT_PATTERN[patternRowFromGrid(iy)]![ix]!
-}
+const GRID_SIZE = 4
 
 type Axis = 'x' | 'y' | 'z'
-
-function isShell(ix: number, iy: number, iz: number): boolean {
-  return ix === 0 || ix === 3 || iy === 0 || iy === 3 || iz === 0 || iz === 3
-}
-
-function shouldIncludeBlock(ix: number, iy: number, iz: number): boolean {
-  if (!isShell(ix, iy, iz)) return false
-
-  const frontCell = frontCellAt(ix, iy)
-  if (frontCell === '-') return false
-
-  return true
-}
 
 function gridToPosition(ix: number, iy: number, iz: number): THREE.Vector3 {
   return new THREE.Vector3(
@@ -57,10 +35,6 @@ function gridToPosition(ix: number, iy: number, iz: number): THREE.Vector3 {
     (iy - 1.5) * SPACING,
     (iz - 1.5) * SPACING,
   )
-}
-
-function isAccentBlock(ix: number, iy: number, iz: number): boolean {
-  return ix === 3 && iy === 3 && iz === 3
 }
 
 function waitSeconds(seconds: number): Promise<void> {
@@ -116,6 +90,7 @@ export class MagicCubeV8Scene {
   private readonly pmrem: THREE.PMREMGenerator
   private readonly resizeObserver: ResizeObserver
   private readonly resizeHandler: () => void
+  private readonly isotipoLookup = buildIsotipoBrandingLookup()
 
   private config: MagicCubeConfig
   private raf = 0
@@ -218,6 +193,51 @@ export class MagicCubeV8Scene {
     }
   }
 
+  /**
+   * Grid 4×4×4 completo — fragmentação definida uma vez e travada em userData.initial*.
+   */
+  private buildCubeMatrix(): void {
+    for (let iz = 0; iz < GRID_SIZE; iz++) {
+      for (let iy = 0; iy < GRID_SIZE; iy++) {
+        for (let ix = 0; ix < GRID_SIZE; ix++) {
+          const mesh = new THREE.Mesh(this.cubeGeometry, this.whiteMaterial)
+          mesh.position.copy(gridToPosition(ix, iy, iz))
+
+          const posKey = isotipoPosKey(mesh.position.x, mesh.position.y, mesh.position.z)
+
+          if (isFrontFacePosition(mesh.position.z)) {
+            const brandColor = this.isotipoLookup.get(posKey)
+            if (brandColor !== undefined) {
+              mesh.scale.set(1, 1, 1)
+              mesh.material = isAccentIsotipoColor(brandColor)
+                ? this.accentMaterial
+                : this.whiteMaterial
+            } else {
+              mesh.scale.set(0, 0, 0)
+            }
+          } else if (Math.random() > FRAGMENT_VISIBLE_THRESHOLD) {
+            mesh.scale.set(1, 1, 1)
+            mesh.material = this.whiteMaterial
+          } else {
+            mesh.scale.set(0, 0, 0)
+          }
+
+          mesh.userData.initialPos = mesh.position.clone()
+          mesh.userData.initialRot = mesh.rotation.clone()
+          mesh.userData.initialScale = mesh.scale.clone()
+
+          this.cubeContainer.add(mesh)
+          this.cubes.push(mesh)
+        }
+      }
+    }
+  }
+
+  private isBlockVisible(mesh: THREE.Mesh): boolean {
+    const initialScale = mesh.userData.initialScale as THREE.Vector3
+    return initialScale.x > 0
+  }
+
   private applyLayout(): void {
     this.layoutGroup.scale.setScalar(this.config.scale)
     this.layoutGroup.position.set(this.config.offsetX, this.config.offsetY, 0)
@@ -243,27 +263,6 @@ export class MagicCubeV8Scene {
     )
   }
 
-  private buildCubeMatrix(): void {
-    for (let iz = 0; iz < 4; iz++) {
-      for (let iy = 0; iy < 4; iy++) {
-        for (let ix = 0; ix < 4; ix++) {
-          if (!shouldIncludeBlock(ix, iy, iz)) continue
-
-          const mesh = new THREE.Mesh(
-            this.cubeGeometry,
-            isAccentBlock(ix, iy, iz) ? this.accentMaterial : this.whiteMaterial,
-          )
-          mesh.position.copy(gridToPosition(ix, iy, iz))
-          mesh.userData.originalPos = mesh.position.clone()
-          mesh.userData.originalRot = mesh.rotation.clone()
-
-          this.cubeContainer.add(mesh)
-          this.cubes.push(mesh)
-        }
-      }
-    }
-  }
-
   /** Gira uma fatia do cubo mágico via pivot group temporário. */
   async rotateSlice(
     axis: Axis,
@@ -274,7 +273,9 @@ export class MagicCubeV8Scene {
     if (this.disposed) return
 
     const blocks = this.cubes.filter(
-      (mesh) => Math.abs(mesh.position[axis] - layerCoord) <= SLICE_TOLERANCE,
+      (mesh) =>
+        this.isBlockVisible(mesh)
+        && Math.abs(mesh.position[axis] - layerCoord) <= SLICE_TOLERANCE,
     )
     if (blocks.length === 0) return
 
@@ -306,7 +307,7 @@ export class MagicCubeV8Scene {
     })
   }
 
-  /** Explode as peças e devolve-as à pose inicial guardada em userData. */
+  /** Explode blocos visíveis e devolve todos ao estado inicial travado. */
   async explodeAndReset(): Promise<void> {
     if (this.disposed) return
 
@@ -316,6 +317,8 @@ export class MagicCubeV8Scene {
       const timeline = gsap.timeline({ onComplete: resolve })
 
       for (const mesh of this.cubes) {
+        if (!this.isBlockVisible(mesh)) continue
+
         const factor = 1.2 + Math.random() * 0.8
         const target = mesh.position.clone().multiplyScalar(factor)
 
@@ -325,18 +328,6 @@ export class MagicCubeV8Scene {
             x: target.x,
             y: target.y,
             z: target.z,
-            duration: explodeDuration,
-            ease: 'power2.out',
-          },
-          0,
-        )
-
-        timeline.to(
-          mesh.rotation,
-          {
-            x: (Math.random() - 0.5) * Math.PI,
-            y: (Math.random() - 0.5) * Math.PI,
-            z: (Math.random() - 0.5) * Math.PI,
             duration: explodeDuration,
             ease: 'power2.out',
           },
@@ -353,15 +344,16 @@ export class MagicCubeV8Scene {
       const timeline = gsap.timeline({ onComplete: resolve })
 
       for (const mesh of this.cubes) {
-        const originalPos = mesh.userData.originalPos as THREE.Vector3
-        const originalRot = mesh.userData.originalRot as THREE.Euler
+        const initialPos = mesh.userData.initialPos as THREE.Vector3
+        const initialRot = mesh.userData.initialRot as THREE.Euler
+        const initialScale = mesh.userData.initialScale as THREE.Vector3
 
         timeline.to(
           mesh.position,
           {
-            x: originalPos.x,
-            y: originalPos.y,
-            z: originalPos.z,
+            x: initialPos.x,
+            y: initialPos.y,
+            z: initialPos.z,
             duration: resetDuration,
             ease: 'power2.inOut',
           },
@@ -371,9 +363,21 @@ export class MagicCubeV8Scene {
         timeline.to(
           mesh.rotation,
           {
-            x: originalRot.x,
-            y: originalRot.y,
-            z: originalRot.z,
+            x: initialRot.x,
+            y: initialRot.y,
+            z: initialRot.z,
+            duration: resetDuration,
+            ease: 'power2.inOut',
+          },
+          0,
+        )
+
+        timeline.to(
+          mesh.scale,
+          {
+            x: initialScale.x,
+            y: initialScale.y,
+            z: initialScale.z,
             duration: resetDuration,
             ease: 'power2.inOut',
           },
@@ -434,7 +438,7 @@ export class MagicCubeV8Scene {
   dispose(): void {
     this.disposed = true
     cancelAnimationFrame(this.raf)
-    gsap.killTweensOf(this.cubes.map((mesh) => [mesh.position, mesh.rotation]).flat())
+    gsap.killTweensOf(this.cubes.map((mesh) => [mesh.position, mesh.rotation, mesh.scale]).flat())
     gsap.killTweensOf(this.scene.children)
 
     this.resizeObserver.disconnect()

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-06-13T01:58:23.538Z",
+  "generatedAt": "2026-06-13T02:29:55.721Z",
   "assets": [
     {
       "id": "background-grid-black",
@@ -57,6 +57,17 @@
       "shortcode": "fracto3d_logo_light",
       "vcName": "Objeto 3D (Logo claro)",
       "rowClass": "fracto-logo-01-light",
+      "gridOptions": []
+    },
+    {
+      "id": "magic-cube-v8",
+      "label": "Cubo mágico",
+      "description": "Cubo voxel 4×4×4 — preview /cubo-magico",
+      "previewRoute": "/cubo-magico",
+      "type": "logo",
+      "shortcode": "fracto3d_magic_cube",
+      "vcName": "Cubo Mágico 3D (Fracto)",
+      "rowClass": "fracto-magic-cube-v8",
       "gridOptions": []
     }
   ]
