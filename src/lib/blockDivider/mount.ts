@@ -47,7 +47,7 @@ function buildGrid(container: HTMLElement, options: BlockDividerOptions): void {
   grid.setAttribute('aria-hidden', 'true')
 
   for (const block of pattern.blocks) {
-    const el = document.createElement('span')
+    const el = document.createElement('div')
     el.className = `${BLOCK_CLASS} ${COLOR_CLASS[block.color]}`
     el.style.gridColumn = String(block.c + 1)
     el.style.gridRow = String(block.r + 1)
@@ -56,6 +56,26 @@ function buildGrid(container: HTMLElement, options: BlockDividerOptions): void {
   }
 
   container.appendChild(grid)
+  syncGridMetrics(container, pattern.rows)
+}
+
+function measureBlockSize(container: HTMLElement): number {
+  const probe = document.createElement('div')
+  probe.style.cssText =
+    'position:absolute;left:-9999px;top:0;width:var(--fracto-block-size);height:var(--fracto-block-size);pointer-events:none;visibility:hidden;'
+  container.appendChild(probe)
+  const { width } = probe.getBoundingClientRect()
+  container.removeChild(probe)
+  return Math.max(1, Math.round(width))
+}
+
+function syncGridMetrics(container: HTMLElement, rows: number): void {
+  const grid = container.querySelector<HTMLElement>(`.${GRID_CLASS}`)
+  if (!grid) return
+
+  const size = measureBlockSize(container)
+  container.style.setProperty('--fracto-block-size', `${size}px`)
+  grid.style.height = `${size * rows}px`
 }
 
 function tick(container: HTMLElement): void {
@@ -98,10 +118,15 @@ export function mountBlockDivider(
     state.raf = requestAnimationFrame(() => tick(container))
   }
 
-  window.addEventListener('scroll', onScroll, { passive: true })
-  window.addEventListener('resize', onScroll, { passive: true })
+  const onResize = () => {
+    syncGridMetrics(container, getBlockDividerVariant(container.dataset.fractoBlockDivider ?? 'default').rows)
+    onScroll()
+  }
 
-  mounted.set(container, { raf: 0, onScroll, onResize: onScroll, reducedMotion })
+  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onResize, { passive: true })
+
+  mounted.set(container, { raf: 0, onScroll, onResize, reducedMotion })
   tick(container)
 
   return () => unmountBlockDivider(container)

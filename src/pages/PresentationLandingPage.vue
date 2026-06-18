@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import AssetShowcaseBlock from '../components/AssetShowcaseBlock.vue'
+import BlockDivider from '../components/BlockDivider.vue'
 import FractoLogo from '../components/FractoLogo.vue'
 import LandingButton from '../components/landing/LandingButton.vue'
 import SectionBadge from '../components/landing/SectionBadge.vue'
@@ -174,7 +175,17 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <AssetShowcaseBlock v-for="asset in WP_ASSETS_CATALOG" :key="asset.assetId" :asset="asset" />
+    <template v-for="asset in WP_ASSETS_CATALOG" :key="asset.assetId">
+      <AssetShowcaseBlock :asset="asset" />
+
+      <div
+        v-if="asset.assetId === 'magic-cube-v2-light'"
+        class="presentation-divider-transition"
+        aria-hidden="true"
+      >
+        <BlockDivider variant="default" :complete-at="0.4" />
+      </div>
+    </template>
 
     <footer class="presentation-footer">
       <p>Guilherme Leal — Fracto</p>
@@ -390,6 +401,16 @@ onUnmounted(() => {
 .presentation-activos__body code {
   font-family: ui-monospace, monospace;
   font-size: 0.88em;
+}
+
+.presentation-divider-transition {
+  --fracto-block-size: clamp(18px, 3.25vw, 42px);
+  position: relative;
+  z-index: 6;
+  width: 100%;
+  margin-top: calc(var(--fracto-block-size) * -2);
+  margin-bottom: calc(var(--fracto-block-size) * -0.5);
+  background: #fff;
 }
 
 .presentation-footer {
