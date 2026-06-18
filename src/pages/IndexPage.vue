@@ -123,7 +123,7 @@ const backupPages = [
     </header>
 
     <section class="index__section">
-      <h2 class="index__section-title">Activos</h2>
+      <h2 class="index__section-title">Ativos</h2>
       <p class="index__section-lead">Páginas alinhadas com widgets WordPress ou pipeline de export.</p>
       <ul class="index__list">
         <li v-for="page in activePages" :key="page.to">

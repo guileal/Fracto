@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { nextTick, onUnmounted, ref, watch } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import InstancedGridBackgroundV5 from './InstancedGridBackgroundV5.vue'
 import SectionBadge from './landing/SectionBadge.vue'
 import { useInView } from '../composables/useInView'
+import { MOBILE_GRID_CONFIG } from '../lib/gridConfig'
 import {
   DEFAULT_FRACTO_LOGO_CONFIG,
   DEFAULT_FRACTO_LOGO_LIGHT_CONFIG,
@@ -45,6 +46,20 @@ const props = defineProps<{
 const sectionRef = ref<HTMLElement | null>(null)
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const { inView } = useInView(sectionRef)
+
+const gridCols = ref(16)
+const gridRows = ref(12)
+
+function syncGridForViewport() {
+  const narrow = window.innerWidth < 768
+  gridCols.value = narrow ? MOBILE_GRID_CONFIG.cols : 16
+  gridRows.value = narrow ? MOBILE_GRID_CONFIG.rows : 12
+}
+
+onMounted(() => {
+  syncGridForViewport()
+  window.addEventListener('resize', syncGridForViewport, { passive: true })
+})
 
 const isGrid = props.kind === 'grid-dark' || props.kind === 'grid-light'
 const gridTheme = props.kind === 'grid-light' ? 'light' : 'dark'
@@ -96,7 +111,10 @@ watch(
   { flush: 'post' },
 )
 
-onUnmounted(disposeScene)
+onUnmounted(() => {
+  window.removeEventListener('resize', syncGridForViewport)
+  disposeScene()
+})
 </script>
 
 <template>
@@ -113,11 +131,12 @@ onUnmounted(disposeScene)
       <InstancedGridBackgroundV5
         v-if="inView"
         class="showcase__grid-bg"
-        :cols="16"
-        :rows="12"
+        :cols="gridCols"
+        :rows="gridRows"
         :lighting="gridLighting"
         :theme="gridTheme"
         :cube-color="gridTheme === 'light' ? GRID_V5_THEMES.light.defaultCubeColor : undefined"
+        low-power
       />
       <div class="hero__vignette hero__vignette--grid" aria-hidden="true" />
 
@@ -305,42 +324,89 @@ onUnmounted(disposeScene)
 }
 
 @media (max-width: 899px) {
+  .showcase--grid {
+    min-height: min(88svh, 720px);
+  }
+
+  .showcase--split {
+    min-height: auto;
+  }
+
   .showcase__grid-copy {
     top: auto;
-    bottom: clamp(5.5rem, 14vw, 6.5rem);
+    left: 0;
+    right: 0;
+    bottom: 0;
     transform: none;
     max-height: none;
+    width: 100%;
+    padding: clamp(5.5rem, 14vw, 6.5rem) clamp(1.25rem, 5vw, 1.75rem)
+      calc(1.35rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.65rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.55) 55%, transparent 100%);
+  }
+
+  .showcase--grid.hero--grid-light .showcase__grid-copy {
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.72) 55%, transparent 100%);
   }
 
   .showcase__split {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    row-gap: clamp(2rem, 5vh, 3rem);
-    min-height: 100svh;
-    min-height: 100dvh;
-    padding: clamp(4.5rem, 13vh, 6.5rem) clamp(1.25rem, 5vw, 2rem)
-      clamp(5.5rem, 15vh, 7.5rem);
+    justify-content: flex-start;
+    align-items: stretch;
+    row-gap: clamp(1.25rem, 4vh, 2rem);
+    min-height: auto;
+    padding: calc(3.75rem + env(safe-area-inset-top, 0px)) clamp(1.25rem, 5vw, 1.75rem)
+      calc(2.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   .showcase__stage {
     order: -1;
     flex: 0 0 auto;
-    width: min(100%, 28rem);
-    min-height: clamp(260px, 36svh, 380px);
+    width: 100%;
+    min-height: clamp(220px, 44svh, 360px);
     max-height: none;
   }
 
   .showcase__copy {
     flex: 0 1 auto;
-    width: min(100%, 38rem);
+    width: 100%;
+    max-width: none;
     margin: 0;
     padding: 0;
+    gap: 0.85rem;
   }
 
   .showcase__title {
-    font-size: clamp(1.55rem, 6.5vw, 2.1rem);
+    font-size: clamp(1.45rem, 6.2vw, 1.95rem);
+    line-height: 1.14;
+  }
+
+  .showcase__body {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    max-width: none;
+  }
+
+  .showcase__link {
+    min-height: 2.75rem;
+    align-items: center;
+    padding-top: 0.15rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .showcase--grid {
+    min-height: min(82svh, 640px);
+  }
+
+  .showcase__stage {
+    min-height: clamp(200px, 40svh, 300px);
+  }
+
+  .showcase__grid-copy {
+    padding-top: clamp(4.75rem, 12vw, 5.5rem);
   }
 }
 </style>

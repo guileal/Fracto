@@ -1,14 +1,48 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import AssetShowcaseBlock, { type ShowcaseKind } from '../components/AssetShowcaseBlock.vue'
 import FractoLogo from '../components/FractoLogo.vue'
 import LandingButton from '../components/landing/LandingButton.vue'
 import SectionBadge from '../components/landing/SectionBadge.vue'
+import { computeHeroVideoFrame, mobileHeroHeight } from '../lib/videoHeroFrame'
 import '../styles/landing.css'
 
 const VIDEO_SRC = '/video/loop-fracto.mp4'
 const VIDEO_DOWNLOAD_NAME = 'Loop - Fracto 3D - Compactado.mp4'
+
+const logoSize = ref(44)
+const videoFrameStyle = ref<Record<string, string>>({})
+const heroSectionStyle = ref<Record<string, string>>({})
+
+function syncPresentationLayout() {
+  logoSize.value = window.innerWidth < 720 ? 36 : 44
+  syncVideoFrame()
+}
+
+function syncVideoFrame() {
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight
+  const isMobile = viewportWidth < 720
+  const frameHeight = isMobile ? mobileHeroHeight(viewportHeight) : viewportHeight
+  const { width, height } = computeHeroVideoFrame(viewportWidth, frameHeight)
+
+  heroSectionStyle.value = isMobile
+    ? {
+        height: `${frameHeight}px`,
+        minHeight: `${frameHeight}px`,
+      }
+    : {}
+
+  videoFrameStyle.value = {
+    width: `${width}px`,
+    height: `${height}px`,
+  }
+}
+
+function onViewportChange() {
+  syncPresentationLayout()
+}
 
 type ShowcaseItem = {
   assetId: string
@@ -95,10 +129,15 @@ const showcases: ShowcaseItem[] = [
 
 onMounted(() => {
   document.body.dataset.presentation = ''
+  syncPresentationLayout()
+  window.addEventListener('resize', onViewportChange, { passive: true })
+  window.visualViewport?.addEventListener('resize', onViewportChange)
 })
 
 onUnmounted(() => {
   delete document.body.dataset.presentation
+  window.removeEventListener('resize', onViewportChange)
+  window.visualViewport?.removeEventListener('resize', onViewportChange)
 })
 </script>
 
@@ -106,18 +145,25 @@ onUnmounted(() => {
   <div class="presentation landing-page">
     <nav class="presentation-nav">
       <RouterLink to="/" class="presentation-nav__link">Índice</RouterLink>
-      <a href="#activos" class="presentation-nav__link">Activos</a>
+      <a href="#ativos" class="presentation-nav__link">Ativos</a>
     </nav>
 
-    <section class="presentation-hero" aria-label="Vídeo de apresentação">
-      <video
-        class="presentation-hero__video"
-        :src="VIDEO_SRC"
-        autoplay
-        muted
-        loop
-        playsinline
-      />
+    <section
+      class="presentation-hero"
+      :style="heroSectionStyle"
+      aria-label="Vídeo de apresentação"
+    >
+      <div class="presentation-hero__media" aria-hidden="true">
+        <video
+          class="presentation-hero__video"
+          :style="videoFrameStyle"
+          :src="VIDEO_SRC"
+          autoplay
+          muted
+          loop
+          playsinline
+        />
+      </div>
       <div class="presentation-hero__fade" aria-hidden="true" />
 
       <a
@@ -150,7 +196,7 @@ onUnmounted(() => {
     <section class="presentation-intro">
       <div class="presentation-intro__inner">
         <RouterLink to="/home" class="presentation-intro__logo" aria-label="Fracto">
-          <FractoLogo :size="44" decorative />
+          <FractoLogo :size="logoSize" decorative />
         </RouterLink>
 
         <h1 class="presentation-intro__headline">
@@ -159,12 +205,12 @@ onUnmounted(() => {
         </h1>
 
         <div class="presentation-intro__actions">
-          <LandingButton href="#activos">Ver activos 3D</LandingButton>
+          <LandingButton href="#ativos">Ver ativos 3D</LandingButton>
         </div>
       </div>
     </section>
 
-    <section id="activos" class="presentation-activos" aria-label="Widgets exportados">
+    <section id="ativos" class="presentation-activos" aria-label="Widgets exportados">
       <div class="presentation-activos__lead">
         <SectionBadge label="Pipeline WordPress" />
         <h2 class="presentation-activos__title">
@@ -224,12 +270,21 @@ onUnmounted(() => {
   background: #000;
 }
 
-.presentation-hero__video {
+.presentation-hero__media {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.presentation-hero__video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: block;
   object-fit: cover;
+  object-position: center center;
 }
 
 .presentation-hero__fade {
@@ -394,5 +449,94 @@ onUnmounted(() => {
 
 .presentation-video-download__label {
   padding-right: 0.1rem;
+}
+
+@media (max-width: 720px) {
+  .presentation-nav {
+    top: calc(0.85rem + env(safe-area-inset-top, 0px));
+    right: calc(1rem + env(safe-area-inset-right, 0px));
+    gap: 0.85rem;
+  }
+
+  .presentation-nav__link {
+    font-size: 0.72rem;
+    padding: 0.35rem 0;
+  }
+
+  .presentation-hero__fade {
+    background:
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.28) 0%, transparent 18%),
+      linear-gradient(to bottom, transparent 48%, #000 100%);
+  }
+
+  .presentation-video-download {
+    left: 50%;
+    bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    padding: 0.45rem 0.75rem 0.45rem 0.55rem;
+    font-size: 0.68rem;
+  }
+
+  .presentation-video-download:hover {
+    transform: translateX(-50%) translateY(-1px);
+  }
+
+  .presentation-intro {
+    min-height: auto;
+    padding: calc(2.75rem + env(safe-area-inset-top, 0px)) 1.25rem 2.5rem;
+  }
+
+  .presentation-intro__inner {
+    gap: 1.65rem;
+    width: 100%;
+  }
+
+  .presentation-intro__headline {
+    font-size: clamp(1.28rem, 5.8vw, 1.75rem);
+    line-height: 1.28;
+    text-wrap: balance;
+  }
+
+  .presentation-intro__actions {
+    width: 100%;
+  }
+
+  .presentation-intro__actions :deep(.landing-btn) {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.88rem;
+  }
+
+  .presentation-activos {
+    padding: 2.25rem 1.25rem 1.5rem;
+  }
+
+  .presentation-activos__lead {
+    gap: 0.75rem;
+  }
+
+  .presentation-activos__title {
+    font-size: clamp(1.35rem, 6vw, 1.85rem);
+    text-wrap: balance;
+  }
+
+  .presentation-activos__body {
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .presentation-footer {
+    padding: 2rem 1.25rem calc(2rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 380px) {
+  .presentation-video-download__label {
+    display: none;
+  }
+
+  .presentation-video-download {
+    padding: 0.55rem;
+  }
 }
 </style>
