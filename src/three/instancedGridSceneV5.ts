@@ -181,11 +181,21 @@ export function createInstancedGridSceneV5(
   let mouseGridX = 0
   let mouseGridY = 0
   let mouseActive = false
+  let userTouching = false
   let gridScale = 1
   let clock = 0
 
   const isTouchLike = () =>
     window.matchMedia('(hover: none), (pointer: coarse)').matches
+
+  /** Slow wandering pointer on touch devices — no hover, no scroll dependency. */
+  const updateAmbientPointer = (timeMs: number) => {
+    if (!isTouchLike() || userTouching) return
+    const t = timeMs * 0.001
+    targetNdcX = Math.sin(t * 1.15) * 0.58 + Math.sin(t * 0.48 + 1.1) * 0.14
+    targetNdcY = Math.cos(t * 0.88 + 0.6) * 0.45 + Math.sin(t * 0.36) * 0.12
+    mouseActive = true
+  }
 
   const setPointerNdcFromClient = (clientX: number, clientY: number) => {
     const rect = container.getBoundingClientRect()
@@ -229,6 +239,7 @@ export function createInstancedGridSceneV5(
   }
 
   const onTouchPointer = (clientX: number, clientY: number) => {
+    userTouching = true
     mouseActive = true
     setPointerNdcFromClient(clientX, clientY)
   }
@@ -246,8 +257,11 @@ export function createInstancedGridSceneV5(
   }
 
   const onTouchEnd = () => {
-    mouseActive = false
-    updateMouseLight()
+    userTouching = false
+    if (!isTouchLike()) {
+      mouseActive = false
+      updateMouseLight()
+    }
   }
 
   pointerEl.addEventListener('mousemove', onMove, { passive: true, capture: true })
@@ -416,6 +430,7 @@ export function createInstancedGridSceneV5(
   }
 
   const updateInstances = (time: number): boolean => {
+    updateAmbientPointer(time)
     spawnAmbientFlickers(time)
 
     const cutoff = time - 50
