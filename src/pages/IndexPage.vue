@@ -6,7 +6,7 @@ const activePages = [
     to: '/home',
     title: 'Landing de apresentação',
     description:
-      'Home final com vídeo em loop no hero e showcase dos 8 widgets exportados para WordPress.',
+      'Home final com vídeo no hero e showcase dos 8 ativos gráficos exportados para WordPress.',
     tag: 'Landing',
     assetId: null,
   },
@@ -17,14 +17,6 @@ const activePages = [
       'Grade interactiva em fundo preto — preview do widget WP background-grid-black.',
     tag: 'Widget WP',
     assetId: 'background-grid-black',
-  },
-  {
-    to: '/grid-background-white',
-    title: 'Grid background white',
-    description:
-      'Mesma grade em fundo claro — preview do widget WP background-grid-light.',
-    tag: 'Widget WP',
-    assetId: 'background-grid-light',
   },
   {
     to: '/logo-fracto',
@@ -72,6 +64,14 @@ const activePages = [
       'Narrativa expandida do cubo para fundos escuros — Inteligência Criativa Fracto.',
     tag: 'Widget WP',
     assetId: 'magic-cube-v2-light',
+  },
+  {
+    to: '/block-divider',
+    title: 'Divisor de blocos',
+    description:
+      'Transição pixelada preto/branco — blocos formam com piscar tech no scroll (40% até entrar no viewport).',
+    tag: 'Widget WP',
+    assetId: 'block-divider',
   },
 ]
 

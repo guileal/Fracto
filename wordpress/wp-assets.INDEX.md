@@ -7,7 +7,6 @@
 | ID | Preview | Tipo | Export |
 |----|---------|------|--------|
 | `background-grid-black` | `/grid-background-black` | grid | sim |
-| `background-grid-light` | `/grid-background-white` | grid | sim |
 | `logo-01-black` | `/logo-fracto` | logo | sim |
 | `magic-cube-v8` | `/cubo-magico` | logo | sim |
 

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import AssetUsageGuide from './AssetUsageGuide.vue'
+import BlockDivider from './BlockDivider.vue'
 import InstancedGridBackgroundV5 from './InstancedGridBackgroundV5.vue'
 import SectionBadge from './landing/SectionBadge.vue'
 import { useInView } from '../composables/useInView'
+import type { WpAssetCatalogEntry } from '../lib/wpAssetsCatalog'
 import { MOBILE_GRID_CONFIG } from '../lib/gridConfig'
 import {
   DEFAULT_FRACTO_LOGO_CONFIG,
@@ -19,28 +22,15 @@ import {
 } from '../lib/magicCubeConfig'
 import { buildV4Lighting } from '../lib/gridLightingV4'
 import { GRID_V5_THEMES } from '../lib/gridThemeV5'
+import type { ShowcaseKind } from '../lib/showcaseKinds'
 import { FractoLogoScene } from '../three/FractoLogoScene'
 import { MagicCubeV2Scene } from '../three/MagicCubeV2Scene'
 import { MagicCubeV8Scene } from '../three/MagicCubeV8Scene'
 
-export type ShowcaseKind =
-  | 'grid-dark'
-  | 'grid-light'
-  | 'logo-black'
-  | 'logo-light'
-  | 'cube-v1'
-  | 'cube-v2'
-  | 'cube-v1-light'
-  | 'cube-v2-light'
+export type { ShowcaseKind }
 
 const props = defineProps<{
-  assetId: string
-  kind: ShowcaseKind
-  badge: string
-  title: string
-  description: string
-  previewTo: string
-  theme: 'dark' | 'light'
+  asset: WpAssetCatalogEntry
 }>()
 
 const sectionRef = ref<HTMLElement | null>(null)
@@ -61,8 +51,10 @@ onMounted(() => {
   window.addEventListener('resize', syncGridForViewport, { passive: true })
 })
 
-const isGrid = props.kind === 'grid-dark' || props.kind === 'grid-light'
-const gridTheme = props.kind === 'grid-light' ? 'light' : 'dark'
+const kind = props.asset.kind
+const isGrid = kind === 'grid-dark' || kind === 'grid-light'
+const isDivider = kind === 'block-divider'
+const gridTheme = kind === 'grid-light' ? 'light' : 'dark'
 const gridLighting =
   gridTheme === 'light'
     ? buildV4Lighting(
@@ -75,7 +67,7 @@ type SceneHandle = FractoLogoScene | MagicCubeV8Scene | MagicCubeV2Scene
 let scene: SceneHandle | null = null
 
 function createScene(canvas: HTMLCanvasElement) {
-  switch (props.kind) {
+  switch (kind) {
     case 'logo-black':
       return new FractoLogoScene(canvas, DEFAULT_FRACTO_LOGO_CONFIG)
     case 'logo-light':
@@ -119,12 +111,14 @@ onUnmounted(() => {
 
 <template>
   <section
-    :id="assetId"
+    :id="asset.assetId"
     ref="sectionRef"
     class="showcase"
     :class="[
-      `showcase--${theme}`,
-      isGrid ? ['showcase--grid', 'hero', 'hero--grid', gridTheme === 'light' ? 'hero--grid-light' : ''] : 'showcase--split',
+      `showcase--${asset.theme}`,
+      isGrid ? ['showcase--grid', 'hero', 'hero--grid', gridTheme === 'light' ? 'hero--grid-light' : ''] : '',
+      isDivider ? 'showcase--split' : '',
+      !isGrid && !isDivider ? 'showcase--split' : '',
     ]"
   >
     <template v-if="isGrid">
@@ -141,22 +135,46 @@ onUnmounted(() => {
       <div class="hero__vignette hero__vignette--grid" aria-hidden="true" />
 
       <div class="showcase__grid-copy">
-        <SectionBadge :label="badge" />
-        <h2 class="showcase__title">{{ title }}</h2>
-        <p class="showcase__body">{{ description }}</p>
-        <p class="showcase__asset-id">WP: {{ assetId }}</p>
-        <RouterLink :to="previewTo" class="showcase__link">Ver preview completo</RouterLink>
+        <SectionBadge :label="asset.badge" />
+        <h2 class="showcase__title">{{ asset.title }}</h2>
+        <p class="showcase__body">{{ asset.description }}</p>
+        <p class="showcase__asset-id">WP: {{ asset.assetId }}</p>
+        <RouterLink :to="asset.previewTo" class="showcase__link">Ver preview completo</RouterLink>
+        <AssetUsageGuide :asset="asset" />
+      </div>
+    </template>
+
+    <template v-else-if="isDivider">
+      <div class="showcase__split">
+        <div class="showcase__copy">
+          <SectionBadge :label="asset.badge" />
+          <h2 class="showcase__title">{{ asset.title }}</h2>
+          <p class="showcase__body">{{ asset.description }}</p>
+          <p class="showcase__hint">Faz scroll pela página para ver os blocos formarem.</p>
+          <p class="showcase__asset-id">WP: {{ asset.assetId }}</p>
+          <RouterLink :to="asset.previewTo" class="showcase__link">Ver preview completo</RouterLink>
+          <AssetUsageGuide :asset="asset" />
+        </div>
+
+        <div class="showcase__stage showcase__stage--divider" aria-hidden="true">
+          <div class="showcase__divider-frame">
+            <div class="showcase__divider-frame-top" />
+            <BlockDivider v-if="inView" variant="default" :complete-at="0.4" />
+            <div class="showcase__divider-frame-bottom" />
+          </div>
+        </div>
       </div>
     </template>
 
     <template v-else>
       <div class="showcase__split">
         <div class="showcase__copy">
-          <SectionBadge :label="badge" />
-          <h2 class="showcase__title">{{ title }}</h2>
-          <p class="showcase__body">{{ description }}</p>
-          <p class="showcase__asset-id">WP: {{ assetId }}</p>
-          <RouterLink :to="previewTo" class="showcase__link">Ver preview completo</RouterLink>
+          <SectionBadge :label="asset.badge" />
+          <h2 class="showcase__title">{{ asset.title }}</h2>
+          <p class="showcase__body">{{ asset.description }}</p>
+          <p class="showcase__asset-id">WP: {{ asset.assetId }}</p>
+          <RouterLink :to="asset.previewTo" class="showcase__link">Ver preview completo</RouterLink>
+          <AssetUsageGuide :asset="asset" />
         </div>
 
         <div class="showcase__stage" aria-hidden="true">
@@ -210,6 +228,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0;
+  overflow-y: auto;
 }
 
 .showcase--grid .showcase__title,
@@ -227,6 +246,52 @@ onUnmounted(() => {
   min-height: 100svh;
 }
 
+.showcase__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  opacity: 0.55;
+  font-style: italic;
+}
+
+.showcase--light .showcase__hint {
+  color: var(--fracto-muted, #6b6b6b);
+  opacity: 1;
+}
+
+.showcase__stage--divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  background: #0a0a0a;
+}
+
+.showcase__divider-frame {
+  width: min(100%, 500px);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+}
+
+.showcase__divider-frame-top {
+  height: clamp(96px, 16vw, 148px);
+  background: #000;
+}
+
+.showcase__divider-frame-bottom {
+  height: clamp(64px, 10vw, 100px);
+  background: #fff;
+}
+
+.showcase__divider-frame :deep(.fracto-block-divider) {
+  margin: 0;
+}
+
+.showcase__divider-frame :deep(.fracto-block-divider-wrap) {
+  margin: 0;
+}
+
 .showcase__split {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -239,7 +304,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: clamp(1rem, 2.5vw, 1.35rem);
+  gap: clamp(0.65rem, 2vw, 1rem);
   width: min(100%, 38rem);
   padding: clamp(5rem, 10vw, 7rem) clamp(1.5rem, 5vw, 3.5rem);
 }
@@ -348,6 +413,12 @@ onUnmounted(() => {
 
   .showcase--grid.hero--grid-light .showcase__grid-copy {
     background: linear-gradient(to top, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.72) 55%, transparent 100%);
+  }
+
+  .showcase__stage--divider {
+    order: -1;
+    min-height: clamp(280px, 50svh, 400px);
+    padding: 1.25rem;
   }
 
   .showcase__split {

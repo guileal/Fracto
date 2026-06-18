@@ -1,0 +1,10 @@
+export type ShowcaseKind =
+  | 'grid-dark'
+  | 'grid-light'
+  | 'logo-black'
+  | 'logo-light'
+  | 'cube-v1'
+  | 'cube-v2'
+  | 'cube-v1-light'
+  | 'cube-v2-light'
+  | 'block-divider'

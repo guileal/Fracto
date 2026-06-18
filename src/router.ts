@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import IndexPage from './pages/IndexPage.vue'
 import GridBackgroundBlackPage from './pages/GridBackgroundBlackPage.vue'
-import GridBackgroundWhitePage from './pages/GridBackgroundWhitePage.vue'
 import LogoFractoPage from './pages/LogoFractoPage.vue'
 import LogoFractoLightPage from './pages/LogoFractoLightPage.vue'
 import CuboMagicoPage from './pages/CuboMagicoPage.vue'
 import CuboMagico2Page from './pages/CuboMagico2Page.vue'
 import CuboMagicoLightPage from './pages/CuboMagicoLightPage.vue'
 import CuboMagicoLight2Page from './pages/CuboMagicoLight2Page.vue'
+import BlockDividerPage from './pages/BlockDividerPage.vue'
 import PresentationLandingPage from './pages/PresentationLandingPage.vue'
 import LandingPage from './pages/backup/LandingPage.vue'
 import LandingPageV2 from './pages/backup/LandingPageV2.vue'
@@ -27,17 +27,16 @@ const router = createRouter({
 
     // Preview dos widgets WordPress (fonte activa)
     { path: '/grid-background-black', name: 'grid-background-black', component: GridBackgroundBlackPage, meta: bare },
-    { path: '/grid-background-white', name: 'grid-background-white', component: GridBackgroundWhitePage, meta: bare },
     { path: '/logo-fracto', name: 'logo-fracto', component: LogoFractoPage, meta: bare },
     { path: '/logo-fracto-light', name: 'logo-fracto-light', component: LogoFractoLightPage, meta: bare },
     { path: '/cubo-magico', name: 'cubo-magico', component: CuboMagicoPage, meta: bare },
     { path: '/cubo-magico-2', name: 'cubo-magico-2', component: CuboMagico2Page, meta: bare },
     { path: '/cubo-magico-light', name: 'cubo-magico-light', component: CuboMagicoLightPage, meta: bare },
     { path: '/cubo-magico-light-2', name: 'cubo-magico-light-2', component: CuboMagicoLight2Page, meta: bare },
+    { path: '/block-divider', name: 'block-divider', component: BlockDividerPage, meta: bare },
 
     // Redirecionamentos das rotas antigas
     { path: '/v5', redirect: '/grid-background-black' },
-    { path: '/background-grid-light', redirect: '/grid-background-white' },
     { path: '/v7', redirect: '/logo-fracto' },
     { path: '/v8', redirect: '/cubo-magico' },
 

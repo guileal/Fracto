@@ -148,7 +148,6 @@ onUnmounted(() => {
 
       <nav class="hero__nav">
         <RouterLink to="/" class="hero__nav-link">Índice</RouterLink>
-        <RouterLink to="/grid-background-white" class="hero__nav-link">Grid branco</RouterLink>
         <RouterLink to="/logo-fracto" class="hero__nav-link">Logo</RouterLink>
         <RouterLink to="/cubo-magico" class="hero__nav-link">Cubo</RouterLink>
       </nav>

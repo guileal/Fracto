@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build-assets.mjs",
+    "build": "node scripts/build-assets.mjs && npm run build:block-divider",
+    "build:block-divider": "vite build --config packages/block-divider/vite.config.ts",
     "build:grid": "node scripts/build-assets.mjs --only background-grid-black",
     "build:grid-light": "node scripts/build-assets.mjs --only background-grid-light",
     "build:logo": "node scripts/build-assets.mjs --only logo-01-black",

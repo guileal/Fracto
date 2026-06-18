@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-06-13T03:09:23.736Z",
+  "generatedAt": "2026-06-18T09:30:53.662Z",
   "assets": [
     {
       "id": "background-grid-black",
@@ -16,24 +16,6 @@
         "rows",
         "light_intensity",
         "light_color",
-        "low_power"
-      ]
-    },
-    {
-      "id": "background-grid-light",
-      "label": "Grid branco",
-      "description": "Mesma grade em fundo claro",
-      "previewRoute": "/grid-background-white",
-      "type": "grid",
-      "shortcode": "fracto3d_grid_light",
-      "vcName": "Background 3D Claro (Fracto)",
-      "rowClass": "fracto-background-grid-light",
-      "gridOptions": [
-        "cols",
-        "rows",
-        "light_intensity",
-        "light_color",
-        "cube_color",
         "low_power"
       ]
     },

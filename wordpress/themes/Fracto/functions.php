@@ -14,7 +14,15 @@ $fracto_inc = get_stylesheet_directory() . '/inc/fracto-3d.php';
 
 if ( is_readable( $fracto_inc ) ) {
 	require_once $fracto_inc;
-} elseif ( is_admin() ) {
+}
+
+$fracto_divider_inc = get_stylesheet_directory() . '/inc/fracto-block-divider.php';
+
+if ( is_readable( $fracto_divider_inc ) ) {
+	require_once $fracto_divider_inc;
+}
+
+if ( ! is_readable( $fracto_inc ) && is_admin() ) {
 	add_action(
 		'admin_notices',
 		static function () {

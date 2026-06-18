@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import AssetShowcaseBlock, { type ShowcaseKind } from '../components/AssetShowcaseBlock.vue'
+import AssetShowcaseBlock from '../components/AssetShowcaseBlock.vue'
 import FractoLogo from '../components/FractoLogo.vue'
 import LandingButton from '../components/landing/LandingButton.vue'
 import SectionBadge from '../components/landing/SectionBadge.vue'
+import { WP_ASSETS_CATALOG, WP_ASSET_COUNT } from '../lib/wpAssetsCatalog'
 import { computeHeroVideoFrame, mobileHeroHeight } from '../lib/videoHeroFrame'
 import '../styles/landing.css'
 
@@ -44,89 +45,6 @@ function onViewportChange() {
   syncPresentationLayout()
 }
 
-type ShowcaseItem = {
-  assetId: string
-  kind: ShowcaseKind
-  badge: string
-  title: string
-  description: string
-  previewTo: string
-  theme: 'dark' | 'light'
-}
-
-const showcases: ShowcaseItem[] = [
-  {
-    assetId: 'background-grid-black',
-    kind: 'grid-dark',
-    badge: 'Hero',
-    title: 'Grid background black',
-    description:
-      'Grade interactiva em fundo preto — reacção à luz do cursor, ideal para heroes e rows de destaque no WordPress.',
-    previewTo: '/grid-background-black',
-    theme: 'dark',
-  },
-  {
-    assetId: 'logo-01-black',
-    kind: 'logo-black',
-    badge: 'Isotipo',
-    title: 'Logo Fracto',
-    description:
-      'Isotipo 3D animado com cubos pretos e accent coral — widget para secções Sobre nós em fundo claro.',
-    previewTo: '/logo-fracto',
-    theme: 'light',
-  },
-  {
-    assetId: 'logo-01-light',
-    kind: 'logo-light',
-    badge: 'Isotipo',
-    title: 'Logo Fracto (claro)',
-    description:
-      'Variante em cubos claros para blocos com fundo escuro — mesma animação, contraste invertido.',
-    previewTo: '/logo-fracto-light',
-    theme: 'dark',
-  },
-  {
-    assetId: 'magic-cube-v8',
-    kind: 'cube-v1',
-    badge: 'Cubo mágico',
-    title: 'Cubo mágico v1',
-    description:
-      'Hero com isotipo em recomposição — a metáfora Fracto de desconstruir para reconstruir com estratégia.',
-    previewTo: '/cubo-magico',
-    theme: 'light',
-  },
-  {
-    assetId: 'magic-cube-v2',
-    kind: 'cube-v2',
-    badge: 'Cubo mágico',
-    title: 'Cubo mágico v2',
-    description:
-      'Narrativa dinâmica com menos ruído e mais estratégia — giros, fragmentos e pausa até a essência voltar ao centro.',
-    previewTo: '/cubo-magico-2',
-    theme: 'light',
-  },
-  {
-    assetId: 'magic-cube-v8-light',
-    kind: 'cube-v1-light',
-    badge: 'Cubo mágico',
-    title: 'Cubo mágico v1 (claro)',
-    description:
-      'Mesma mensagem de Sobre nós para blocos com fundo escuro — alinhado ao site fracto.com.br.',
-    previewTo: '/cubo-magico-light',
-    theme: 'dark',
-  },
-  {
-    assetId: 'magic-cube-v2-light',
-    kind: 'cube-v2-light',
-    badge: 'Cubo mágico',
-    title: 'Cubo mágico v2 (claro)',
-    description:
-      'Narrativa expandida do cubo para fundos escuros — Inteligência Criativa Fracto em contraste invertido.',
-    previewTo: '/cubo-magico-light-2',
-    theme: 'dark',
-  },
-]
-
 onMounted(() => {
   document.body.dataset.presentation = ''
   syncPresentationLayout()
@@ -145,6 +63,7 @@ onUnmounted(() => {
   <div class="presentation landing-page">
     <nav class="presentation-nav">
       <RouterLink to="/" class="presentation-nav__link">Índice</RouterLink>
+      <a href="#guia" class="presentation-nav__link">Guia WP</a>
       <a href="#ativos" class="presentation-nav__link">Ativos</a>
     </nav>
 
@@ -205,32 +124,63 @@ onUnmounted(() => {
         </h1>
 
         <div class="presentation-intro__actions">
-          <LandingButton href="#ativos">Ver ativos 3D</LandingButton>
+          <LandingButton href="#ativos">Ver ativos gráficos</LandingButton>
+          <LandingButton href="#guia" variant="outline">Como usar no WordPress</LandingButton>
         </div>
       </div>
     </section>
 
-    <section id="ativos" class="presentation-activos" aria-label="Widgets exportados">
-      <div class="presentation-activos__lead">
-        <SectionBadge label="Pipeline WordPress" />
-        <h2 class="presentation-activos__title">
-          Sete widgets 3D exportados e prontos para produção
-        </h2>
-        <p class="presentation-activos__body">
-          Cada secção abaixo corresponde a um bundle standalone no child theme Fracto —
-          carregado sob demanda via shortcode ou fundo de row no WPBakery.
+    <section id="guia" class="presentation-guide" aria-label="Guia WordPress">
+      <div class="presentation-guide__inner">
+        <SectionBadge label="Para quem edita o site" />
+        <h2 class="presentation-guide__title">Como inserir os ativos no WPBakery</h2>
+        <p class="presentation-guide__lead">
+          Todos os elementos estão na categoria <strong>Fracto Widgets</strong> no Add Element.
+          Cada um carrega só o JavaScript necessário — a página não fica pesada.
+        </p>
+
+        <ol class="presentation-guide__steps">
+          <li>
+            <strong>Elemento WPBakery</strong> — Add Element → Fracto Widgets → escolha o widget
+            (ex.: Background 3D, Logo, Divisor de blocos).
+          </li>
+          <li>
+            <strong>Fundo de row</strong> — na row, aba Background →
+            <em>Fracto — Fundo da marca</em> (só widgets 3D de fundo e logo).
+          </li>
+          <li>
+            <strong>Classe CSS</strong> — aba Advanced → Extra Class Name, ex.:
+            <code>fracto-background-grid-black</code>.
+          </li>
+        </ol>
+
+        <p class="presentation-guide__note">
+          Em cada ativo abaixo há instruções específicas: quando usar, onde colocar e o shortcode
+          exacto.
         </p>
       </div>
     </section>
 
-    <AssetShowcaseBlock
-      v-for="item in showcases"
-      :key="item.assetId"
-      v-bind="item"
-    />
+    <section id="ativos" class="presentation-activos" aria-label="Ativos exportados">
+      <div class="presentation-activos__lead">
+        <SectionBadge label="Pipeline WordPress" />
+        <h2 class="presentation-activos__title">
+          {{ WP_ASSET_COUNT }} ativos gráficos prontos para produção
+        </h2>
+        <p class="presentation-activos__body">
+          Sete widgets 3D interactivos e um divisor de blocos com animação no scroll — todos no
+          child theme <code>Fracto</code>, carregados sob demanda.
+        </p>
+      </div>
+    </section>
+
+    <AssetShowcaseBlock v-for="asset in WP_ASSETS_CATALOG" :key="asset.assetId" :asset="asset" />
 
     <footer class="presentation-footer">
-      <p>Guilherme Leal</p>
+      <p>Guilherme Leal — Fracto</p>
+      <p class="presentation-footer__dev">
+        Referência técnica (desenvolvedor): <code>wordpress/ASSETS.md</code>
+      </p>
     </footer>
   </div>
 </template>
@@ -344,6 +294,67 @@ onUnmounted(() => {
   gap: 0.75rem;
 }
 
+.presentation-guide {
+  background: #0a0a0a;
+  padding: clamp(3rem, 8vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.presentation-guide__inner {
+  max-width: 42rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.presentation-guide__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.presentation-guide__lead {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.presentation-guide__lead strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.presentation-guide__steps {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.presentation-guide__steps code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.presentation-guide__note {
+  margin: 0.5rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.5);
+}
+
 .presentation-activos {
   background: #000;
   padding: clamp(3rem, 8vw, 5rem) clamp(1.5rem, 5vw, 4rem) clamp(1.5rem, 4vw, 2.5rem);
@@ -376,6 +387,11 @@ onUnmounted(() => {
   max-width: 36rem;
 }
 
+.presentation-activos__body code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.88em;
+}
+
 .presentation-footer {
   padding: 2.5rem clamp(1.5rem, 5vw, 4rem);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -388,6 +404,17 @@ onUnmounted(() => {
   font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.45);
   letter-spacing: 0.02em;
+}
+
+.presentation-footer__dev {
+  margin-top: 0.5rem !important;
+  font-size: 0.75rem !important;
+  opacity: 0.7;
+}
+
+.presentation-footer__link {
+  color: var(--fracto-brand);
+  text-decoration: none;
 }
 
 .presentation-video-download {
@@ -499,12 +526,17 @@ onUnmounted(() => {
 
   .presentation-intro__actions {
     width: 100%;
+    flex-direction: column;
   }
 
   .presentation-intro__actions :deep(.landing-btn) {
     width: 100%;
     justify-content: center;
     font-size: 0.88rem;
+  }
+
+  .presentation-guide {
+    padding: 2.25rem 1.25rem;
   }
 
   .presentation-activos {
