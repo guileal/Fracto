@@ -8,6 +8,7 @@ import SectionBadge from '../components/landing/SectionBadge.vue'
 import '../styles/landing.css'
 
 const VIDEO_SRC = '/video/loop-fracto.mp4'
+const VIDEO_DOWNLOAD_NAME = 'Loop - Fracto 3D - Compactado.mp4'
 
 type ShowcaseItem = {
   assetId: string
@@ -121,9 +122,9 @@ onUnmounted(() => {
 
       <a
         :href="VIDEO_SRC"
-        download="loop-fracto.mp4"
+        :download="VIDEO_DOWNLOAD_NAME"
         class="presentation-video-download"
-        aria-label="Descarregar vídeo loop-fracto.mp4"
+        aria-label="Descarregar vídeo Loop - Fracto 3D - Compactado"
       >
         <span class="presentation-video-download__icon" aria-hidden="true">
           <svg width="15" height="15" viewBox="0 0 18 18" fill="none">
